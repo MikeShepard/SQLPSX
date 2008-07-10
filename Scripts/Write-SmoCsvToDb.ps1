@@ -16,8 +16,8 @@
 $scriptRoot = Split-Path (Resolve-Path $myInvocation.MyCommand.Path)
 . $scriptRoot\LibrarySmo.ps1
 
-$CsvDir = '\\Z81145\C$\usr\bin\SQLPSX\'
-$sqlserver = 'COUGARXA\SQLDEV2'
+$CsvDir = '\\Z002\C$\usr\bin\SQLPSX\'
+$sqlserver = 'MyServer'
 $db = 'SQLPSX'
 
 #######################

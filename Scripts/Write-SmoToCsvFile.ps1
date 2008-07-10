@@ -20,7 +20,7 @@ $scriptRoot = Split-Path (Resolve-Path $myInvocation.MyCommand.Path)
 Set-Alias Test-SqlConn $scriptRoot\Test-SqlConn.ps1
 
 $DBExclude = @{}
-$dir = "C:\usr\bin\SQLPSX\"
+$dir = "$scriptRoot\Data\"
 $outfile = $sqlserver -replace '\\','_'
 
 #######################

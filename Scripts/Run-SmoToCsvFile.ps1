@@ -12,7 +12,7 @@
 ### will consume 100% CPU and ~500 MB of memory.
 ### </Description>
 ### <Usage>
-### ./Run-SmotToCsvFile.ps1 'MySqlServer'
+### ./Run-SmotToCsvFile.ps1
 ### C:\usr\bin>C:\WINDOWS\system32\WindowsPowerShell\v1.0\powershell.EXE -command "run-SmoToCsvFile.ps1 2>&1" >> C:\usr\bin\SQLPSX\SqlSec.err
 ### </Usage>
 ### </Script>
@@ -24,9 +24,9 @@ Set-Alias Test-SqlConn $scriptRoot\Test-SqlConn.ps1
 
 $maxThread = 2
 $ServerList = New-Object System.Collections.ArrayList
-$SQLPSXServer = 'COUGARXA\SQLDEV2'
+$SQLPSXServer = 'MyServer'
 $SQLPSXDb = 'SQLPSX'
-$SQLPSXDir = "C:\usr\bin\SQLPSX\"
+$SQLPSXDir = "$scriptRoot\Data\"
 
 #######################
 function Get-SqlList
