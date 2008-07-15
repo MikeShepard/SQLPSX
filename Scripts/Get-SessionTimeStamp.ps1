@@ -13,7 +13,7 @@
 
     if (!(Test-Path Variable:__SQLPSXSessionTimeStamp))
     { 
-        Set-Variable __SQLPSXSessionTimeStamp $((Get-Date).ToString("yyyy-MM-dd HH:mm")) -Scope Global -Option AllScope -Description "SQLPSX variable"
+        Set-Variable __SQLPSXSessionTimeStamp $((Get-Date).ToString("yyyy-MM-dd")) -Scope Global -Option AllScope -Description "SQLPSX variable"
     }
 
     Get-Variable __SQLPSXSessionTimeStamp -valueonly 

@@ -374,17 +374,19 @@ function Get-SqlDatabaseRoleMember
             $user = Get-SqlUserMember -db $role.parent
 
             $member = @()
-            $tmpMember = $null        
+            $tmpMember = @()        
 
             #Although public is a role its members cannot be enumerated using EnumMembers()
             if (!($role.Name -match "public"))
             {
                  #The EnumMembers() method will recursively (reports nested role members) enumerate role membership for you
                  #Thank You Microsoft SMO Developers!
-                 $tmpMember = $role.EnumMembers()
                  #List only members that are Roles or valid users i.e. users which meet condition in get-sqluser, this will 
                  #eliminate users that do not have access to the database (orphaned DB users)
-                 $member = $tmpMember | where { $role.parent.Roles.Contains($_) -or $user.Contains($_) }
+                 $tmpMember = $role.EnumMembers() | where { $role.parent.Roles.Contains($_) -or $user.Contains($_) }
+                 if ($tmpMember -ne $null)
+                 {$member += $tmpMember}
+                 $member += $role.Name
                  #Now let's re-enumerate and flatten out Windows group membership, adding the SqlUser Objects members array
                  #However we will ensure we only list an individual login once
                  $member | where { $user.Contains($_) } | foreach { $member += $user[$_] }
@@ -395,6 +397,7 @@ function Get-SqlDatabaseRoleMember
             else
             {
                 $member = $user.values | Sort-Object -unique
+                $member += $role.Name
             }
             #Add member to global hash
             $__SQLPSXDatabaseRoleMember[$key] += @{$role.Name = $member}
@@ -467,12 +470,16 @@ function Get-SqlLinkedServerLogin
 
     foreach ($linkedSrv in $server.LinkedServers)
     {
+        #Some DataSources contains commas such as "myserver.mydomain.com,1433"
+        #This can cause problems when exporting to csv so replace , with ;
+        $dataSource = $linkedSrv.DataSource -replace ",",";"
+
         foreach ($linkedSrvLogin in $linkedSrv.LinkedServerLogins)
         {
         #Return linked Server Login Object
         $linkedSrvLogin | add-Member -memberType noteProperty -name timestamp -value $(Get-SessionTimeStamp) -passthru |
                           add-Member -memberType noteProperty -name LinkedServer -value $linkedSrv.Name -passthru |
-                          add-Member -memberType noteProperty -name DataSource -value $("`"" + $linkedSrv.DataSource + "`"") -passthru |
+                          add-Member -memberType noteProperty -name DataSource -value $dataSource -passthru |
                           add-Member -memberType noteProperty -name Server -value $server.Name -passthru
         }
     }
@@ -571,6 +578,7 @@ function Get-SqlServerRole
             $member = $login.values | Sort-Object -unique
         }
 
+        $member += $svrole.Name
 
         #Return ServerRole Object
         $svrole | add-Member -memberType noteProperty -name timestamp -value $(Get-SessionTimeStamp) -passthru |
@@ -719,7 +727,7 @@ function Get-SqlDatabasePermission
             foreach ($perm in $db.EnumDatabasePermissions() | where {$_.PermissionType.ToString() -ne 'CONNECT'})
             {
                 $member = @()
-                switch ($dbPerm.GranteeType)
+                switch ($perm.GranteeType)
                 {
                     'User' { $member = $user["$($perm.Grantee)"] }
                     'DatabaseRole' { $member = $role["$($perm.Grantee)"] }
@@ -887,7 +895,9 @@ function Get-SqlObjectPermission
             #Skip object permissions for system objects i.e. ObjectID > 0
             #EnumObjectPermissions() will take a long time to return data for very large permission sets
             #in my testing a database with over 57,000 permission will take 10 min. 
-            foreach ($perm in $db.EnumObjectPermissions() | where {$_.ObjectID -gt 0})
+            #dtproperties is an annoying little MS table used for DB diagrams it shows up as user table and
+            #is automatically created when someone clicks on DB Diagrams in SSMS/EM, permissions default to public
+            foreach ($perm in $db.EnumObjectPermissions() | where {$_.ObjectID -gt 0 -and $_.ObjectName -ne 'dtproperties'})
             {
                 $member = @()
                 switch ($perm.GranteeType)
@@ -916,7 +926,7 @@ function Get-SqlObjectPermission
             $user = Get-SqlUserMember -db $db
             $role = Get-SqlDatabaseRoleMember -db $db
 
-            foreach ($perm in Get-Permission80 $db | where {$_.ObjectClass -eq 'ObjectOrColumn' -and $_.ObjectID -gt 0})
+            foreach ($perm in Get-Permission80 $db | where {$_.ObjectClass -eq 'ObjectOrColumn' -and $_.ObjectID -gt 0 -and $_.ObjectName -ne 'dtproperties'})
             { 
                 $member = @()
                 switch ($perm.GranteeType)

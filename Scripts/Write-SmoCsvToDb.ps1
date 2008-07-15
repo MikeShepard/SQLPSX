@@ -16,15 +16,17 @@
 $scriptRoot = Split-Path (Resolve-Path $myInvocation.MyCommand.Path)
 . $scriptRoot\LibrarySmo.ps1
 
-$CsvDir = '\\Z002\C$\usr\bin\SQLPSX\'
-$sqlserver = 'MyServer'
+$CsvDir = "$scriptRoot\Data\"
+$arcDir = "$scriptRoot\Data\Archive\"
+$sqlserver = 'FERRET\SQLPROD23'
 $db = 'SQLPSX'
 
 #######################
 function Write-ScriptLog
 {
     param($thread,$msg)
-    Write-Host "$((Get-Date).ToString(`"yyyy-MM-dd HH:mm`")) $thread $msg" 
+    $outfile = 'smocsvtodb.log'
+    Add-Content -Path "$CsvDir$outfile" -Value "$((Get-Date).ToString(`"yyyy-MM-dd HH:mm`")) $thread $msg" 
 
 }# Write-ScriptLog
 
@@ -41,33 +43,35 @@ function ImportCsv
 #######################
 function processCsv
 {
-    param($tblname)
+    param($csvFile,$tblname)
 
-    Get-ChildItem "$CsvDir*" -Include *."Sql$tblname".* | foreach {Write-ScriptLog "ImportCsv" "$_"; ImportCsv "$sqlserver" "$db" "$tblname" "$_"}
+    Get-ChildItem "$CsvDir*" -Include *."$csvFile".* | foreach {Write-ScriptLog "ImportCsv" "$_"; ImportCsv "$sqlserver" "$db" "$tblname" "$_"}
 
 }# processCsv
 
 #######################
 Write-ScriptLog "processCsv" "Login"
-    processCsv "Login"
+    processCsv "SqlLogin" "Login"
 Write-ScriptLog "processCsv" "ServerPermission"
-    processCsv "ServerPermission"
+    processCsv "SqlServerPermission" "ServerPermission"
 Write-ScriptLog "processCsv" "ServerRole"
-    processCsv "ServerRole"
+    processCsv "SqlServerRole" "ServerRole"
 Write-ScriptLog "processCsv" "SqlLinkedServerLogin"
-    processCsv "SqlLinkedServerLogin"
+    processCsv "SqlLinkedServerLogin" "SqlLinkedServerLogin"
 Write-ScriptLog "processCsv" "SqlUser"
-    processCsv "SqlUser"
+    processCsv "SqlUser" "SqlUser"
 Write-ScriptLog "processCsv" "DatabasePermission"
-    processCsv "DatabasePermission"
+    processCsv "SqlDatabasePermission" "DatabasePermission"
 Write-ScriptLog "processCsv" "ObjectPermssion"
-    processCsv "ObjectPermission"
+    processCsv "SqlObjectPermission" "ObjectPermission"
 Write-ScriptLog "processCsv" "DatabaseRole"
-    processCsv "DatabaseRole"
+    processCsv "SqlDatabaseRole" "DatabaseRole"
 
 Write-ScriptLog "archiveCsv" "$CsvDir$((Get-Date).ToString(`"yyyyMMdd`"))"
-if (!(Test-Path "$CsvDir$((Get-Date).ToString(`"yyyyMMdd`"))"))
-{ new-item -path $CsvDir -name $((Get-Date).ToString("yyyyMMdd")) -itemType 'directory' }
-Move-Item "$CsvDir*.csv" "$CsvDir$((Get-Date).ToString(`"yyyyMMdd`"))" 
-Move-Item "$CsvDir*.err" "$CsvDir$((Get-Date).ToString(`"yyyyMMdd`"))" 
-Move-Item "$CsvDir*.log" "$CsvDir$((Get-Date).ToString(`"yyyyMMdd`"))" 
+if (!(Test-Path "$arcDir$((Get-Date).ToString(`"yyyyMMdd`"))"))
+{ new-item -path $arcDir -name $((Get-Date).ToString("yyyyMMdd")) -itemType 'directory' }
+Move-Item "$CsvDir*.csv" "$arcDir$((Get-Date).ToString(`"yyyyMMdd`"))" 
+Move-Item "$CsvDir*.err" "$arcDir$((Get-Date).ToString(`"yyyyMMdd`"))" 
+Move-Item "$CsvDir*.log" "$arcDir$((Get-Date).ToString(`"yyyyMMdd`"))"
+$cmd = "compact.exe /C /S:$arcDir$((Get-Date).ToString(`"yyyyMMdd`"))"
+cmd /c $cmd

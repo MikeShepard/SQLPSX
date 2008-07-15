@@ -12,7 +12,7 @@
 ### will consume 100% CPU and ~500 MB of memory.
 ### </Description>
 ### <Usage>
-### ./Run-SmotToCsvFile.ps1
+### ./Run-SmotToCsvFile.ps1 'MySqlServer'
 ### C:\usr\bin>C:\WINDOWS\system32\WindowsPowerShell\v1.0\powershell.EXE -command "run-SmoToCsvFile.ps1 2>&1" >> C:\usr\bin\SQLPSX\SqlSec.err
 ### </Usage>
 ### </Script>
@@ -22,9 +22,9 @@ $scriptRoot = Split-Path (Resolve-Path $myInvocation.MyCommand.Path)
 . $scriptRoot\LibrarySmo.ps1
 Set-Alias Test-SqlConn $scriptRoot\Test-SqlConn.ps1
 
-$maxThread = 2
+$maxThread = 1
 $ServerList = New-Object System.Collections.ArrayList
-$SQLPSXServer = 'MyServer'
+$SQLPSXServer = 'Z002\SQLEXPRESS'
 $SQLPSXDb = 'SQLPSX'
 $SQLPSXDir = "$scriptRoot\Data\"
 

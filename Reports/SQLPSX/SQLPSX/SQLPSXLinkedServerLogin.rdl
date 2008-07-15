@@ -123,7 +123,7 @@
       </Fields>
       <Query>
         <DataSourceName>SQLPSX</DataSourceName>
-        <CommandText>SELECT DISTINCT timestamp FROM dbo.LinkedServerLogin</CommandText>
+        <CommandText>SELECT DISTINCT timestamp FROM dbo.SqlLinkedServerLogin</CommandText>
         <rd:UseGenericDesigner>true</rd:UseGenericDesigner>
       </Query>
     </DataSet>
@@ -138,7 +138,7 @@
         <DataSourceName>SQLPSX</DataSourceName>
         <CommandText>SELECT 'ALL' AS 'Server'
 UNION 
-SELECT Server FROM dbo.LinkedServerLogin
+SELECT Server FROM dbo.SqlLinkedServerLogin
 WHERE timestamp = @timestamp</CommandText>
         <QueryParameters>
           <QueryParameter Name="@timestamp">
