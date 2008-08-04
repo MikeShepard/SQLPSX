@@ -396,8 +396,9 @@ function Get-SqlDatabaseRoleMember
             #enumerate public role by extractng unique values from user hash
             else
             {
-                $member = $user.values | Sort-Object -unique
+                $user.values | foreach { $member += $_ } 
                 $member += $role.Name
+                $member = $member | Sort-Object -unique
             }
             #Add member to global hash
             $__SQLPSXDatabaseRoleMember[$key] += @{$role.Name = $member}
@@ -575,7 +576,8 @@ function Get-SqlServerRole
         #enumerate public role by extractng unique values from login hash
         else
         {
-            $member = $login.values | Sort-Object -unique
+            $login.values | foreach { $member += $_ }
+            $member = $member | Sort-Object -unique
         }
 
         $member += $svrole.Name
