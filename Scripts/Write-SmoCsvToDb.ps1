@@ -18,7 +18,7 @@ $scriptRoot = Split-Path (Resolve-Path $myInvocation.MyCommand.Path)
 
 $CsvDir = "$scriptRoot\Data\"
 $arcDir = "$scriptRoot\Data\Archive\"
-$sqlserver = 'FERRET\SQLPROD23'
+$sqlserver = 'Z002\SQLEXPRESS'
 $db = 'SQLPSX'
 
 #######################

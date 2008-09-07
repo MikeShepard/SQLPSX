@@ -12,6 +12,14 @@ Optional Database and Reporting Services Components
 7. Run Run-SmoToCsvFile.ps1 to create csv files of all available security information
 8. Run Write-SmoToCsvFile.ps1 to import the csv file into the database
 
+What's New
+    Version 1.1
+        Added the following functions: 
+        Get-SqlTable Get-SqlStoredProcedure Get-SqlView Get-SqlUserDefinedDataType Get-SqlUserDefinedFunction Get-SqlSynonym Get-SqlTrigger Get-SqlColumn
+        Get-SqlIndex Get-SqlStatistic Get-SqlCheck Get-SqlForeignKey Set-SqlScriptingOptions Get-SqlScripter Get-Information_Schema.Tables 
+        Get-Information_Schema.Columns Get-Information_Schema.Views Get-Information_Schema.Routines Get-SysDatabases Get-SqlDataFile Get-SqlLogFile 
+        Get-SqlVersion Get-SqlPort ConvertTo-ExtendedPropertyXML Get-Sql ConvertTo-StatisticColumnXML ConvertTo-IndexedColumnXML
+
 Libraries
     LibrarySmo.ps1 functions
         Get-SqlServer 
@@ -52,7 +60,61 @@ Libraries
         Get-SqlObjectPermission
             Returns a SMO ObjectPermission object with additional properties including the effective members of a 
             grantee. Recursively enumerates nested roles and users
-
+        Get-SqlTable
+            Returns a SMO Table object with additional properties
+        Get-SqlStoredProcedure
+            Returns a SMO StoredProcedure object with additional properties
+        Get-SqlView
+            Returns a SMO View object with additional properties
+        Get-SqlUserDefinedDataType
+            Returns a SMO UserDefinedDataType object with additional properites
+        Get-SqlUserDefinedFunction
+            Returns a SMO UserDefinedFunction object with additional properites
+        Get-SqlSynonym
+            Returns a SMO Synonym object with additional properites
+        Get-SqlTrigger
+            Returns a SMO Trigger object with additional properites. Note: A Trigger can have a Server, Database or Table/View parent object.
+        Get-SqlColumn
+            Returns a SMO Column object with additional properites. Note: A Column can have either a Table or View parent object.
+        Get-SqlIndex
+            Returns a SMO Index object with additional properites. Note: An Index can have either a Table or View parent object.
+        Get-SqlStatistic
+            Returns a SMO Statistic object with additional properites
+        Get-SqlCheck
+            Returns a SMO Check object with additional properites. Note: A Check can have either a Table or View parent object.
+        Get-SqlForeignKey
+            Returns a SMO ForeignKey object with additional properites
+        Set-SqlScriptingOptions
+            Sets scripting option used in Get-SqlScripter function by reading in the text file scriptopts.txt
+        Get-SqlScripter
+            Returns a SMO Scripter object. Any function which returns a SMO object can pipe to Get-SqlScripter. For example to script out all table
+            in the pubs database: Get-SqlDatabase MyServer | Get-SqlTable | Get-SqlScripter
+        Get-Information_Schema.Tables
+            Returns the result set from INFORMATION_SCHEMA.Tables for the specified database(s) along with the Server name
+        Get-Information_Schema.Columns
+            Returns the result set from INFORMATION_SCHEMA.Columns for the specified database(s) along with the Server name
+        Get-Information_Schema.Views
+            Returns the result set from INFORMATION_SCHEMA.Views for the specified database(s) along with the Server name
+        Get-Information_Schema.Routines
+            Returns the result set from INFORMATION_SCHEMA.Routines for the specified database(s) along with the Server name
+        Get-SysDatabases
+            Returns the result set from sysdatases for the specified server along with the Server name
+        Get-SqlDataFile
+            Returns a SMO DataFile object with additional properties
+        Get-SqlLogFile
+            Returns a SMO LogFile object with additional properties
+        Get-SqlVersion
+            Returns a custom object with the Server name and version number
+        Get-SqlPort
+            Uses SQL-DMO to return the port number of the specified SQL Server
+        ConvertTo-ExtendedPropertyXML
+            Helper function returns XML representation of the Extended Properties of a SMO object
+        Get-Sql
+            Uses WMI to list all of the SQL Server related services running on the specified computer along with the service state and service account
+        ConvertTo-StatisticColumnXML
+            Helper function returns XML representation of the Statistic Columns of a SMO Statistic object
+        ConvertTo-IndexedColumnXML
+            Helper function returns XML representation of the Indexed Columns of a SMO Index object
     LibraryShowmbrs.ps1 functions
         Get-ShowMbrs
             Recursivley enumerates local Windows and AD groups similar to the NT Resource utility showmbrs.exe
@@ -79,6 +141,7 @@ Scripts
         Load the SMO Csv file into the specified database
     Write-SmoToCsvFile.ps1
         Generates an a csv file for all SQL Server security settings
+    scriptopts.txt
 
 SQL Server Reporting Services (2005) reports
     See the screenshots_sqlpsx.docx for sample output of reports

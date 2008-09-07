@@ -1,0 +1,85 @@
+# ---------------------------------------------------------------------------
+### <Script>
+### <Author>
+### Chad Miller 
+### </Author>
+### <Description>
+### This file is used to set options for scripting of SQL Mangement Objects
+### Uncomment the scripting options you wish to set. Be sure to follow PowerShell
+### syntax for setting variables i.e. true = $true and false = $false
+### </Description>
+### </Script>
+# ---------------------------------------------------------------------------
+#$scriptingOptions.AgentAlertJob = $false
+#$scriptingOptions.AgentJobId = $false
+#$scriptingOptions.AgentNotify = $false
+#$scriptingOptions.AllowSystemObjects = $false
+#$scriptingOptions.AnsiFile = $false
+#$scriptingOptions.AnsiPadding = $false
+#$scriptingOptions.AppendToFile = $false
+#$scriptingOptions.BatchSize = 100
+$scriptingOptions.Bindings = $true
+#$scriptingOptions.ClusteredIndexes = $false
+#$scriptingOptions.ConvertUserDefinedDataTypesToBaseType = $false
+#$scriptingOptions.DdlBodyOnly = $false
+#$scriptingOptions.DdlHeaderOnly = $false
+#$scriptingOptions.Default = $false
+$scriptingOptions.DriAll = $true
+#$scriptingOptions.DriAllConstraints = $false
+#$scriptingOptions.DriAllKeys = $false
+#$scriptingOptions.DriChecks = $false
+#$scriptingOptions.DriClustered = $false
+#$scriptingOptions.DriDefaults = $false
+#$scriptingOptions.DriForeignKeys = $false
+#$scriptingOptions.DriIncludeSystemNames = $false
+#$scriptingOptions.DriIndexes = $false
+#$scriptingOptions.DriNonClustered = $false
+#$scriptingOptions.DriPrimaryKey = $false
+#$scriptingOptions.DriUniqueKeys = $false
+#$scriptingOptions.DriWithNoCheck = $false
+#$scriptingOptions.EnforceScriptingOptions = $false
+#$scriptingOptions.ExtendedProperties = $false
+#$scriptingOptions.FileName = [string]$fileName
+#$scriptingOptions.FullTextCatalogs = $false
+#$scriptingOptions.FullTextIndexes = $false
+#IncludeDatabaseContext = $true
+#$scriptingOptions.IncludeDatabaseRoleMemberships = $false
+#$scriptingOptions.IncludeFullTextCatalogRootPath = $false
+#$scriptingOptions.IncludeHeaders = $false
+$scriptingOptions.IncludeIfNotExists = $true
+$scriptingOptions.Indexes = $true
+#$scriptingOptions.LoginSid = $false
+#$scriptingOptions.NoAssemblies = $false
+$scriptingOptions.NoCollation = $true
+#$scriptingOptions.NoCommandTerminator = $false
+#$scriptingOptions.NoExecuteAs = $false
+#$scriptingOptions.NoFileGroup = $false
+#$scriptingOptions.NoFileStream = $false
+#$scriptingOptions.NoFileStreamColumn = $false
+#$scriptingOptions.NoIdentities = $false
+#$scriptingOptions.NoIndexPartitioningSchemes = $false
+#$scriptingOptions.NoMailProfileAccounts = $false
+#$scriptingOptions.NoMailProfilePrincipals = $false
+#$scriptingOptions.NonClusteredIndexes = $false
+#$scriptingOptions.NoTablePartitioningSchemes = $false
+#$scriptingOptions.NoVardecimal = $false
+#$scriptingOptions.NoViewColumns = $false
+#$scriptingOptions.NoXmlNamespaces = $false
+#$scriptingOptions.OptimizerData = $false
+$scriptingOptions.Permissions = $true
+#$scriptingOptions.PrimaryObject = $false
+#$scriptingOptions.SchemaQualify = $false
+#$scriptingOptions.SchemaQualifyForeignKeysReferences = $false
+#$scriptingOptions.ScriptBatchTerminator = $false
+#$scriptingOptions.ScriptData = $false
+#$scriptingOptions.ScriptDataCompression = $false
+#$scriptingOptions.ScriptDrops = $false
+#$scriptingOptions.ScriptOwner = $false
+#$scriptingOptions.ScriptSchema = $false
+#$scriptingOptions.Statistics = $false
+#$scriptingOptions.TargetServerVersion = Version90
+#$scriptingOptions.TimestampToBinary = $false
+#$scriptingOptions.ToFileOnly = $false
+#$scriptingOptions.Triggers = $false
+#$scriptingOptions.WithDependencies = $false
+#$scriptingOptions.XmlIndexes = $false

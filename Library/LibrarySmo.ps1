@@ -31,9 +31,10 @@ function Get-SqlServer
 
     Write-Verbose "Get-SqlServer $sqlserver"
     $server = new-object ("Microsoft.SqlServer.Management.Smo.Server") $sqlserver
-#    $server.SetDefaultInitFields([Microsoft.SqlServer.Management.SMO.StoredProcedure], "IsSystemObject")
-#    $server.SetDefaultInitFields([Microsoft.SqlServer.Management.SMO.Table], "IsSystemObject")
-#    $server.SetDefaultInitFields([Microsoft.SqlServer.Management.SMO.View], "IsSystemObject")
+    $server.SetDefaultInitFields([Microsoft.SqlServer.Management.SMO.StoredProcedure], "IsSystemObject")
+    $server.SetDefaultInitFields([Microsoft.SqlServer.Management.SMO.Table], "IsSystemObject")
+    $server.SetDefaultInitFields([Microsoft.SqlServer.Management.SMO.View], "IsSystemObject")
+    $server.SetDefaultInitFields([Microsoft.SqlServer.Management.SMO.UserDefinedFunction], "IsSystemObject")
     #trap { "Check $SqlServer Name"; continue} $server.ConnectionContext.Connect() 
     return $server
     
@@ -967,3 +968,934 @@ function Get-SqlObjectPermission
     }
 
 }# Get-SqlObjectPermission
+
+#######################
+function Get-SqlTable
+{
+    param($db, $name="*")
+    begin
+    {
+        function Select-SqlTable ($db, $name="*")
+        {
+
+            foreach ($table in $db.Tables)
+            {
+                if ($table.IsSystemObject -eq $false -and ($table.name -like "*$name*" -or $name.Contains($table.name)))
+                {
+                #Return Table Object
+                $table | add-Member -memberType noteProperty -name timestamp -value $(Get-SessionTimeStamp) -passthru |
+                add-Member -memberType noteProperty -name XMLExtendedProperties -value $(ConvertTo-ExtendedPropertyXML $table.ExtendedProperties) -passthru |
+                        add-Member -memberType noteProperty -name Server -value $db.parent.Name -passthru |
+                        add-Member -memberType noteProperty -name dbname -value $db.Name -passthru
+                }
+            }
+
+        } # Select-SqlTable
+    }
+    process
+    {
+        if ($_)
+        {
+            if ($_.GetType().Name -eq 'Database')
+            { Write-Verbose "Get-SqlTable $($_.Name)"
+              Select-SqlTable $_ -name $name }
+            else
+            { throw 'Get-SqlTable:Param `$db must be a database object.' }
+
+        }
+    }
+    end
+    {
+        if ($db)
+        { $db | Get-SqlTable -name $name }
+    }
+
+} #Get-SqlTable
+
+#######################
+function Get-SqlStoredProcedure
+{
+    param($db, $name="*")
+    begin
+    {
+        function Select-SqlStoredProcedure ($db, $name="*")
+        {
+
+            foreach ($storedProcedure in $db.StoredProcedures)
+            {
+                if ($storedProcedure.IsSystemObject -eq $false -and ($storedProcedure.name -like "*$name*" -or $name.Contains($storedProcedure.name)))
+                {
+                #Return StoredProcedure Object
+                $storedProcedure | add-Member -memberType noteProperty -name timestamp -value $(Get-SessionTimeStamp) -passthru |
+      add-Member -memberType noteProperty -name XMLExtendedProperties -value $(ConvertTo-ExtendedPropertyXML $storedProcedure.ExtendedProperties) -passthru |
+                        add-Member -memberType noteProperty -name Server -value $db.parent.Name -passthru |
+                        add-Member -memberType noteProperty -name dbname -value $db.Name -passthru
+                }
+            }
+
+        } # Select-SqlStoredProcedure
+    }
+    process
+    {
+        if ($_)
+        {
+            if ($_.GetType().Name -eq 'Database')
+            { Write-Verbose "Get-SqlStoredProcedure $($_.Name)"
+              Select-SqlStoredProcedure $_ -name $name }
+            else
+            { throw 'Get-SqlStoredProcedure:Param `$db must be a database object.' }
+        }
+    }
+    end
+    {
+        if ($db)
+        { $db | Get-SqlStoredProcedure -name $name }
+    }
+
+} #Get-SqlStoredProcedure
+
+#######################
+function Get-SqlView
+{
+    param($db, $name="*")
+    begin
+    {
+        function Select-SqlView ($db, $name="*")
+        {
+
+            foreach ($view in $db.Views)
+            {
+                if ($view.IsSystemObject -eq $false -and ($view.name -like "*$name*" -or $name.Contains($view.name)))
+                {
+                #Return View Object
+                $view | add-Member -memberType noteProperty -name timestamp -value $(Get-SessionTimeStamp) -passthru |
+                add-Member -memberType noteProperty -name XMLExtendedProperties -value $(ConvertTo-ExtendedPropertyXML $view.ExtendedProperties) -passthru |
+                        add-Member -memberType noteProperty -name Server -value $db.parent.Name -passthru |
+                        add-Member -memberType noteProperty -name dbname -value $db.Name -passthru
+                }
+            }
+
+        } # Select-SqlView
+    }
+    process
+    {
+        if ($_)
+        {
+            if ($_.GetType().Name -eq 'Database')
+            { Write-Verbose "Get-SqlView $($_.Name)"
+              Select-SqlView $_ -name $name }
+            else
+            { throw 'Get-SqlView:Param `$db must be a database object.' }
+        }
+    }
+    end
+    {
+        if ($db)
+        { $db | Get-SqlView -name $name }
+    }
+
+} #Get-SqlView
+
+#######################
+function Get-SqlUserDefinedDataType
+{
+    param($db, $name="*")
+    begin
+    {
+        function Select-SqlUserDefinedDataType ($db, $name="*")
+        {
+
+            foreach ($userDefinedDataType in $db.UserDefinedDataTypes)
+            {
+           if ($userDefinedDataType.IsSystemObject -eq $false -and ($userDefinedDataType.name -like "*$name*" -or $name.Contains($userDefinedDataType.name)))
+                { 
+                #Return UserDefinedDataType Object
+                $userDefinedDataType | add-Member -memberType noteProperty -name timestamp -value $(Get-SessionTimeStamp) -passthru |
+  add-Member -memberType noteProperty -name XMLExtendedProperties -value $(ConvertTo-ExtendedPropertyXML $userDefinedDataType.ExtendedProperties) -passthru |
+                        add-Member -memberType noteProperty -name Server -value $db.parent.Name -passthru |
+                        add-Member -memberType noteProperty -name dbname -value $db.Name -passthru
+                }
+            }
+
+        } # Select-SqlUserDefinedDataType
+    }
+    process
+    {
+        if ($_)
+        {
+            if ($_.GetType().Name -eq 'Database')
+            { Write-Verbose "Get-SqlUserDefinedDataType $($_.Name)"
+              Select-SqlUserDefinedDataType $_ -name $name }
+            else
+            { throw 'Get-SqlUserDefinedDataType:Param `$db must be a database object.' }
+
+        }
+    }
+    end
+    {
+        if ($db)
+        { $db | Get-SqlUserDefinedDataType -name $name }
+    }
+
+} #Get-SqlUserDefinedDataType
+
+#######################
+function Get-SqlUserDefinedFunction
+{
+    param($db, $name="*")
+    begin
+    {
+        function Select-SqlUserDefinedFunction ($db, $name="*")
+        {
+
+            foreach ($userDefinedFunction in $db.UserDefinedFunctions)
+            {
+           if ($userDefinedFunction.IsSystemObject -eq $false -and ($userDefinedFunction.name -like "*$name*" -or $name.Contains($userDefinedFunction.name)))
+                {
+                #Return UserDefinedFunction Object
+                $userDefinedFunction | add-Member -memberType noteProperty -name timestamp -value $(Get-SessionTimeStamp) -passthru |
+  add-Member -memberType noteProperty -name XMLExtendedProperties -value $(ConvertTo-ExtendedPropertyXML $userDefinedFunction.ExtendedProperties) -passthru |
+                        add-Member -memberType noteProperty -name Server -value $db.parent.Name -passthru |
+                        add-Member -memberType noteProperty -name dbname -value $db.Name -passthru
+                }
+            }
+
+        } #Select-SqlUserFunction
+    }
+    process
+    {
+        if ($_)
+        {
+            if ($_.GetType().Name -eq 'Database')
+            { Write-Verbose "Get-SqlUserDefinedFunction $($_.Name)"
+              Select-SqlUserDefinedFunction $_ -name $name }
+            else
+            { throw 'Get-SqlUserDefinedFunction:Param `$db must be a database object.' }
+
+        }
+    }
+    end
+    {
+        if ($db)
+        { $db | Get-SqlUserDefinedFunction -name $name }
+    }
+
+} #Get-SqlUserDefinedFunction
+
+#######################
+function Get-SqlSynonym
+{
+    param($db, $name="*")
+    begin
+    {
+        function Select-SqlSynonym ($db, $name="*")
+        {
+
+            foreach ($synonym in $db.Synonyms)
+            {
+                if ($synonym.name -like "*$name*" -or $name.Contains($synonym.name))
+                {
+                #Return Synonym Object
+                $synonym | add-Member -memberType noteProperty -name timestamp -value $(Get-SessionTimeStamp) -passthru |
+  add-Member -memberType noteProperty -name XMLExtendedProperties -value $(ConvertTo-ExtendedPropertyXML $synonym.ExtendedProperties) -passthru |
+                        add-Member -memberType noteProperty -name Server -value $db.parent.Name -passthru |
+                        add-Member -memberType noteProperty -name dbname -value $db.Name -passthru
+                }
+            }
+
+        } # Select-SqlSynonym
+    }
+    process
+    {
+        if ($_)
+        {
+            if ($_.GetType().Name -eq 'Database')
+            { Write-Verbose "Get-SqlSynonym $($_.Name)"
+              Select-SqlSynonym $_ -name $name }
+            else
+            { throw 'Get-SqlSynonym:Param `$db must be a database object.' }
+
+        }
+    }
+    end
+    {
+        if ($db)
+        { $db | Get-SqlSynonym -name $name }
+    }
+
+} #Get-SqlSynonym
+
+#######################
+function Get-SqlTrigger
+{
+    param($smo, $name="*")
+    begin
+    {
+        function Select-SqlTrigger ($smo, $name="*")
+        {
+
+            foreach ($trigger in $smo.Triggers)
+            {
+                if ($trigger.name -like "*$name*" -or $name.Contains($trigger.name))
+                {
+                switch ($smo.GetType().Name)
+                {
+                    'Server' { $server = $smo.Name }
+                    'Database' { $server = $smo.parent.Name; $dbname = $smo.Name }
+                    #Default is table or view
+                    Default { $server = $smo.parent.parent.Name; $dbname = $smo.parent.Name; $schema = $smo.parent.schema; $tbl = $smo.Name }
+                }
+                #Return Trigger Object
+                if ($trigger -ne $null)
+                {
+                $trigger | add-Member -memberType noteProperty -name timestamp -value $(Get-SessionTimeStamp) -passthru |
+  add-Member -memberType noteProperty -name XMLExtendedProperties -value $(ConvertTo-ExtendedPropertyXML $triggr.ExtendedProperties) -passthru |
+                        add-Member -memberType noteProperty -name Server -value $server -passthru |
+                        add-Member -memberType noteProperty -name dbname -value $dbname -passthru |
+                        add-Member -memberType noteProperty -name Schema -value $schema -passthru |
+                        add-Member -memberType noteProperty -name Table -value $tbl -passthru 
+                }
+                }
+            }
+
+        } #Select-SqlTrigger
+    }
+    process
+    {
+        if ($_)
+        {
+            if ($_.GetType().Name -eq 'Server' -or $_.GetType().Name -eq 'Database' -or $_.GetType().Name -eq 'Table' -or $_.GetType().Name -eq 'View')
+            { Write-Verbose "Get-SqlTrigger $($_.Name)"
+              Select-SqlTrigger $_ -name $name }
+            else
+            { throw 'Get-SqlTrigger:Param `$smo must be a server, database, table or view object.' }
+
+        }
+    }
+    end
+    {
+        if ($smo)
+        { $smo | Get-SqlTrigger -name $name }
+    }
+
+} #Get-SqlTrigger
+
+#######################
+function Get-SqlColumn
+{
+    param($table)
+    begin
+    {
+        function Select-SqlColumn ($table)
+        {
+
+            foreach ($column in $table.Columns)
+            {
+                #Return Column Object
+                $column | add-Member -memberType noteProperty -name timestamp -value $(Get-SessionTimeStamp) -passthru |
+  add-Member -memberType noteProperty -name XMLExtendedProperties -value $(ConvertTo-ExtendedPropertyXML $column.ExtendedProperties) -passthru |
+                        add-Member -memberType noteProperty -name Server -value $table.parent.parent.Name -passthru |
+                        add-Member -memberType noteProperty -name dbname -value $table.parent.Name -passthru |
+                        add-Member -memberType noteProperty -name Schema -value $table.schema -passthru |
+                        add-Member -memberType noteProperty -name Table -value $table.Name -passthru 
+            }
+
+        } # Select-SqlColumn
+    }
+    process
+    {
+        if ($_)
+        {
+            if ($_.GetType().Name -eq 'Table' -or $_.GetType().Name -eq 'View')
+            { Write-Verbose "Get-SqlColumn $($_.Name)"
+              Select-SqlColumn $_ }
+            else
+            { throw 'Get-SqlColumn:Param `$table must be a table or view object.' }
+
+        }
+    }
+    end
+    {
+        if ($table)
+        { $table | Get-SqlColumn }
+    }
+
+} #Get-SqlColumn
+
+#######################
+function Get-SqlIndex
+{
+    param($table)
+    begin
+    {
+        function Select-SqlIndex ($table)
+        {
+
+            foreach ($index in $table.Indexes)
+            {
+                #Return Index Object
+                $index | add-Member -memberType noteProperty -name timestamp -value $(Get-SessionTimeStamp) -passthru |
+  add-Member -memberType noteProperty -name XMLExtendedProperties -value $(ConvertTo-ExtendedPropertyXML $index.ExtendedProperties) -passthru |
+  add-Member -memberType noteProperty -name XMLIndexedColumns -value $(ConvertTo-IndexedColumnXML $index.IndexedColumns) -passthru |
+                        add-Member -memberType noteProperty -name Server -value $table.parent.parent.Name -passthru |
+                        add-Member -memberType noteProperty -name dbname -value $table.parent.Name -passthru |
+                        add-Member -memberType noteProperty -name Schema -value $table.Schema -passthru |
+                        add-Member -memberType noteProperty -name Table -value $table.Name -passthru 
+            }
+
+        } #Select-SqlIndex
+    }
+    process
+    {
+        if ($_)
+        {
+            if ($_.GetType().Name -eq 'Table' -or $_.GetType().Name -eq 'View')
+            { Write-Verbose "Get-SqlIndex $($_.Name)"
+              Select-SqlIndex $_ }
+            else
+            { throw 'Get-SqlIndex:Param `$table must be a table or view object.' }
+
+        }
+    }
+    end
+    {
+        if ($table)
+        { $table | Get-SqlIndex }
+    }
+
+} #Get-SqlIndex
+
+#######################
+function Get-SqlStatistic
+{
+    param($table)
+    begin
+    {
+        function Select-SqlStatistic ($table)
+        {
+
+            foreach ($statistic in $table.Statistics)
+            {
+                #Only return statistics not associated with indexes
+                if ($statistic.IsFromIndexCreation -eq $false)
+                {
+                #Return Statistic Object
+                $statistic | add-Member -memberType noteProperty -name timestamp -value $(Get-SessionTimeStamp) -passthru |
+            add-Member -memberType noteProperty -name XMLExtendedProperties -value $(ConvertTo-ExtendedPropertyXML $statistic.ExtendedProperties) -passthru |
+            add-Member -memberType noteProperty -name XMLStatisticColumns -value $(ConvertTo-StatisticColumnXML $statistic.StatisticColumns) -passthru |
+                        add-Member -memberType noteProperty -name Server -value $table.parent.parent.Name -passthru |
+                        add-Member -memberType noteProperty -name dbname -value $table.parent.Name -passthru |
+                        add-Member -memberType noteProperty -name Schema -value $table.Schema -passthru |
+                        add-Member -memberType noteProperty -name Table -value $table.Name -passthru 
+                }
+            }
+
+        } #Select-SqlStatistic
+    }
+    process
+    {
+        if ($_)
+        {
+            if ($_.GetType().Name -eq 'Table' -or $_.GetType().Name -eq 'View')
+            { Write-Verbose "Get-SqlStatistic $($_.Name)"
+              Select-SqlStatistic $_ }
+            else
+            { throw 'Get-SqlStatistic:Param `$table must be a table or view object.' }
+
+        }
+    }
+    end
+    {
+        if ($table)
+        { $table | Get-SqlStatistic }
+    }
+
+} #Get-SqlStatistic
+
+#######################
+function Get-SqlCheck
+{
+    param($table)
+    begin
+    {
+        function Select-SqlCheck ($table)
+        {
+
+            foreach ($Check in $table.Checks)
+            {
+                #Return Check Object
+                $Check | add-Member -memberType noteProperty -name timestamp -value $(Get-SessionTimeStamp) -passthru |
+            add-Member -memberType noteProperty -name XMLExtendedProperties -value $(ConvertTo-ExtendedPropertyXML $check.ExtendedProperties) -passthru |
+                        add-Member -memberType noteProperty -name Server -value $table.parent.parent.Name -passthru |
+                        add-Member -memberType noteProperty -name dbname -value $table.parent.Name -passthru |
+                        add-Member -memberType noteProperty -name Schema -value $table.Schema -passthru |
+                        add-Member -memberType noteProperty -name Table -value $table.Name -passthru 
+            }
+
+        } #Select-SqlCheck
+    }
+    process
+    {
+        if ($_)
+        {
+            if ($_.GetType().Name -eq 'Table' -or $_.GetType().Name -eq 'View')
+            { Write-Verbose "Get-SqlCheck $($_.Name)"
+              Select-SqlCheck $_ }
+            else
+            { throw 'Get-SqlCheck:Param `$table must be a table or view object.' }
+
+        }
+    }
+    end
+    {
+        if ($table)
+        { $table | Get-SqlCheck }
+    }
+
+} #Get-SqlCheck
+
+#######################
+function Get-SqlForeignKey
+{
+    param($table)
+    begin
+    {
+        function Select-SqlForeignKey ($table)
+        {
+
+            foreach ($ForeignKey in $table.ForeignKeys)
+            {
+                #Return ForeignKey Object
+                $ForeignKey | add-Member -memberType noteProperty -name timestamp -value $(Get-SessionTimeStamp) -passthru |
+           add-Member -memberType noteProperty -name XMLExtendedProperties -value $(ConvertTo-ExtendedPropertyXML $ForeignKey.ExtendedProperties) -passthru |
+                        add-Member -memberType noteProperty -name Server -value $table.parent.parent.Name -passthru |
+                        add-Member -memberType noteProperty -name dbname -value $table.parent.Name -passthru |
+                        add-Member -memberType noteProperty -name Schema -value $table.Schema -passthru |
+                        add-Member -memberType noteProperty -name Table -value $table.Name -passthru 
+            }
+
+        } #Select-SqlForeignKey
+    }
+    process
+    {
+        if ($_)
+        {
+            if ($_.GetType().Name -eq 'Table' -or $_.GetType().Name -eq 'View')
+            { Write-Verbose "Get-SqlForeignKey $($_.Name)"
+              Select-SqlForeignKey $_ }
+            else
+            { throw 'Get-SqlForeignKey:Param `$table must be a table or view object.' }
+
+        }
+    }
+    end
+    {
+        if ($table)
+        { $table | Get-SqlForeignKey }
+    }
+
+} #Get-SqlForeignKey
+
+#######################
+function Set-SqlScriptingOptions
+{
+    #There 77 settable scripting options at the time of this writing, rather than set the options as parameters
+    #I've choosen to set them through a separate file called scriptopts.txt. Modify the scriptopts.txt to set
+    #the various scriptingOptions to your liking. See the following MSDN link for a description of the settable options:
+    #http://msdn.microsoft.com/en-us/library/microsoft.sqlserver.management.smo.scriptingoptions_members.aspx
+
+    $ScriptingOptions = New-Object Microsoft.SqlServer.Management.Smo.ScriptingOptions
+    if (test-path $scriptRoot\scriptopts.txt)
+    {
+        $include = [System.IO.File]::ReadAllText("$scriptRoot\scriptopts.txt")
+        invoke-expression $include
+    }
+
+    return $scriptingOptions
+
+} #Set-SqlScriptingOptions
+
+#######################
+function Get-SqlScripter
+{
+    param($smo, $scriptingOptions=$(Set-SqlScriptingOptions))
+    begin
+    {
+        function Select-SqlScripter ($smo, $scriptingOptions=$(Set-SqlScriptingOptions))
+        {
+            $smo.Script($scriptingOptions)
+
+        } #Select-SqlScripter
+    }
+    process
+    {
+        if ($_)
+        {
+            if ($_.GetType().Namespace -eq 'Microsoft.SqlServer.Management.Smo')
+            { Write-Verbose "Get-SqlScripter $($_.Name)"
+              Select-SqlScripter $_ $scriptingOptions }
+            else
+            { throw 'Get-SqlScripter:Param `$smo must be an SMO object.' }
+
+        }
+    }
+    end
+    {
+        if ($smo)
+        { $smo | Get-SqlScripter -scriptingOptions $scriptingOptions }
+    }
+
+} #Get-SqlScripter
+
+#######################
+function Get-Information_Schema.Tables
+{
+    param($db,$name='%')
+    begin
+    {
+        function Select-Information_Schema.Tables ($db, $name='%')
+        {
+$qry = @"
+SELECT SERVERPROPERTY('ServerName') AS Server, * FROM INFORMATION_SCHEMA.TABLES
+WHERE TABLE_TYPE = 'BASE TABLE'
+AND OBJECTPROPERTY(OBJECT_ID('['+TABLE_SCHEMA+'].['+TABLE_NAME+']'),'IsMSShipped') = 0
+AND TABLE_NAME NOT IN ('dtproperties','sysdiagrams')
+AND TABLE_NAME LIKE '%$name%'
+"@
+            Get-SqlData -dbname $db -qry $qry
+        } #Select-Information_Schema.Tables
+    }
+    process
+    {
+        if ($_)
+        {
+            if ($_.GetType().Name -eq 'Database')
+            { Write-Verbose "Get-Information_Schema.Tables $($_.Name)"
+              Select-Information_Schema.Tables $_ -name $name }
+            else
+            { throw 'Get-Information_Schema.Tables:Param `$db must be a database object.' }
+
+        }
+    }
+    end
+    {
+        if ($db)
+        { $db | Get-Information_Schema.Tables -name $name }
+    }
+
+} #Get-Information_Schema.Tables
+
+#######################
+function Get-Information_Schema.Columns
+{
+    param($db,$tblname='%',$colname='%')
+    begin
+    {
+        function Select-Information_Schema.Columns ($db,$tblname='%',$colname='%')
+        {
+$qry = @"
+SELECT SERVERPROPERTY('ServerName') AS Server, * FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_NAME NOT IN ('dtproperties','sysdiagrams')
+AND OBJECTPROPERTY(OBJECT_ID('['+TABLE_SCHEMA+'].['+TABLE_NAME+']'),'IsMSShipped') = 0
+AND TABLE_NAME LIKE '%$tblname%'
+AND COLUMN_NAME LIKE '%$colname%'
+"@
+            Get-SqlData -dbname $db -qry $qry
+        } #Select-Information_Schema.Columns
+    }
+    process
+    {
+        if ($_)
+        {
+            if ($_.GetType().Name -eq 'Database')
+            { Write-Verbose "Get-Information_Schema.Columns $($_.Name)"
+              Select-Information_Schema.Columns $_ -tblname $tblname -colname $colname }
+            else
+            { throw 'Get-Information_Schema.Columns:Param `$db must be a database object.' }
+
+        }
+    }
+    end
+    {
+        if ($db)
+        { $db | Get-Information_Schema.Columns -tblname $tblname -colname $colname }
+    }
+
+} #Get-Information_Schema.Columns
+
+#######################
+function Get-Information_Schema.Views
+{
+    param($db,$name='%')
+    begin
+    {
+        function Select-Information_Schema.Views ($db, $name='%')
+        {
+$qry = @"
+SELECT SERVERPROPERTY('ServerName') AS Server, * FROM INFORMATION_SCHEMA.VIEWS
+WHERE TABLE_NAME like '%$name%'
+AND OBJECTPROPERTY(OBJECT_ID('['+TABLE_SCHEMA+'].['+TABLE_NAME+']'),'IsMSShipped') = 0
+"@
+            Get-SqlData -dbname $db -qry $qry
+        } #Select-Information_Schema.Views
+    }
+    process
+    {
+        if ($_)
+        {
+            if ($_.GetType().Name -eq 'Database')
+            { Write-Verbose "Get-Information_Schema.Views $($_.Name)"
+              Select-Information_Schema.Views $_ -name $name }
+            else
+            { throw 'Get-Information_Schema.Views:Param `$db must be a database object.' }
+
+        }
+    }
+    end
+    {
+        if ($db)
+        { $db | Get-Information_Schema.Views -name $name }
+    }
+
+} #Get-Information_Schema.Views
+
+#######################
+function Get-Information_Schema.Routines
+{
+    param($db,$name='%',$text='%')
+    begin
+    {
+        function Select-Information_Schema.Routines ($db, $name='%',$text='%')
+        {
+$qry = @"
+SELECT SERVERPROPERTY('ServerName') AS Server, * FROM INFORMATION_SCHEMA.ROUTINES
+WHERE ROUTINE_NAME NOT LIKE 'sp_%diagram%'
+AND OBJECTPROPERTY(OBJECT_ID('['+ROUTINE_SCHEMA+'].['+ROUTINE_NAME+']'),'IsMSShipped') = 0
+AND ROUTINE_NAME LIKE '%$name%'
+AND ROUTINE_DEFINITION LIKE '%$text%'
+"@
+            Get-SqlData -dbname $db -qry $qry
+        } #Select-Information_Schema.Routines
+    }
+    process
+    {
+        if ($_)
+        {
+            if ($_.GetType().Name -eq 'Database')
+            { Write-Verbose "Get-Information_Schema.Routines $($_.Name)"
+              Select-Information_Schema.Routines $_ -name $name -text $text }
+            else
+            { throw 'Get-Information_Schema.Routines:Param `$db must be a database object.' }
+
+        }
+    }
+    end
+    {
+        if ($db)
+        { $db | Get-Information_Schema.Routines -name $name -text $text }
+    }
+
+} #Get-Information_Schema.Routines
+
+#######################
+function Get-SysDatabases
+{
+    param($sqlserver=$(throw 'Get-SysDatabases:`$sqlserver is required.'),$name='%')
+
+    switch ($sqlserver.GetType().Name)
+    {
+        'String' { $server = Get-SqlServer $sqlserver }
+        'Server' { $server = $sqlserver }
+        default { throw 'Get-SysDatabases:Param `$sqlserver must be a String or Server object.' }
+    }
+
+    Write-Verbose "Get-SysDatabases $($server.Name)"
+
+    $db = Get-SqlDatabase $server 'master'
+$qry = @"
+SELECT SERVERPROPERTY('ServerName') AS Server, name FROM sysdatabases
+WHERE name LIKE '%$name%'
+"@
+    Get-SqlData -dbname $db -qry $qry
+
+} #Get-SysDatabases
+
+#######################
+function Get-SqlDataFile
+{
+    param($db)
+    begin
+    {
+        function Select-SqlDataFile ($db)
+        {
+
+            foreach ($dataFile in $db.FileGroups | % {$_.Files})
+            {
+                #Return DataFile Object
+                $dataFile | add-Member -memberType noteProperty -name timestamp -value $(Get-SessionTimeStamp) -passthru |
+                        add-Member -memberType noteProperty -name FileGroup -value $dataFile.parent.Name -passthru |
+                        add-Member -memberType noteProperty -name Server -value $db.parent.Name -passthru |
+                        add-Member -memberType noteProperty -name dbname -value $db.Name -passthru
+            }
+
+        } #Select-SqlDataFile
+    }
+    process
+    {
+        if ($_)
+        {
+            if ($_.GetType().Name -eq 'Database')
+            { Write-Verbose "Get-SqlDataFile $($_.Name)"
+              Select-SqlDataFile $_ }
+            else
+            { throw 'Get-SqlDataFile:Param `$db must be a database object.' }
+
+        }
+    }
+    end
+    {
+        if ($db)
+        { $db | Get-SqlDataFile }
+    }
+
+} #Get-SqlDataFile
+
+#######################
+function Get-SqlLogFile
+{
+    param($db)
+    begin
+    {
+        function Select-SqlLogFile ($db)
+        {
+
+            foreach ($logFile in $db.LogFiles)
+            {
+                #Return LogFile Object
+                $LogFile | add-Member -memberType noteProperty -name timestamp -value $(Get-SessionTimeStamp) -passthru |
+                        add-Member -memberType noteProperty -name Server -value $db.parent.Name -passthru |
+                        add-Member -memberType noteProperty -name dbname -value $db.Name -passthru
+            }
+
+        } #Select-SqlLogFile
+    }
+    process
+    {
+        if ($_)
+        {
+            if ($_.GetType().Name -eq 'Database')
+            { Write-Verbose "Get-SqlLogFile $($_.Name)"
+              Select-SqlLogFile $_ }
+            else
+            { throw 'Get-SqlLogFile:Param `$db must be a database object.' }
+
+        }
+    }
+    end
+    {
+        if ($db)
+        { $db | Get-SqlLogFile }
+    }
+
+} #Get-SqlLogFile
+
+#######################
+function Get-SqlVersion
+{
+    param($sqlserver=$(throw 'Get-SqlVersion:`$sqlserver is required.'))
+
+    switch ($sqlserver.GetType().Name)
+    {
+        'String' { $server = Get-SqlServer $sqlserver }
+        'Server' { $server = $sqlserver }
+        default { throw 'Get-SqlVersion:Param `$sqlserver must be a String or Server object.' }
+    }
+
+    Write-Verbose "Get-SqlVersion $($server.Name)"
+
+    $server.information | Select @{name='Server';Expression={$server.Name}}, Version
+
+}#Get-SqlVersion
+
+#######################
+function Get-SqlPort
+{
+    param([string]$sqlserver=$(throw 'Get-SqlPort:`$sqlserver is required.'))
+
+    #This can be done using Microsoft.SqlServer.Management.Smo.Wmi.ManagedComputer,
+    #but it has some severe limitations -- only support in 2005 or higher and must have a SQL 
+    #instance installed locally, so back SQLDMO instead of SMO for this one
+
+    $dmoServer = New-Object -comobject "SQLDMO.SQLServer"
+    $dmoServer.loginsecure = $true
+    $dmoServer.connect($sqlserver)
+    $tcpPort = $dmoServer.registry.tcpport
+    $dmoServer.close() 
+    
+    new-object psobject |
+    add-member -pass NoteProperty Server $sqlserver |
+    add-member -pass NoteProperty TcpPort $tcpPort
+
+}#Get-SqlPort
+
+#######################
+function ConvertTo-ExtendedPropertyXML
+{
+    param($extendedProperty=$(throw 'ConvertTo-SqlExtendedPropertyXML:`$extendedProperty is required.'))
+
+    Write-Verbose "ConvertTo-SqlExtendedPropertyXML"
+    
+    foreach ($xp in $extendedProperty)
+    {
+            if ($xp.Name -ne $null -and $xp.Value -ne $null)
+            { $xpXML += [string] "<ExtendedProperty Name=`"" + $xp.Name + "`" Value=`"" + $xp.Value + "`"></ExtendedProperty>" }
+    }
+
+    Return $xpXML
+
+} #ConvertTo-ExtendedPropertyXML
+
+#######################
+function Get-Sql
+{
+    param ($computer=$(throw 'Get-Sql:`$computer is required.'))
+
+    if((get-wmiobject win32_pingstatus -Filter "address='$computer'").protocoladdress) 
+    {
+        Get-WmiObject win32_service -computer $computer |
+Where {($_.Name -Like "MSSQL*" -or $_.Name -Like "SQLAgent*" -or $_.Name -Like "SQLServer*" -or $_.Name -eq 'MSDTC') -and $_.Name -ne 'MSSQLServerADHelper'} | Select SystemName, Name, State, StartName | ft
+    }
+} #Get-Sql
+
+#######################
+function ConvertTo-StatisticColumnXML
+{
+    param($statisticColumn=$(throw 'ConvertTo-SqlStatisticColumnXML:`$statisticColumn is required.'))
+
+    Write-Verbose "ConvertTo-SqlStatisticColumnXML"
+    
+    foreach ($wa in $statisticColumn)
+    {
+        $waXML += [string] "<StatisticColumn Name=`"" + $wa.Name + "`"</StatisticColumn>"
+    }
+
+    Return $waXML
+
+} #ConvertTo-StatisticColumnXML
+
+#######################
+function ConvertTo-IndexedColumnXML
+{
+    param($indexedColumn=$(throw 'ConvertTo-SqlIndexedColumnXML:`$indexedColumn is required.'))
+
+    Write-Verbose "ConvertTo-SqlIndexedColumnXML"
+    
+    foreach ($ix in $indexedColumn)
+    {
+$ixXML += [string] "<IndexedColumn Name=`"" + $ix.Name + "`" Descending=`"" +$($ix.Descending.ToString()) + "`" IsComputed=`"" + $($ix.IsComputed.ToString())  + "`"</IndexedColumn>"
+    }
+
+    Return $ixXML
+
+} #ConvertTo-IndexedColumnXML
+
