@@ -13,6 +13,11 @@ Optional Database and Reporting Services Components
 8. Run Write-SmoToCsvFile.ps1 to import the csv file into the database
 
 What's New
+    Version 1.2
+        Added the following functions: 
+        Get-AgentJobServer  Get-AgentAlertCategory  Get-AgentAlert  Get-AgentJob  Get-AgentJobSchedule  Get-AgentJobStep  Get-AgentOperator
+        Get-AgentOperatorCategory  Get-AgentProxyAccount  Get-AgentSchedule  Get-AgentTargetServerGroup  Get-AgentTargetServer  Get-AgentJobHistory
+
     Version 1.1
         Added the following functions: 
         Get-SqlTable Get-SqlStoredProcedure Get-SqlView Get-SqlUserDefinedDataType Get-SqlUserDefinedFunction Get-SqlSynonym Get-SqlTrigger Get-SqlColumn
@@ -115,7 +120,36 @@ Libraries
             Helper function returns XML representation of the Statistic Columns of a SMO Statistic object
         ConvertTo-IndexedColumnXML
             Helper function returns XML representation of the Indexed Columns of a SMO Index object
-    LibraryShowmbrs.ps1 functions
+    LibraryAgent.ps1 functions
+        Get-AgentJobServer
+            Returns a Microsoft.SqlServer.Management.Smo.Agent.JobServer Object. This is the top level object for Agent.Smo
+        Get-AgentAlertCategory
+            Returns an SMO.Agent AlertCategory object or collection of AlertCategory objects
+        Get-AgentAlert
+            Returns an SMO.Agent Alert object or collection of Alert objects
+        Get-AgentJob
+            Returns an SMO.Agent Job object or collection of Job objects
+        Get-AgentJobSchedule
+            Returns an SMO.Agent JobSchedule object or collection of JobSchedule objects for Job Objects
+        Get-AgentJobStep
+            Returns an SMO.Agent JobStep object or collection of JobStep objects
+        Get-AgentOperator
+            Returns an SMO.Agent Operator object or collection of Operator objects
+        Get-AgentOperatorCategory
+            Returns an SMO.Agent OperatorCategory object or collection of OperatorCategory objects
+        Get-AgentProxyAccount
+            Returns an SMO.Agent ProxyAccount object or collection of ProxyAccount objects
+        Get-AgentSchedule
+            Returns an SMO.Agent JobSchedule object or collection of JobSchedule objects for JobServer Shared Schedules 
+        Get-AgentTargetServerGroup
+            Returns an SMO.Agent TargetServerGroup object or collection of TargetServerGroup objects
+        Get-AgentTargetServer
+            Returns an SMO.Agent TargetServer object or collection of TargetServer objects
+        Set-AgentJobHistoryFilter
+            Sets filtering option used in Get-AgentJobHistory function
+        Get-AgentJobHistory
+            Returns an DataTable of job history, filtering can be applied by using the Set-AgentJobHistoryFilter function
+    LibraryShowmbrs.ps1 s
         Get-ShowMbrs
             Recursivley enumerates local Windows and AD groups similar to the NT Resource utility showmbrs.exe
 

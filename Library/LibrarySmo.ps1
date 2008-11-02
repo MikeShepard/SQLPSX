@@ -1531,7 +1531,7 @@ function Get-SqlScripter
     {
         if ($_)
         {
-            if ($_.GetType().Namespace -eq 'Microsoft.SqlServer.Management.Smo')
+            if ($_.GetType().Namespace -like "Microsoft.SqlServer.Management.Smo*")
             { Write-Verbose "Get-SqlScripter $($_.Name)"
               Select-SqlScripter $_ $scriptingOptions }
             else
