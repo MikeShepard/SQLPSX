@@ -1499,15 +1499,23 @@ function Get-SqlForeignKey
 #######################
 function Set-SqlScriptingOptions
 {
+    param($optsFile="scriptopts.txt")
+
     #There 77 settable scripting options at the time of this writing, rather than set the options as parameters
-    #I've choosen to set them through a separate file called scriptopts.txt. Modify the scriptopts.txt to set
+    #I've choosen to set them through a separate file. Modify the  passed in file to set
     #the various scriptingOptions to your liking. See the following MSDN link for a description of the settable options:
     #http://msdn.microsoft.com/en-us/library/microsoft.sqlserver.management.smo.scriptingoptions_members.aspx
+    Write-Verbose "Set-SqlScriptingOptions $optsFile"
 
     $ScriptingOptions = New-Object Microsoft.SqlServer.Management.Smo.ScriptingOptions
-    if (test-path $scriptRoot\scriptopts.txt)
+    if (test-path $scriptRoot\$optsFile)
     {
-        $include = [System.IO.File]::ReadAllText("$scriptRoot\scriptopts.txt")
+        $include = [System.IO.File]::ReadAllText("$scriptRoot\$optsFile")
+        invoke-expression $include
+    }
+    elseif (test-path $optsFile)
+    {
+        $include = [System.IO.File]::ReadAllText("$optsFile")
         invoke-expression $include
     }
 

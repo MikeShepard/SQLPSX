@@ -1,6 +1,6 @@
 Getting Started with SQLPSX
 ** NOTE: You must have SMO installed to run the SQLPSX, SMO is installed with SQL Server Management Studio ***
-1. Copy all Library and Script files to the same directory. Add sourcing of LibrarySmo.ps1 to
+1. Copy all Library and Script files to the same directory. Add sourcing of Library Files to
    your Profile if desired
 
 Optional Database and Reporting Services Components
@@ -13,11 +13,16 @@ Optional Database and Reporting Services Components
 8. Run Write-SmoToCsvFile.ps1 to import the csv file into the database
 
 What's New
+    Version 1.3
+        Added the following functions: 
+        Get-SqlConnection Get-ReplServer Get-ReplLightPublication New-ReplTransPublication New-ReplMergePublication Get-ReplSubscriberSubscription
+        Get-ReplPublication Get-ReplSubscription Get-ReplArticle Get-ReplMonitor Get-ReplPublisherMonitor Get-ReplPublicationMonitor
+        Get-ReplEnumPublications Get-ReplEnumPublications2 Get-ReplEnumSubscriptions Get-ReplEnumSubscriptions2 Get-ReplTransPendingCommandInfo
+        Get-ReplEnumLogReaderAgent Get-ReplEnumSnapshotAgent Set-ReplScriptOptions Get-ReplScript
     Version 1.2
         Added the following functions: 
         Get-AgentJobServer  Get-AgentAlertCategory  Get-AgentAlert  Get-AgentJob  Get-AgentJobSchedule  Get-AgentJobStep  Get-AgentOperator
         Get-AgentOperatorCategory  Get-AgentProxyAccount  Get-AgentSchedule  Get-AgentTargetServerGroup  Get-AgentTargetServer  Get-AgentJobHistory
-
     Version 1.1
         Added the following functions: 
         Get-SqlTable Get-SqlStoredProcedure Get-SqlView Get-SqlUserDefinedDataType Get-SqlUserDefinedFunction Get-SqlSynonym Get-SqlTrigger Get-SqlColumn
@@ -149,7 +154,51 @@ Libraries
             Sets filtering option used in Get-AgentJobHistory function
         Get-AgentJobHistory
             Returns an DataTable of job history, filtering can be applied by using the Set-AgentJobHistoryFilter function
-    LibraryShowmbrs.ps1 s
+    LibraryRmo.ps1 functions
+        Get-SqlConnection
+            Returns a ServerConnection object
+        Get-ReplServer
+            Returns an RMO.ReplicationServer
+        Get-ReplLightPublication
+            Returns an RMO.LightPublication
+        New-ReplTransPublication
+            Constructor for RMO.TransPublication
+        New-ReplMergePublication
+            Constructor for RMO.MergePublication
+        Get-ReplSubscriberSubscription
+            Returns an RMO.SubscriberSubscription. Note: this is the only function executed on a subscriber
+        Get-ReplPublication
+            Returns either an RMO.TransPublication or RMO.MergePublication object
+        Get-ReplSubscription
+            Returns an RMO.TransSubscription or RMO.MergeSubscription object from a Publication
+        Get-ReplArticle
+            Returns an RMO.TransArticle or RMO.MergeArticle object from a Publication
+        Get-ReplMonitor
+            Returns an RMO.ReplicationMonitor
+        Get-ReplPublisherMonitor
+            Returns an RMO.PublisherMonitor
+        Get-ReplPublicationMonitor
+            Returns an RMO.PublicationMonitor
+        Get-ReplEnumPublications
+            Calls the EnumPublications method on a PublisherMonitor object
+        Get-ReplEnumPublications2
+            Calls the EnumPublications method on a PublisherMonitor object
+        Get-ReplEnumSubscriptions
+            Calls the EnumSubscriptions method on a PublicationMonitor object
+        Get-ReplEnumSubscriptions2
+            Calls the EnumSubscriptions2 method on a PublicationMonitor object
+        Get-ReplTransPendingCommandInfo
+            Calls the TransPendingCommandInfo method on a PublicationMonitor object
+        Get-ReplEnumLogReaderAgent
+            Calls the EnumLogReaderReader method on a PublicationMonitor object
+        Get-ReplEnumSnapshotAgent
+            Calls the EnumSnapshotAgent method on a PublicationMonitor object
+        Set-ReplScriptOptions
+            Sets the Enum ScriptOptions for scripting RMO objects. Unlike SMO which has a default script options
+            RMO at at a minimum CREATION enum must be specified.
+        Get-ReplScript
+            Calls Script Method on RMO objects include ReplicationServer, Publication, Subscription and Articles
+    LibraryShowmbrs.ps1 functions
         Get-ShowMbrs
             Recursivley enumerates local Windows and AD groups similar to the NT Resource utility showmbrs.exe
 
@@ -176,6 +225,9 @@ Scripts
     Write-SmoToCsvFile.ps1
         Generates an a csv file for all SQL Server security settings
     scriptopts.txt
+        Scripting options file for SMO
+    replscriptopts.txt
+        Scripting options file for RMO
 
 SQL Server Reporting Services (2005) reports
     See the screenshots_sqlpsx.docx for sample output of reports
