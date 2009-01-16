@@ -13,33 +13,37 @@ Optional Database and Reporting Services Components
 8. Run Write-SmoToCsvFile.ps1 to import the csv file into the database
 
 What's New
+    Version 1.4
+        Added the following functions:
+        Copy-ISItemSQLToSQL Copy-ISItemSQLToFile Copy-ISItemFileToSQL Get-ISData Get-ISItem Get-ISPackage Get-ISRunningPackage Get-ISSqlConfigurationItem
+        New-ISApplication New-ISItem Remove-ISItem Rename-ISItem Set-ISConnectionString Set-ISPackage Test-ISPath
     Version 1.3
-        Added the following functions: 
+        Added the following functions:
         Get-SqlConnection Get-ReplServer Get-ReplLightPublication New-ReplTransPublication New-ReplMergePublication Get-ReplSubscriberSubscription
         Get-ReplPublication Get-ReplSubscription Get-ReplArticle Get-ReplMonitor Get-ReplPublisherMonitor Get-ReplPublicationMonitor
         Get-ReplEnumPublications Get-ReplEnumPublications2 Get-ReplEnumSubscriptions Get-ReplEnumSubscriptions2 Get-ReplTransPendingCommandInfo
         Get-ReplEnumLogReaderAgent Get-ReplEnumSnapshotAgent Set-ReplScriptOptions Get-ReplScript
     Version 1.2
-        Added the following functions: 
+        Added the following functions:
         Get-AgentJobServer  Get-AgentAlertCategory  Get-AgentAlert  Get-AgentJob  Get-AgentJobSchedule  Get-AgentJobStep  Get-AgentOperator
         Get-AgentOperatorCategory  Get-AgentProxyAccount  Get-AgentSchedule  Get-AgentTargetServerGroup  Get-AgentTargetServer  Get-AgentJobHistory
     Version 1.1
-        Added the following functions: 
+        Added the following functions:
         Get-SqlTable Get-SqlStoredProcedure Get-SqlView Get-SqlUserDefinedDataType Get-SqlUserDefinedFunction Get-SqlSynonym Get-SqlTrigger Get-SqlColumn
-        Get-SqlIndex Get-SqlStatistic Get-SqlCheck Get-SqlForeignKey Set-SqlScriptingOptions Get-SqlScripter Get-Information_Schema.Tables 
-        Get-Information_Schema.Columns Get-Information_Schema.Views Get-Information_Schema.Routines Get-SysDatabases Get-SqlDataFile Get-SqlLogFile 
+        Get-SqlIndex Get-SqlStatistic Get-SqlCheck Get-SqlForeignKey Set-SqlScriptingOptions Get-SqlScripter Get-Information_Schema.Tables
+        Get-Information_Schema.Columns Get-Information_Schema.Views Get-Information_Schema.Routines Get-SysDatabases Get-SqlDataFile Get-SqlLogFile
         Get-SqlVersion Get-SqlPort ConvertTo-ExtendedPropertyXML Get-Sql ConvertTo-StatisticColumnXML ConvertTo-IndexedColumnXML
 
 Libraries
     LibrarySmo.ps1 functions
-        Get-SqlServer 
+        Get-SqlServer
             Returns a Microsoft.SqlServer.Management.Smo.Server Object
         Get-SqlDatabase
             Returns an SMO Database object or collection of Database objects
         Get-SqlData
             Executes a query returns an ADO.NET DataTable
         Set-SqlData
-            Executes a query that does not return a result set 
+            Executes a query that does not return a result set
         Get-SqlShowMbrs
             Recursively enumerates AD/local groups handling built-in SQL Server Windows groups
         Get-SqlUser
@@ -68,7 +72,7 @@ Libraries
             Returns a SMO DatabasePermission object with additional properites including the effective members of a
             grantee. Recursively enumerates nested roles and users
         Get-SqlObjectPermission
-            Returns a SMO ObjectPermission object with additional properties including the effective members of a 
+            Returns a SMO ObjectPermission object with additional properties including the effective members of a
             grantee. Recursively enumerates nested roles and users
         Get-SqlTable
             Returns a SMO Table object with additional properties
@@ -145,7 +149,7 @@ Libraries
         Get-AgentProxyAccount
             Returns an SMO.Agent ProxyAccount object or collection of ProxyAccount objects
         Get-AgentSchedule
-            Returns an SMO.Agent JobSchedule object or collection of JobSchedule objects for JobServer Shared Schedules 
+            Returns an SMO.Agent JobSchedule object or collection of JobSchedule objects for JobServer Shared Schedules
         Get-AgentTargetServerGroup
             Returns an SMO.Agent TargetServerGroup object or collection of TargetServerGroup objects
         Get-AgentTargetServer
@@ -198,6 +202,39 @@ Libraries
             RMO at at a minimum CREATION enum must be specified.
         Get-ReplScript
             Calls Script Method on RMO objects include ReplicationServer, Publication, Subscription and Articles
+    LibrarySSIS.ps1 functions:
+        Copy-ISItemSQLToSQL
+            Copies a Package or SSIS folder from SQL to SQL
+        Copy-ISItemSQLToFile
+            Copies a Package or SSIS folder from SQL to file
+        Copy-ISItemFileToSQL
+            Copies a Package or SSIS folder from file to SQL
+        Get-ISData
+            Executes a query and returns an ADO.NET DataTable
+        Get-ISItem
+            Retrieves a list of SQL Server Integration Services folders and packages from the specified SQL Server instance. Returns a PackInfo Object.
+            Note: Unlike the other SSIS functions this function requires a SQL instance name i.e. serverName\instanceName
+        Get-ISPackage
+            Retrieves an SSIS package from the specified Integration Services server or file path. Returns a Package Object
+        Get-ISRunningPackage
+            Returns a list of running packages on the specified Integration Services server. Returns a RunningPackage object or collection of objects
+        Get-ISSqlConfigurationItem
+            Executes a query to retrieve a configuration item
+        New-ISApplication
+            Base object for all other functions. Executes new-object ("Microsoft.SqlServer.Dts.Runtime.Application") 
+        New-ISItem
+            Creates a SQL storage folder for the specified Integration Services server
+        Remove-ISItem
+            Deletes a SQL storage folder or package on the specified Integration Services server
+        Rename-ISItem
+            Renames a SQL storage folder or package on the specified Integration Services server
+        Set-ISConnectionString
+            Sets the Connection string for an SSIS package. Useful for package configuration connection string which cannot be set dynamically at run 
+            or deploy time
+        Set-ISPackage
+            Saves an SSIS package to an Integration Services server or file path as a dtsx file.
+        Test-ISPath
+            Test the existance of a SQL storage folder or package on the specified Integration Services server
     LibraryShowmbrs.ps1 functions
         Get-ShowMbrs
             Recursivley enumerates local Windows and AD groups similar to the NT Resource utility showmbrs.exe
@@ -217,7 +254,7 @@ Scripts
     Run-SmoToCsvFile.ps1
         Runs Write-SmoToCsvFile.ps1 with the specified number of threads.
     Test-SqlConn.ps1
-        Verifies Sql connectivity and writes successful connection to stdout and 
+        Verifies Sql connectivity and writes successful connection to stdout and
         failed connections to stderr. Script is useful when combined with other
         scripts which would otherwise produce a terminating error on connectivity
     Write-SmoCsvToDb.ps1
