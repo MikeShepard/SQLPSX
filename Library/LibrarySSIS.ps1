@@ -531,7 +531,7 @@ function Set-ISConnectionString
     {
         $name = $($i.Key); $value = $($i.Value);
         Write-Verbose "Set-ISConnectionString name:$name value:$value "
-        $connectionManager = $package.connections | where {$_.Name -eq "SSISCONFIG"}
+        $connectionManager = $package.connections | where {$_.Name -eq "$name"}
         Write-Verbose "Set-ISConnectionString connString1:$($connectionManager.ConnectionString)"
         if ($connectionManager)
         {
