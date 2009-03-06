@@ -194,9 +194,10 @@ function Copy-ISItemFileToSQL
     #######################
     function Copy-ISChildItemFileToSQL
     {
-        param($item, [string]$destination, [string]$destinationServer, [bool]$force, $connectionInfo)
+        param($item, [string]$path, [string]$destination, [string]$destinationServer, [bool]$force, $connectionInfo)
 
-        $itemPath = $($item.PSParentPath -replace 'Microsoft.PowerShell.Core\\FileSystem::') -replace $($path -replace "\\","\\")
+        $parentPath = $item.PSParentPath -replace 'Microsoft.PowerShell.Core\\FileSystem::'
+        $itemPath = $path -replace $($parentPath -replace '\\', '\\') -replace $item.Name
         Write-Verbose "itemPath:$itemPath"
         $folder = $destination + $itemPath 
         Write-Verbose "folder:$folder"
@@ -242,7 +243,7 @@ function Copy-ISItemFileToSQL
            { 
              $i++
              Write-Progress -activity "Copying Items..." -status "Copying $($item.Name)" -percentcomplete ($i/$count.count*100) 
-             Copy-ISChildItemFileToSQL -item $item -destination $destination -destinationServer $destinationServer -force $force -connectionInfo $connectionInfo
+             Copy-ISChildItemFileToSQL -item $item -path $path -destination $destination -destinationServer $destinationServer -force $force -connectionInfo $connectionInfo
            }
        }
        else
@@ -253,7 +254,7 @@ function Copy-ISItemFileToSQL
            {
              $i++
              Write-Progress -activity "Copying Items..." -status "Copying $($item.Name)" -percentcomplete ($i/$count.count*100) 
-             Copy-ISChildItemFileToSQL -item $item -destination $destination -destinationServer $destinationServer -force $force -connectionInfo $connectionInfo
+             Copy-ISChildItemFileToSQL -item $item -path $path -destination $destination -destinationServer $destinationServer -force $force -connectionInfo $connectionInfo
            }
        }
     }

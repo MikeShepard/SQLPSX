@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 9.00
-# Visual Studio 2005
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
 Project("{F14B399A-7131-4C87-9E4B-1186C45EF12D}") = "SQLPSX", "SQLPSX\SQLPSX.rptproj", "{A50ED531-0F73-4BFE-9368-F14C0C0A0132}"
 EndProject
 Global
