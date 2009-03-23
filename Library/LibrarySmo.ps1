@@ -14,6 +14,7 @@
 ### </Script>
 # ---------------------------------------------------------------------------
 [reflection.assembly]::LoadWithPartialName("Microsoft.SqlServer.Smo") > $null 
+[reflection.assembly]::LoadWithPartialName('Microsoft.SqlServer.SMOExtended') > $null
 
 $scriptRoot = Split-Path (Resolve-Path $myInvocation.MyCommand.Path)
 . $scriptRoot\LibraryShowMbrs.ps1
@@ -1906,4 +1907,820 @@ $ixXML += [string] "<IndexedColumn Name=`"" + $ix.Name + "`" Descending=`"" +$($
     Return $ixXML
 
 } #ConvertTo-IndexedColumnXML
+
+#######################
+function Invoke-SqlDatabaseCheck
+{
+    param($db)
+
+    process
+    {
+        if ($_)
+        {
+            if ($_.GetType().Name -eq 'Database')
+            { Write-Verbose "Invoke-SqlDatabaseCheck $($_.Name)"
+              $_.CheckTables('None') }
+            else
+            { throw 'Invoke-SqlDatabaseCheck:Param db must be a database object.' }
+
+        }
+    }
+    end
+    {
+        if ($db)
+        { $db | Invoke-SqlDatabaseCheck }
+    }
+
+} #Invoke-SqlDatabaseCheck
+
+#######################
+function Invoke-SqlIndexRebuild
+{
+    param($index)
+
+    process
+    {
+        if ($_)
+        {
+            if ($_.GetType().Name -eq 'Index')
+            { Write-Verbose "Invoke-SqlIndexRebuild $($_.Name)"
+              Write-Host "Rebuilding Index $($_.Name)"
+              $_.Rebuild() }
+            else
+            { throw 'Invoke-SqlIndexRebuild:Param index must be a index object.' }
+
+        }
+    }
+    end
+    {
+        if ($index)
+        { $index | Invoke-SqlIndexRebuild }
+    }
+
+} #Invoke-SqlIndexRebuild
+
+#######################
+function Invoke-SqlIndexDefrag
+{
+    param($index)
+
+    process
+    {
+        if ($_)
+        {
+            if ($_.GetType().Name -eq 'Index')
+            { Write-Verbose "Invoke-SqlIndexDefrag $($_.Name)"
+              Write-Host "Defraging Index $($_.Name)"
+              $_.Reorganize() }
+            else
+            { throw 'Invoke-SqlIndexDefrag:Param index must be a index object.' }
+
+        }
+    }
+    end
+    {
+        if ($index)
+        { $index | Invoke-SqlIndexDefrag }
+    }
+
+} #Invoke-SqlIndexDefrag
+
+#######################
+function Get-SqlIndexFragmentation
+{
+    param($index)
+
+    process
+    {
+        if ($_)
+        {
+            if ($_.GetType().Name -eq 'Index')
+            { Write-Verbose "Get-SqlIndexFragmentation $($_.Name)"
+              $_.EnumFragmentation() }
+            else
+            { throw 'Get-SqlIndexFragmentation:Param index must be a index object.' }
+
+        }
+    }
+    end
+    {
+        if ($index)
+        { $index | Get-SqlIndexFragmentation }
+    }
+
+} #Get-SqlIndexFragmentation
+
+#######################
+function Update-Statistic
+{
+    param($statistic, $scanType='Default', [int]$sampleValue, [switch]$recompute)
+    
+    process
+    {
+        if ($_)
+        {
+            if ($_.GetType().Name -eq 'Statistic')
+            { 
+              Write-Verbose "Update-Statistic $($_.Name)"
+              Write-Host "Updating statistic $($_.Name)"
+
+              if ($sampleValue -and $recompute.IsPresent)
+              { $_.Update($scanType, $sampleValue, $true) }
+              elseif ($sampleValue)
+              { $_.Update($scanType, $sampleValue) }
+              else
+              { $_.Update($scanType) }
+            }
+            else
+            { throw 'Update-Statistic:Param statistic must be a statistic object.' }
+
+        }
+    }
+    end
+    {
+        if ($statistic)
+        { $statistic | Update-Statistic }
+    }
+
+} #Update-Statistic
+
+#######################
+function Invoke-SqlBackup
+{
+    param($sqlserver=$(throw 'sqlserver required.'),$dbname=$(throw 'dbname required.'),$filepath=$(throw 'filepath required.')
+          ,$action='Database', $description='',$name='',[switch]$force,[switch]$incremental,[switch]$copyOnly)
+    
+    #action can be Database or Log
+
+    switch ($sqlserver.GetType().Name)
+    {
+        'String' { $server = Get-SqlServer $sqlserver }
+        'Server' { $server = $sqlserver }
+        default { throw 'Invoke-SqlBackup:Param sqlserver must be a String or Server object.' }
+    }
+
+    Write-Verbose "Invoke-SqlBackup $($server.Name) $dbname"
+
+    $backup = new-object ("Microsoft.SqlServer.Management.Smo.Backup")
+    $backupDevice = new-object ("Microsoft.SqlServer.Management.Smo.BackupDeviceItem") $filepath, 'File'
+
+    $backup.Action = $action
+    $backup.BackupSetDescription = $description
+    $backup.BackupSetName = $name
+    if (!$server.Databases.Contains("$dbname")) {throw 'Database $dbname does not exist on $($server.Name).'}
+    $backup.Database = $dbname
+    $backup.Devices.Add($backupDevice) 
+    $backup.Initialize = $($force.IsPresent)
+    $backup.Incremental = $($incremental.IsPresent)
+    $backup.CopyOnly = $($copyOnly.IsPresent)
+
+    $backup.SqlBackup($server) 
+    
+    Write-Host "$action backup of $dbname to $filepath complete."
+
+} #Invoke-SqlBackup
+
+#######################
+function Invoke-SqlRestore
+{
+    param($sqlserver=$(throw 'sqlserver required.'),$dbname=$(throw 'dbname required.'),$filepath=$(throw 'filepath required.'),
+          $action='Database',$stopat,$relocatefiles,[switch]$force,[switch]$norecovery,[switch]$keepreplication)
+
+    #action can be Database or Log
+
+    switch ($sqlserver.GetType().Name)
+    {
+        'String' { $server = Get-SqlServer $sqlserver }
+        'Server' { $server = $sqlserver }
+        default { throw 'Invoke-SqlRestore:Param sqlserver must be a String or Server object.' }
+    }
+
+    Write-Verbose "Invoke-SqlRestore $($server.Name) $dbname"
+
+    $restore = new-object ("Microsoft.SqlServer.Management.Smo.Restore")
+    $restoreDevice = new-object ("Microsoft.SqlServer.Management.Smo.BackupDeviceItem") $filepath, 'File'
+
+    $restore.Action = $action
+    $restore.Database = $dbname
+    $restore.Devices.Add($restoreDevice) 
+    $restore.ReplaceDatabase = $($force.IsPresent)
+    $restore.NoRecovery = $($norecovery.IsPresent)
+    $restore.KeepReplication = $($keepreplication.IsPresent)
+   
+    if ($stopat)
+    { $restore.ToPointInTime = $stopAt }
+
+    if ($relocatefiles)
+    {
+       if ($relocateFile.GetType().Name -ne 'Hashtable')
+       { throw 'Invoke-SqlRestore:Param relocateFile must be a hashtable' }
+
+       $relocateFileAR = New-Object Collections.ArrayList
+        
+       foreach ($i in $relocatefiles.GetEnumerator())
+        {
+            $logicalName = $($i.Key); $physicalName = $($i.Value);
+            $relocateFile = new-object ("Microsoft.SqlServer.Management.Smo.RelocateFile") $logicalName, $physicalName
+            [void]$relocateFileAR.Add($relocateFile)
+        }
+
+        $restore.RelocateFiles = $relocateFileAR
+     
+    }
+
+    $restore.SqlRestore($server) 
+    
+    Write-Host "$action restore of $dbname from $filepath complete."
+
+} #Invoke-SqlRestore
+
+#######################
+function Remove-SqlDatabase
+{
+    
+    param($sqlserver,$dbname)
+    
+    $db = Get-SqlDatabase $sqlserver $dbname
+    $db.Drop()
+
+} #Remove-SqlDatabase
+
+#######################
+function Add-SqlFileGroup
+{
+    param($db=$(throw 'db is required.'), $name=$(throw 'name is required.'))
+
+    $fileGroup = new-object ('Microsoft.SqlServer.Management.Smo.FileGroup') $db, $name
+    
+    $db.FileGroups.Add($fileGroup)
+
+    return $fileGroup
+
+} #Add-SqlFileGroup
+
+#######################
+function Add-SqlDataFile
+{
+    param($filegroup=$(throw 'filegroup is required.'), $name=$(throw 'name is required.'), $filepath=$(throw 'filepath is required.')
+            ,$size, $growthType, $growth, $maxSize)
+    #GrowthType is KB, None, Percent
+    $dataFile = new-object ('Microsoft.SqlServer.Management.Smo.DataFile') $filegroup, $name
+    $dataFile.FileName = $filepath
+    if ($size)
+    { $dataFile.Size = $size }
+    if ($growthType)
+    { $dataFile.GrowthType = $growthType }
+    if ($growth)
+    { $dataFile.Growth = $growth }
+    if ($maxSize)
+    { $dataFile.MaxSize = $maxSize }
+
+    $filegroup.Files.Add($dataFile)
+
+} #Add-SqlDataFile
+
+#######################
+function Add-SqlLogFile
+{
+    param($db=$(throw 'db is required.'), $name=$(throw 'name is required.'), $filepath=$(throw 'filepath is required.')
+            ,$size, $growthType, $growth, $maxSize)
+    #GrowthType is KB, None, Percent
+    $logFile = new-object ('Microsoft.SqlServer.Management.Smo.LogFile') $db, $name
+    $logFile.FileName = $filepath
+    if ($size)
+    { $logFile.Size = $size }
+    if ($growthType)
+    { $logFile.GrowthType = $growthType }
+    if ($growth)
+    { $logFile.Growth = $growth }
+    if ($maxSize)
+    { $logFile.MaxSize = $maxSize }
+
+    $db.LogFiles.Add($logFile)
+
+} #Add-SqlLogFile
+
+#######################
+function Add-SqlDatabase
+{
+    param($sqlserver=$(throw 'sqlserver required.'),$dbname=$(throw 'dbname required.'),
+           $dataName, $dataFilePath, $dataSize, $dataGrowthType, $dataGrowth, $dataMaxSize,
+            $logName, $logFilePath, $logSize, $logGrowthType, $logGrowth, $logMaxSize)
+    #GrowthType is KB, None, Percent
+    switch ($sqlserver.GetType().Name)
+    {
+        'String' { $server = Get-SqlServer $sqlserver }
+        'Server' { $server = $sqlserver }
+        default { throw 'Add-SqlDatabase:Param sqlserver must be a String or Server object.' }
+    }
+
+    Write-Verbose "Add-SqlDatabase $($server.Name) $dbname"
+
+    if ($server.Databases.Contains("$dbname")) {throw 'Database $dbname already exists on $($server.Name).'}
+
+    $db = new-object ('Microsoft.SqlServer.Management.Smo.Database') $server, $dbname
+
+    #Need to implement overloaded method if migrated to compiled cmdlet
+
+    if (!($logName))
+    { $dataName = $dbname }
+    if (!($dataFilePath))
+    { $dataFilePath = $(Get-SqlDefaultDir $server 'Data') + '\' + $dbname + '.mdf' }
+    if (!($logName))
+    { $logName = $dbname + '_log' }
+    if (!($logFilePath))
+    { $logFilePath = $(Get-SqlDefaultDir $server 'Log') + '\' + $dbname + '_log.ldf' }
+
+    $fileGroup = Add-SqlFileGroup $db 'PRIMARY'
+Add-SqlDataFile -filegroup $fileGroup -name $dataName -filepath $dataFilePath -size $dataSize -growthtype $dataGrowthType -growth $dataGrowth -maxsize $dataMaxSize
+
+Add-SqlLogFile -db $db -name $logName -filepath $logFilePath -size $logSize -growthtype $logGrowthType -growth $logGrowth -maxsize $logMaxSize
+
+    $db.Create()  
+
+} #Add-SqlDatabase
+
+#######################
+function Get-SqlDefaultDir
+{
+    param ($sqlserver, $dirtype)
+    
+    switch ($sqlserver.GetType().Name)
+    {
+        'String' { $server = Get-SqlServer $sqlserver }
+        'Server' { $server = $sqlserver }
+        default { throw 'Get-SqlDefaultDir:Param sqlserver must be a String or Server object.' }
+    }
+
+    Write-Verbose "Get-SqlDefaultDir $($server.Name)"
+    
+    #The DefaultFile and DefaultLog properties are only written to registry if you modify the properties in SSMS
+    #even setting the properties to same value will create the registry keys.
+    #If the properties have not been created used the InstallDataDirectory properties. This seems to recreate how
+    #SSMS works. I thought about adding this properties to the server object in Get-SqlServer, but felt it was important
+    #not to mask whether the default directories had been set or not. You should always set the default directories as
+    #a configuration task
+    switch ($dirtype)
+    {
+        'Data'  { if ($server.DefaultFile) { $server.DefaultFile } else { $server.InstallDataDirectory + '\' + 'Data' } }
+        'Log'   { if ($server.DefaultLog) { $server.DefaultLog } else { $server.InstallDataDirectory + '\' + 'Data' } }
+        default { throw 'Get-SqlDefaultDir:Param dirtype must be Data or Log.' }
+    }
+
+} #Get-SqlDefaultDir
+
+#######################
+function Add-SqlUser
+{
+    param($sqlserver,$dbname=$(throw 'dbname is required'),$name=$(throw 'name is required'),$login=$name,$defaultSchema='dbo')
+
+    switch ($dbname.GetType().Name)
+    {
+        'String' { $db = Get-SqlDatabase $sqlserver $dbname }
+        'Database' { $db = $dbname }
+        default { throw "Add-SqlUser:Param '`$dbname' must be a String or Database object." }
+    }
+
+    Write-Verbose "Add-SqlUser $($db.Name) $name"
+
+    $user = new-object ('Microsoft.SqlServer.Management.Smo.User') $db, $name
+    $user.Login = $login
+    $user.DefaultSchema = $defaultschema
+    $user.Create()
+
+} #Add-SqlUser
+
+#######################
+function Remove-SqlUser
+{
+    param($sqlserver,$dbname=$(throw 'dbname is required'),$name=$(throw 'name is required'))
+
+    switch ($dbname.GetType().Name)
+    {
+        'String' { $db = Get-SqlDatabase $sqlserver $dbname }
+        'Database' { $db = $dbname }
+        default { throw "Remove-SqlUser:Param '`$dbname' must be a String or Database object." }
+    }
+
+    Write-Verbose "Remove-SqlUser $($db.Name) $name"
+
+    $user = Get-SqlUser $db | where {$_.name -eq $name}
+    if ($user)
+    { $user.Drop() }
+    else
+    { throw "User $name does not exist in database $($db.Name)." }
+
+} #Remove-SqlUser
+
+#######################
+function Add-SqlLogin
+{
+    param($sqlserver=$(throw 'sqlserver is required'),$name=$(throw 'name is required'),$password,$DefaultDatabase='master',
+        [switch]$PasswordExpirationEnabled,[switch]$PasswordPolicyEnforced)
+
+    switch ($sqlserver.GetType().Name)
+    {
+        'String' { $server = Get-SqlServer $sqlserver }
+        'Server' { $server = $sqlserver }
+        default { throw 'Add-SqlLogin:Param `$sqlserver must be a String or Server object.' }
+    }
+
+    Write-Verbose "Get-SqlDatabase $($server.Name) $dbname"
+
+    $login = new-object ('Microsoft.SqlServer.Management.Smo.Login') $server, $name
+    $login.DefaultDatabase = $defaultDatabase
+
+    if ($password) #SQL Login
+    {
+        $login.PasswordExpirationEnabled = $($PasswordExpirationEnabled.IsPresent)
+        $login.PasswordPolicyEnforced = $($PasswordPolicyEnforced.IsPresent)
+        $login.Create($password)
+    }
+    else #Windows Login
+    { $login.Create() }
+
+} #Add-SqlLogin
+
+#######################
+function Remove-SqlLogin
+{
+
+    param($sqlserver=$(throw 'sqlserver is required'),$name=$(throw 'name is required'))
+
+    switch ($sqlserver.GetType().Name)
+    {
+        'String' { $server = Get-SqlServer $sqlserver }
+        'Server' { $server = $sqlserver }
+        default { throw 'Remove-SqlLogin:Param `$sqlserver must be a String or Server object.' }
+    }
+
+    Write-Verbose "Remove-SqlLogin $($server.Name) $name"
+
+    $login = Get-SqlLogin $server | where {$_.name -eq $name}
+    if ($login)
+    { $login.Drop() }
+    else
+    { throw "Login $name does not exist on server $($server.Name)." }
+
+} #Remove-SqlLogin
+
+#######################
+function Add-SqlServerRoleMember
+{
+    param($sqlserver=$(throw 'sqlserver is required'),$loginame=$(throw 'loginame is required'),$rolename=$(throw 'rolename is required'))
+
+    switch ($sqlserver.GetType().Name)
+    {
+        'String' { $server = Get-SqlServer $sqlserver }
+        'Server' { $server = $sqlserver }
+        default { throw 'Add-SqlServerRoleMember:Param `$sqlserver must be a String or Server object.' }
+    }
+
+    Write-Verbose "Add-SqlServerRoleMember $($server.Name) $name"
+
+    $svrole = Get-SqlServerRole $server | where {$_.name -eq $rolename}
+
+    if ($svrole)
+    { $svrole.AddMember($loginame) }
+    else
+    { throw "ServerRole $name does not exist on server $($server.Name)." }
+
+} #Add-SqlServerRoleMember
+
+#######################
+function Remove-SqlServerRoleMember
+{
+    param($sqlserver=$(throw 'sqlserver is required'),$loginame=$(throw 'loginame is required'),$rolename=$(throw 'rolename is required'))
+
+    switch ($sqlserver.GetType().Name)
+    {
+        'String' { $server = Get-SqlServer $sqlserver }
+        'Server' { $server = $sqlserver }
+        default { throw 'Remove-SqlServerRoleMember:Param `$sqlserver must be a String or Server object.' }
+    }
+
+    Write-Verbose "Remove-SqlServerRoleMember $($server.Name) $name"
+
+    $svrole = Get-SqlServerRole $server | where {$_.name -eq $rolename}
+
+    if ($svrole)
+    { $svrole.DropMember($loginame) }
+    else
+    { throw "Login $name does not exist on server $($server.Name)." }
+
+} #Remove-SqlServerRoleMember
+
+#######################
+function Add-SqlDatabaseRole
+{
+    param($sqlserver,$dbname=$(throw 'dbname is required'),$name=$(throw 'name is required'))
+
+    switch ($dbname.GetType().Name)
+    {
+        'String' { $db = Get-SqlDatabase $sqlserver $dbname }
+        'Database' { $db = $dbname }
+        default { throw "Add-SqlDatabaseRole:Param '`$dbname' must be a String or Database object." }
+    }
+
+    Write-Verbose "Add-SqlDatabaseRole $($db.Name) $name"
+
+    $role = new-object ('Microsoft.SqlServer.Management.Smo.DatabaseRole') $db, $name
+    $role.Create()
+
+} #Add-SqlDatabaseRole
+
+#######################
+function Remove-SqlDatabaseRole
+{
+    param($sqlserver,$dbname=$(throw 'dbname is required'),$name=$(throw 'name is required'))
+
+    switch ($dbname.GetType().Name)
+    {
+        'String' { $db = Get-SqlDatabase $sqlserver $dbname }
+        'Database' { $db = $dbname }
+        default { throw "Remove-SqlDatabaseRole:Param '`$dbname' must be a String or Database object." }
+    }
+
+    Write-Verbose "Remove-SqlDatabaseRole $($db.Name) $name"
+
+    $role = Get-SqlDatabaseRole $db | where {$_.name -eq $name}
+
+    if ($role)
+    { $role.Drop() }
+    else
+    { throw "Role $name does not exist in database $($db.Name)." }
+
+} #Remove-SqlDatabaseRole
+
+#######################
+function Add-SqlDatabaseRoleMember
+{
+    param($sqlserver,$dbname=$(throw 'dbname is required'),$name=$(throw 'name is required'))
+
+    switch ($dbname.GetType().Name)
+    {
+        'String' { $db = Get-SqlDatabase $sqlserver $dbname }
+        'Database' { $db = $dbname }
+        default { throw "Add-SqlDatabaseRoleMember:Param '`$dbname' must be a String or Database object." }
+    }
+
+    Write-Verbose "Add-SqlDatabaseRoleMember $($db.Name) $name"
+
+    $role = Get-SqlDatabaseRole $db | where {$_.name -eq $rolename}
+
+    if ($role)
+    { $role.AddMember($name) }
+    else
+    { throw "DatabaseRole $name does not exist in database $($db.Name)." }
+
+} #Add-SqlDatabaseRoleMember
+
+#######################
+function Add-SqlDatabaseRoleMember
+{
+    param($sqlserver,$dbname=$(throw 'dbname is required'),$name=$(throw 'name is required'))
+
+    switch ($dbname.GetType().Name)
+    {
+        'String' { $db = Get-SqlDatabase $sqlserver $dbname }
+        'Database' { $db = $dbname }
+        default { throw "Add-SqlDatabaseRoleMember:Param '`$dbname' must be a String or Database object." }
+    }
+
+    Write-Verbose "Add-SqlDatabaseRoleMember $($db.Name) $name"
+
+    $role = Get-SqlDatabaseRole $db | where {$_.name -eq $rolename}
+
+    if ($role)
+    { $role.DropMember($name) }
+    else
+    { throw "DatabaseRole $name does not exist in database $($db.Name)." }
+
+} #Add-SqlDatabaseRoleMember
+
+#######################
+function Set-SqlServerPermission
+{
+    param($sqlserver=$(throw 'sqlserver is required'),$permission=$(throw 'permission is required'),$name=$(throw 'name is required'),$action=$(throw 'action is required'))
+
+#Valid serverpermissions:
+#AdministerBulkOperations AlterAnyConnection AlterAnyCredential AlterAnyDatabase AlterAnyEndpoint AlterAnyEventNotification
+#AlterAnyLinkedServer AlterAnyLogin AlterAnyServerAudit   AlterResources AlterServerState AlterSettings AlterTrace AuthenticateServer
+#ConnectSql ControlServer CreateAnyDatabase CreateDdlEventNotification CreateEndpoint CreateTraceEventNotification ExternalAccessAssembly
+#UnsafeAssembly ViewAnyDatabase ViewAnyDefinition ViewServerState 
+
+    switch ($sqlserver.GetType().Name)
+    {
+        'String' { $server = Get-SqlServer $sqlserver }
+        'Server' { $server = $sqlserver }
+        default { throw 'Set-SqlServerPermission:Param `$sqlserver must be a String or Server object.' }
+    }
+
+    Write-Verbose "Set-SqlServerPermission $($server.Name) $serverpermission $name $action"
+
+    $perm = new-object ('Microsoft.SqlServer.Management.Smo.ServerPermissionSet') $permission
+
+    switch ($action)
+    { 
+        'Grant'  { $server.Grant($name,$perm) }
+        'Deny'   { $server.Deny($name,$perm) }
+        'Revoke' { $server.Revoke($name,$perm) }
+        default  { throw 'Set-SqlServerPermission:Param `$action must be Grant, Deny or Revoke.' }
+    }
+
+} #Set-SqlServerPermission
+
+#######################
+function Set-SqlDatabasePermission
+{
+    param($sqlserver=$(throw 'sqlserver is required'),$dbname=$(throw 'dbname is required'),$permission=$(throw 'permission is required'),$name=$(throw 'name is required'),$action=$(throw 'action is required'))
+
+#Valid databasepermissions:
+#Alter AlterAnyApplicationRole AlterAnyAssembly AlterAnyAsymmetricKey AlterAnyCertificate AlterAnyContract AlterAnyDatabaseAudit
+#AlterAnyDatabaseDdlTrigger AlterAnyDatabaseEventNotification AlterAnyDataspace AlterAnyFulltextCatalog AlterAnyMessageType
+#AlterAnyRemoteServiceBinding AlterAnyRole AlterAnyRoute AlterAnySchema AlterAnyService AlterAnySymmetricKey AlterAnyUser Authenticate
+#BackupDatabase BackupLog Checkpoint Connect ConnectReplication Control CreateAggregate CreateAssembly CreateAsymmetricKey CreateCertificate
+#CreateContract CreateDatabase CreateDatabaseDdlEventNotification CreateDefault CreateFulltextCatalog CreateFunction CreateMessageType 
+#CreateProcedure CreateQueue CreateRemoteServiceBinding CreateRole CreateRoute CreateRule CreateSchema CreateService CreateSymmetricKey 
+#CreateSynonym CreateTable CreateType CreateView CreateXmlSchemaCollection Delete Execute Insert References Select Showplan 
+#SubscribeQueryNotifications TakeOwnership Update ViewDatabaseState ViewDefinition 
+
+    switch ($dbname.GetType().Name)
+    {
+        'String' { $db = Get-SqlDatabase $sqlserver $dbname }
+        'Database' { $db = $dbname }
+        default { throw "Set-SqlDatabasePermission:Param '`$dbname' must be a String or Database object." }
+    }
+
+    Write-Verbose "Set-SqlDatabasePermission $($db.Name) $name $permission $action"
+
+    $perm = new-object ('Microsoft.SqlDatabase.Management.Smo.DatabasePermissionSet') $permission
+
+    switch ($action)
+    { 
+        'Grant'  { $db.Grant($name,$perm) }
+        'Deny'   { $db.Deny($name,$perm) }
+        'Revoke' { $db.Revoke($name,$perm) }
+        default  { throw 'Set-SqlDatabasePermission:Param `$action must be Grant, Deny or Revoke.' }
+    }
+
+} #Set-SqlDatabasePermission
+
+#######################
+function Set-SqlObjectPermission
+{
+
+    param($smo=$(throw 'smo object is required'),$permission=$(throw 'permission is required'),$name=$(throw 'name is required'),$action=$(throw 'action is required'))
+#Alter Connect Control Delete Execute Impersonate Insert Receive References Select Send TakeOwnership Update ViewChangeTracking ViewDefinition 
+    process
+    {
+        if ($_)
+        {
+            if ($_.GetType().Namespace -like "Microsoft.SqlServer.Management.Smo*")
+            { 
+                Write-Verbose "Set-SqlObjectPermission $($_.Name) $permission $name $action"
+                $perm = new-object ('Microsoft.SqlDatabase.Management.Smo.ObjectPermissionSet') $permission
+
+                switch ($action)
+                { 
+                    'Grant'  { $_.Grant($name,$perm) }
+                    'Deny'   { $_.Deny($name,$perm) }
+                    'Revoke' { $_.Revoke($name,$perm) }
+                    default  { throw 'Set-SqlObjectPermission:Param `$action must be Grant, Deny or Revoke.' }
+                }
+            }
+            else
+            { throw ' Set-SqlObjectPermission:Param smo must be an smo database object (schema, table, view, storedprocedure, UDF, or synonym).' }
+
+        }
+    }
+    end
+    {
+        if ($smo)
+        { $smo | Set-SqlObjectPermission }
+    }
+
+} #Set-SqlObjectPermission
+
+#######################
+function Get-SqlSchema
+{
+    param($db, $name="*")
+    begin
+    {
+        function Select-SqlSchema ($db, $name="*")
+        {
+
+            foreach ($schema in $db.Schemas)
+            {
+                if ($schema.name -like "*$name*" -or $name.Contains($schema.name))
+                {
+                #Return schema Object
+                $schema | add-Member -memberType noteProperty -name timestamp -value $(Get-SessionTimeStamp) -passthru |
+            add-Member -memberType noteProperty -name XMLExtendedProperties -value $(ConvertTo-ExtendedPropertyXML $schema.ExtendedProperties) -passthru |
+                        add-Member -memberType noteProperty -name Server -value $db.parent.Name -passthru |
+                        add-Member -memberType noteProperty -name dbname -value $db.Name -passthru
+                }
+            }
+
+        } #Select-Sqlschema
+    }
+    process
+    {
+        if ($_)
+        {
+            if ($_.GetType().Name -eq 'Database')
+            { Write-Verbose "Get-SqlSchema $($_.Name)"
+              Select-Sqlschema $_ -name $name }
+            else
+            { throw 'Get-SqlSchema:Param `$db must be a database object.' }
+
+        }
+    }
+    end
+    {
+        if ($db)
+        { $db | Get-SqlSchema -name $name }
+    }
+
+} #Get-SqlSchema
+
+#######################
+function Get-SqlProcess
+{
+    param($sqlserver=$(throw 'sqlserver is required'),$spid,$name,[switch]$excludeSystemProcesses)
+
+    switch ($sqlserver.GetType().Name)
+    {
+        'String' { $server = Get-SqlServer $sqlserver }
+        'Server' { $server = $sqlserver }
+        default { throw "Get-SqlProcess:Param '`$sqlserver' must be a String or Server object." }
+    }
+
+    Write-Verbose "Get-SqlProcess $($server.Name)"
+        
+        if ($spid)
+        { $server.EnumProcesses($spid) }
+        elseif ($name)
+        { $server.EnumProcesses($name) }
+        else
+        { $server.EnumProcesses($($excludeSystemProcesses.IsPresent)) }
+
+} #Get-SqlProcess
+
+#######################
+function Get-SqlTransaction
+{
+    param($sqlserver,$dbname=$(throw 'dbname is required'))
+
+    switch ($dbname.GetType().Name)
+    {
+        'String' { $db = Get-SqlDatabase $sqlserver $dbname }
+        'Database' { $db = $dbname }
+        default { throw "Get-SqlTransaction:Param '`$dbname' must be a String or Database object." }
+    }
+
+    Write-Verbose "Get-SqlTransaction $($db.Name)"
+
+    $db.EnumTransactions()
+
+} #Get-SqlTransaction
+
+#######################
+function Get-SqlErrorLog
+{
+    param($sqlserver=$(throw 'sqlserver is required'),$lognumber=0)
+
+    switch ($sqlserver.GetType().Name)
+    {
+        'String' { $server = Get-SqlServer $sqlserver }
+        'Server' { $server = $sqlserver }
+        default { throw "Get-SqlErrorLog:Param '`$sqlserver' must be a String or Server object." }
+    }
+
+    Write-Verbose "Get-SqlErrorLog $($server.Name)"
+    $server.ReadErrorLog($lognumber)
+    
+} #Get-SqlErrorLog
+
+#######################
+function Get-SqlFileSpace
+{
+    param($sqlserver,$dbname=$(throw 'dbname is required'))
+
+    switch ($dbname.GetType().Name)
+    {
+        'String' { $db = Get-SqlDatabase $sqlserver $dbname }
+        'Database' { $db = $dbname }
+        default { throw "Get-SqlFileSpace:Param '`$dbname' must be a String or Database object." }
+    }
+
+    Write-Verbose "Get-SqlFileSpace $($db.Name)"
+
+    $filespace = $db | Get-SqlDataFile | Select  Server, dbname, name, FileName, Size, UsedSpace, @{name='FreeSpace';Expression={$(Size - UsedSpace)}}
+    $filespace += $db | Get-SqlLogFile | Select  Server, dbname, name, FileName, Size, UsedSpace, @{name='FreeSpace';Expression={$(Size - UsedSpace)}}
+
+    $filespace
+
+} #Get-SqlFileSpace
 
