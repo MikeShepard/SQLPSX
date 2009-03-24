@@ -2283,10 +2283,15 @@ function Add-SqlUser
 
     Write-Verbose "Add-SqlUser $($db.Name) $name"
 
-    $user = new-object ('Microsoft.SqlServer.Management.Smo.User') $db, $name
-    $user.Login = $login
-    $user.DefaultSchema = $defaultschema
-    $user.Create()
+    if($db.Users | where {$_.name -eq $name})
+    { throw "User $name already exists in Database $dbname." }
+    else
+    {
+        $user = new-object ('Microsoft.SqlServer.Management.Smo.User') $db, $name
+        $user.Login = $login
+        $user.DefaultSchema = $defaultschema
+        $user.Create()
+    }
 
 } #Add-SqlUser
 
@@ -2315,8 +2320,8 @@ function Remove-SqlUser
 #######################
 function Add-SqlLogin
 {
-    param($sqlserver=$(throw 'sqlserver is required'),$name=$(throw 'name is required'),$password,$DefaultDatabase='master',
-        [switch]$PasswordExpirationEnabled,[switch]$PasswordPolicyEnforced)
+    param($sqlserver=$(throw 'sqlserver is required'),$name=$(throw 'name is required'),$password,$logintype,
+            $DefaultDatabase='master', [switch]$PasswordExpirationEnabled,[switch]$PasswordPolicyEnforced)
 
     switch ($sqlserver.GetType().Name)
     {
@@ -2327,17 +2332,28 @@ function Add-SqlLogin
 
     Write-Verbose "Get-SqlDatabase $($server.Name) $dbname"
 
-    $login = new-object ('Microsoft.SqlServer.Management.Smo.Login') $server, $name
-    $login.DefaultDatabase = $defaultDatabase
-
-    if ($password) #SQL Login
+    if($server.Logins | where {$_.name -eq $name})
+    { throw "Login $name already exists on Server $($server.Name)." }
+    else
     {
-        $login.PasswordExpirationEnabled = $($PasswordExpirationEnabled.IsPresent)
-        $login.PasswordPolicyEnforced = $($PasswordPolicyEnforced.IsPresent)
-        $login.Create($password)
+        $login = new-object ('Microsoft.SqlServer.Management.Smo.Login') $server, $name
+        $login.DefaultDatabase = $defaultDatabase
+
+        if ($logintype -eq 'SqlLogin')
+        {
+            $login.LoginType = $logintype
+            $login.PasswordExpirationEnabled = $($PasswordExpirationEnabled.IsPresent)
+            $login.PasswordPolicyEnforced = $($PasswordPolicyEnforced.IsPresent)
+            $login.Create($password)
+        }
+        elseif ($logintype -eq 'WindowsUser' -or $logintype -eq 'WindowsGroup')
+        { 
+            $login.LoginType = $logintype
+            $login.Create()
+        }
+        else
+        { throw 'logintype must be SqlLogin, WindowsUser or WindowsGroup.' }
     }
-    else #Windows Login
-    { $login.Create() }
 
 } #Add-SqlLogin
 
@@ -2378,12 +2394,17 @@ function Add-SqlServerRoleMember
 
     Write-Verbose "Add-SqlServerRoleMember $($server.Name) $name"
 
-    $svrole = Get-SqlServerRole $server | where {$_.name -eq $rolename}
+    if($server.Logins | where {$_.name -eq $loginame})
+    {
+        $svrole = Get-SqlServerRole $server | where {$_.name -eq $rolename}
 
-    if ($svrole)
-    { $svrole.AddMember($loginame) }
+        if ($svrole)
+        { $svrole.AddMember($loginame) }
+        else
+        { throw "ServerRole $rolename does not exist on server $($server.Name)." }
+    }
     else
-    { throw "ServerRole $name does not exist on server $($server.Name)." }
+    { throw "Login $loginame does not exist on server $($server.Name)." }
 
 } #Add-SqlServerRoleMember
 
@@ -2401,12 +2422,17 @@ function Remove-SqlServerRoleMember
 
     Write-Verbose "Remove-SqlServerRoleMember $($server.Name) $name"
 
-    $svrole = Get-SqlServerRole $server | where {$_.name -eq $rolename}
+    if($server.Logins | where {$_.name -eq $loginame})
+    {
+        $svrole = Get-SqlServerRole $server | where {$_.name -eq $rolename}
 
-    if ($svrole)
-    { $svrole.DropMember($loginame) }
+        if ($svrole)
+        { $svrole.DropMember($loginame) }
+        else
+        { throw "ServerRole $rolename does not exist on server $($server.Name)." }
+    }
     else
-    { throw "Login $name does not exist on server $($server.Name)." }
+    { throw "Login $loginame does not exist on server $($server.Name)." }
 
 } #Remove-SqlServerRoleMember
 
@@ -2424,8 +2450,13 @@ function Add-SqlDatabaseRole
 
     Write-Verbose "Add-SqlDatabaseRole $($db.Name) $name"
 
-    $role = new-object ('Microsoft.SqlServer.Management.Smo.DatabaseRole') $db, $name
-    $role.Create()
+    if($db.Roles | where {$_.name -eq $name})
+    { throw "DatabaseRole $name already exists in Database $($db.Name)." }
+    else
+    {
+        $role = new-object ('Microsoft.SqlServer.Management.Smo.DatabaseRole') $db, $name
+        $role.Create()
+    }
 
 } #Add-SqlDatabaseRole
 
@@ -2448,14 +2479,14 @@ function Remove-SqlDatabaseRole
     if ($role)
     { $role.Drop() }
     else
-    { throw "Role $name does not exist in database $($db.Name)." }
+    { throw "DatabaseRole $name does not exist in database $($db.Name)." }
 
 } #Remove-SqlDatabaseRole
 
 #######################
 function Add-SqlDatabaseRoleMember
 {
-    param($sqlserver,$dbname=$(throw 'dbname is required'),$name=$(throw 'name is required'))
+    param($sqlserver,$dbname=$(throw 'dbname is required'),$username=$(throw 'username is required'),$rolename=$(throw 'rolename is required'))
 
     switch ($dbname.GetType().Name)
     {
@@ -2464,39 +2495,49 @@ function Add-SqlDatabaseRoleMember
         default { throw "Add-SqlDatabaseRoleMember:Param '`$dbname' must be a String or Database object." }
     }
 
-    Write-Verbose "Add-SqlDatabaseRoleMember $($db.Name) $name"
+    Write-Verbose "Add-SqlDatabaseRoleMember $($db.Name) $username $rolename"
 
-    $role = Get-SqlDatabaseRole $db | where {$_.name -eq $rolename}
+    if($db.Users | where {$_.name -eq $username})
+    {
+        $role = Get-SqlDatabaseRole $db | where {$_.name -eq $rolename}
 
-    if ($role)
-    { $role.AddMember($name) }
+        if ($role)
+        { $role.AddMember($username) }
+        else
+        { throw "DatabaseRole $rolename does not exist in database $($db.Name)." }
+    }
     else
-    { throw "DatabaseRole $name does not exist in database $($db.Name)." }
+    { throw "User $username does not exist in database $($db.Name)." }
 
 } #Add-SqlDatabaseRoleMember
 
 #######################
-function Add-SqlDatabaseRoleMember
+function Remove-SqlDatabaseRoleMember
 {
-    param($sqlserver,$dbname=$(throw 'dbname is required'),$name=$(throw 'name is required'))
+    param($sqlserver,$dbname=$(throw 'dbname is required'),$username=$(throw 'username is required'),$rolename=$(throw 'rolename is required'))
 
     switch ($dbname.GetType().Name)
     {
         'String' { $db = Get-SqlDatabase $sqlserver $dbname }
         'Database' { $db = $dbname }
-        default { throw "Add-SqlDatabaseRoleMember:Param '`$dbname' must be a String or Database object." }
+        default { throw "Remove-SqlDatabaseRoleMember:Param '`$dbname' must be a String or Database object." }
     }
 
-    Write-Verbose "Add-SqlDatabaseRoleMember $($db.Name) $name"
+    Write-Verbose "Remove-SqlDatabaseRoleMember $($db.Name) $username $rolename"
 
-    $role = Get-SqlDatabaseRole $db | where {$_.name -eq $rolename}
+    if($db.Users | where {$_.name -eq $username})
+    {
+        $role = Get-SqlDatabaseRole $db | where {$_.name -eq $rolename}
 
-    if ($role)
-    { $role.DropMember($name) }
+        if ($role)
+        { $role.DropMember($username) }
+        else
+        { throw "DatabaseRole $rolename does not exist in database $($db.Name)." }
+    }
     else
-    { throw "DatabaseRole $name does not exist in database $($db.Name)." }
+    { throw "User $username does not exist in database $($db.Name)." }
 
-} #Add-SqlDatabaseRoleMember
+} #Remove-SqlDatabaseRoleMember
 
 #######################
 function Set-SqlServerPermission
