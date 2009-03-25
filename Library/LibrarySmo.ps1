@@ -1743,6 +1743,7 @@ function Get-SqlDataFile
                 #Return DataFile Object
                 $dataFile | add-Member -memberType noteProperty -name timestamp -value $(Get-SessionTimeStamp) -passthru |
                         add-Member -memberType noteProperty -name FileGroup -value $dataFile.parent.Name -passthru |
+                        add-Member -memberType noteProperty -name FreeSpace -value $($dataFile.Size - $dataFile.UsedSpace) -passthru |
                         add-Member -memberType noteProperty -name Server -value $db.parent.Name -passthru |
                         add-Member -memberType noteProperty -name dbname -value $db.Name -passthru
             }
@@ -1781,7 +1782,8 @@ function Get-SqlLogFile
             foreach ($logFile in $db.LogFiles)
             {
                 #Return LogFile Object
-                $LogFile | add-Member -memberType noteProperty -name timestamp -value $(Get-SessionTimeStamp) -passthru |
+                $logFile | add-Member -memberType noteProperty -name timestamp -value $(Get-SessionTimeStamp) -passthru |
+                        add-Member -memberType noteProperty -name FreeSpace -value $($logFile.Size - $logFile.UsedSpace) -passthru |
                         add-Member -memberType noteProperty -name Server -value $db.parent.Name -passthru |
                         add-Member -memberType noteProperty -name dbname -value $db.Name -passthru
             }
@@ -2486,7 +2488,7 @@ function Remove-SqlDatabaseRole
 #######################
 function Add-SqlDatabaseRoleMember
 {
-    param($sqlserver,$dbname=$(throw 'dbname is required'),$username=$(throw 'username is required'),$rolename=$(throw 'rolename is required'))
+    param($sqlserver,$dbname=$(throw 'dbname is required'),$name=$(throw 'name is required'),$rolename=$(throw 'rolename is required'))
 
     switch ($dbname.GetType().Name)
     {
@@ -2495,26 +2497,26 @@ function Add-SqlDatabaseRoleMember
         default { throw "Add-SqlDatabaseRoleMember:Param '`$dbname' must be a String or Database object." }
     }
 
-    Write-Verbose "Add-SqlDatabaseRoleMember $($db.Name) $username $rolename"
+    Write-Verbose "Add-SqlDatabaseRoleMember $($db.Name) $name $rolename"
 
-    if($db.Users | where {$_.name -eq $username})
+    if(($db.Users | where {$_.name -eq $name}) -or ($db.Roles | where {$_.name -eq $name}))
     {
         $role = Get-SqlDatabaseRole $db | where {$_.name -eq $rolename}
 
         if ($role)
-        { $role.AddMember($username) }
+        { $role.AddMember($name) }
         else
         { throw "DatabaseRole $rolename does not exist in database $($db.Name)." }
     }
     else
-    { throw "User $username does not exist in database $($db.Name)." }
+    { throw "Role or User $name does not exist in database $($db.Name)." }
 
 } #Add-SqlDatabaseRoleMember
 
 #######################
 function Remove-SqlDatabaseRoleMember
 {
-    param($sqlserver,$dbname=$(throw 'dbname is required'),$username=$(throw 'username is required'),$rolename=$(throw 'rolename is required'))
+    param($sqlserver,$dbname=$(throw 'dbname is required'),$name=$(throw 'name is required'),$rolename=$(throw 'rolename is required'))
 
     switch ($dbname.GetType().Name)
     {
@@ -2523,19 +2525,19 @@ function Remove-SqlDatabaseRoleMember
         default { throw "Remove-SqlDatabaseRoleMember:Param '`$dbname' must be a String or Database object." }
     }
 
-    Write-Verbose "Remove-SqlDatabaseRoleMember $($db.Name) $username $rolename"
+    Write-Verbose "Remove-SqlDatabaseRoleMember $($db.Name) $name $rolename"
 
-    if($db.Users | where {$_.name -eq $username})
+    if(($db.Users | where {$_.name -eq $name}) -or ($db.Roles | where {$_.name -eq $name}))
     {
         $role = Get-SqlDatabaseRole $db | where {$_.name -eq $rolename}
 
         if ($role)
-        { $role.DropMember($username) }
+        { $role.DropMember($name) }
         else
         { throw "DatabaseRole $rolename does not exist in database $($db.Name)." }
     }
     else
-    { throw "User $username does not exist in database $($db.Name)." }
+    { throw "Role or User $name does not exist in database $($db.Name)." }
 
 } #Remove-SqlDatabaseRoleMember
 
@@ -2559,15 +2561,21 @@ function Set-SqlServerPermission
 
     Write-Verbose "Set-SqlServerPermission $($server.Name) $serverpermission $name $action"
 
-    $perm = new-object ('Microsoft.SqlServer.Management.Smo.ServerPermissionSet') $permission
+    if($server.Logins | where {$_.name -eq $name})
+    {
+        $perm = new-object ('Microsoft.SqlServer.Management.Smo.ServerPermissionSet')
+        $perm.$permission = $true
 
-    switch ($action)
-    { 
-        'Grant'  { $server.Grant($name,$perm) }
-        'Deny'   { $server.Deny($name,$perm) }
-        'Revoke' { $server.Revoke($name,$perm) }
-        default  { throw 'Set-SqlServerPermission:Param `$action must be Grant, Deny or Revoke.' }
+        switch ($action)
+        { 
+            'Grant'  { $server.Grant($perm,$name) }
+            'Deny'   { $server.Deny($perm,$name) }
+            'Revoke' { $server.Revoke($perm,$name) }
+            default  { throw 'Set-SqlServerPermission:Param `$action must be Grant, Deny or Revoke.' }
+        }
     }
+    else
+    { throw "Login $name does not exist on server $($server.Name)." }
 
 } #Set-SqlServerPermission
 
@@ -2595,15 +2603,21 @@ function Set-SqlDatabasePermission
 
     Write-Verbose "Set-SqlDatabasePermission $($db.Name) $name $permission $action"
 
-    $perm = new-object ('Microsoft.SqlDatabase.Management.Smo.DatabasePermissionSet') $permission
+    if(($db.Users | where {$_.name -eq $name}) -or ($db.Roles | where {$_.name -eq $name}))
+    {
+        $perm = new-object ('Microsoft.SqlServer.Management.Smo.DatabasePermissionSet')
+        $perm.$permission = $true 
 
-    switch ($action)
-    { 
-        'Grant'  { $db.Grant($name,$perm) }
-        'Deny'   { $db.Deny($name,$perm) }
-        'Revoke' { $db.Revoke($name,$perm) }
-        default  { throw 'Set-SqlDatabasePermission:Param `$action must be Grant, Deny or Revoke.' }
+        switch ($action)
+        { 
+            'Grant'  { $db.Grant($perm,$name) }
+            'Deny'   { $db.Deny($perm,$name) }
+            'Revoke' { $db.Revoke($perm,$name) }
+            default  { throw 'Set-SqlDatabasePermission:Param `$action must be Grant, Deny or Revoke.' }
+        }
     }
+    else
+    { throw "Role or User $name does not exist in database $($db.Name)." }
 
 } #Set-SqlDatabasePermission
 
@@ -2611,34 +2625,34 @@ function Set-SqlDatabasePermission
 function Set-SqlObjectPermission
 {
 
-    param($smo=$(throw 'smo object is required'),$permission=$(throw 'permission is required'),$name=$(throw 'name is required'),$action=$(throw 'action is required'))
+    param($permission=$(throw 'permission is required'),$name=$(throw 'name is required'),$action=$(throw 'action is required'))
 #Alter Connect Control Delete Execute Impersonate Insert Receive References Select Send TakeOwnership Update ViewChangeTracking ViewDefinition 
+#Example: Get-SqlDatabase 'Z002\Sql1 pubs | get-sqlschema -name dbo | set-sqlobjectpermission -permission Select -name test5 -action Grant
     process
     {
-        if ($_)
-        {
-            if ($_.GetType().Namespace -like "Microsoft.SqlServer.Management.Smo*")
-            { 
-                Write-Verbose "Set-SqlObjectPermission $($_.Name) $permission $name $action"
-                $perm = new-object ('Microsoft.SqlDatabase.Management.Smo.ObjectPermissionSet') $permission
+        $smo = $_
+        if ($smo.GetType().Namespace -like "Microsoft.SqlServer.Management.Smo*")
+        { 
+            Write-Verbose "Set-SqlObjectPermission $($smo.Name) $permission $name $action"
+
+            if(($smo.Parent.Users | where {$_.name -eq $name}) -or ($_.Parent.Roles | where {$_.name -eq $name}))
+            {
+                $perm = new-object ('Microsoft.SqlServer.Management.Smo.ObjectPermissionSet')
+                $perm.$permission = $true 
 
                 switch ($action)
                 { 
-                    'Grant'  { $_.Grant($name,$perm) }
-                    'Deny'   { $_.Deny($name,$perm) }
-                    'Revoke' { $_.Revoke($name,$perm) }
+                    'Grant'  { $smo.Grant($perm,$name) }
+                    'Deny'   { $smo.Deny($perm,$name) }
+                    'Revoke' { $smo.Revoke($perm,$name) }
                     default  { throw 'Set-SqlObjectPermission:Param `$action must be Grant, Deny or Revoke.' }
                 }
             }
             else
-            { throw ' Set-SqlObjectPermission:Param smo must be an smo database object (schema, table, view, storedprocedure, UDF, or synonym).' }
-
+            { throw "Role or User $name does not exist in database $($db.Name)." }
         }
-    }
-    end
-    {
-        if ($smo)
-        { $smo | Set-SqlObjectPermission }
+        else
+        { throw ' Set-SqlObjectPermission:Param smo must be an smo database object (schema, table, view, storedprocedure, UDF, or synonym).' }
     }
 
 } #Set-SqlObjectPermission
@@ -2743,25 +2757,3 @@ function Get-SqlErrorLog
     $server.ReadErrorLog($lognumber)
     
 } #Get-SqlErrorLog
-
-#######################
-function Get-SqlFileSpace
-{
-    param($sqlserver,$dbname=$(throw 'dbname is required'))
-
-    switch ($dbname.GetType().Name)
-    {
-        'String' { $db = Get-SqlDatabase $sqlserver $dbname }
-        'Database' { $db = $dbname }
-        default { throw "Get-SqlFileSpace:Param '`$dbname' must be a String or Database object." }
-    }
-
-    Write-Verbose "Get-SqlFileSpace $($db.Name)"
-
-    $filespace = $db | Get-SqlDataFile | Select  Server, dbname, name, FileName, Size, UsedSpace, @{name='FreeSpace';Expression={$(Size - UsedSpace)}}
-    $filespace += $db | Get-SqlLogFile | Select  Server, dbname, name, FileName, Size, UsedSpace, @{name='FreeSpace';Expression={$(Size - UsedSpace)}}
-
-    $filespace
-
-} #Get-SqlFileSpace
-
