@@ -2078,7 +2078,10 @@ function Invoke-SqlBackup
 
     $backup.SqlBackup($server) 
     
-    Write-Host "$action backup of $dbname to $filepath complete."
+    if ($?)
+    { Write-Error "$action backup of $dbname to $filepath failed." }
+    else
+    { Write-Host "$action backup of $dbname to $filepath complete." }
 
 } #Invoke-SqlBackup
 
@@ -2132,7 +2135,10 @@ function Invoke-SqlRestore
 
     $restore.SqlRestore($server) 
     
-    Write-Host "$action restore of $dbname from $filepath complete."
+    if ($?)
+    { Write-Error "$action restore of $dbname from $filepath failed." }
+    else
+    { Write-Host "$action restore of $dbname from $filepath complete." }
 
 } #Invoke-SqlRestore
 
