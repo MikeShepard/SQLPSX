@@ -2763,3 +2763,22 @@ function Get-SqlErrorLog
     $server.ReadErrorLog($lognumber)
     
 } #Get-SqlErrorLog
+
+#######################
+function Get-SqlEdition
+{
+    param($sqlserver=$(throw 'Get-SqlEdition:`$sqlserver is required.'))
+
+    switch ($sqlserver.GetType().Name)
+    {
+        'String' { $server = Get-SqlServer $sqlserver }
+        'Server' { $server = $sqlserver }
+        default { throw 'Get-SqlEdition:Param `$sqlserver must be a String or Server object.' }
+    }
+
+    Write-Verbose "Get-SqlEdition $($server.Name)"
+
+    $server.information | Select @{name='Server';Expression={$server.Name}}, Edition
+
+}#Get-SqlEdition
+

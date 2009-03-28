@@ -13,6 +13,13 @@ Optional Database and Reporting Services Components
 8. Run Write-SmoToCsvFile.ps1 to import the csv file into the database
 
 What's New
+    Version 1.5
+        Invoke-SqlBackup (Database,Log) Invoke-SqlRestore (Database, Log) Invoke-SqlDatabaseCheck Invoke-SqlIndexRebuild Get-SqlIndexFragmentation
+        Invoke-SqlIndexDefrag Update-SqlStatistic Add-SqlDatabase Remove-SqlDatabase Add-SqlFileGroup Add-SqlDataFile Add-SqlLogFile Get-SqlDefaultDir
+        Add-SqlUser Remove-SqlUser Add-SqlLogin Remove-SqlLogin Add-SqlServerRoleMember Remove-SqlServerRoleMember Add-SqlDatabaseRole
+        Remove-SqlDatabaseRole Add-SqlDatabaseRoleMember Remove-SqlDatabaseRolemember Set-SqlServerPermission (GRANT, REVOKE, DENY)
+        Set-SqlDatabasePermission (GRANT, REVOKE, DENY) Set-SqlObjectPermission (GRANT, REVOKE, DENY) Get-SqlErrorLog Get-SqlSchema Get-SqlProcess
+        Get-SqlTransaction Get-SqlEdition Test-SqlScript Out-SqlScript
     Version 1.4
         Added the following functions:
         Copy-ISItemSQLToSQL Copy-ISItemSQLToFile Copy-ISItemFileToSQL Get-ISData Get-ISItem Get-ISPackage Get-ISRunningPackage Get-ISSqlConfigurationItem
@@ -34,6 +41,13 @@ What's New
         Get-Information_Schema.Columns Get-Information_Schema.Views Get-Information_Schema.Routines Get-SysDatabases Get-SqlDataFile Get-SqlLogFile
         Get-SqlVersion Get-SqlPort ConvertTo-ExtendedPropertyXML Get-Sql ConvertTo-StatisticColumnXML ConvertTo-IndexedColumnXML
 
+Snap-ins
+    SqlParser
+        Test-SqlScript
+            Determines whether a SQL script is valid.
+        Out-SqlScript
+            Sends out to the host as a SQL script.
+
 Libraries
     LibrarySmo.ps1 functions
         Get-SqlServer
@@ -41,7 +55,7 @@ Libraries
         Get-SqlDatabase
             Returns an SMO Database object or collection of Database objects
         Get-SqlData
-            Executes a query returns an ADO.NET DataTable
+            Executes a query returns an array of System.Data.DataRow
         Set-SqlData
             Executes a query that does not return a result set
         Get-SqlShowMbrs
@@ -129,6 +143,68 @@ Libraries
             Helper function returns XML representation of the Statistic Columns of a SMO Statistic object
         ConvertTo-IndexedColumnXML
             Helper function returns XML representation of the Indexed Columns of a SMO Index object
+        Invoke-SqlBackup (Database,Log)
+            Performs a SQL Backup
+        Invoke-SqlRestore (Database, Log)
+            Performs a SQL Restore
+        Invoke-SqlDatabaseCheck
+            Performs the equivalent of a DBCC CHECKDB
+        Invoke-SqlIndexRebuild
+            Performs a reindex 
+        Get-SqlIndexFragmentation
+            Returns index fragmentation similar to DBCC SHOWCONTIG
+        Invoke-SqlIndexDefrag
+            Defragments an index. Performs the equivalent of a DBCC INDEXDEFRAG
+        Update-SqlStatistic
+            Updates statistics
+        Add-SqlDatabase
+            Adds a new database to a SQL Server
+        Remove-SqlDatabase
+            Removes a database from a SQL Server
+        Add-SqlFileGroup
+            Adds a new filegroup to a database
+        Add-SqlDataFile
+            Adds a new datafile to a filegroup
+        Add-SqlLogFile
+            Adds a new logfile to a database
+        Get-SqlDefaultDir
+           Returns the default location for data and log files for a SQL Server 
+        Add-SqlUser
+            Adds a new user to a database
+        Remove-SqlUser
+            Removes a user from a database
+        Add-SqlLogin
+            Adds a login to a SQL Server
+        Remove-SqlLogin
+            Removes a login from a SQL Server
+        Add-SqlServerRoleMember
+            Adds a login to a server role
+        Remove-SqlServerRoleMember
+            Removes a login from a server role
+        Add-SqlDatabaseRole
+            Adds a new database role to a database
+        Remove-SqlDatabaseRole
+            Removes a database roel from a database
+        Add-SqlDatabaseRoleMember
+            Adds a user or role to a database role
+        Remove-SqlDatabaseRolemember
+            Removes a user or role from a database role
+        Set-SqlServerPermission (GRANT, REVOKE, DENY)
+            Sets server level permissions to a login
+        Set-SqlDatabasePermission (GRANT, REVOKE, DENY)
+            Sets database level permissiosn to a user or role
+        Set-SqlObjectPermission (GRANT, REVOKE, DENY)
+            Sets database object level permissions to a user or role
+        Get-SqlErrorLog
+            Returns the SQL Server Errorlog
+        Get-SqlSchema
+            Returns a SMO Schema object with additional properties
+        Get-SqlProcess
+            Returns the current proccesses on a SQL Server. Equivalent to sp_who
+        Get-SqlTransaction
+            Returns the current open transactions for a database
+        Get-SqlEdition
+            Returns the SQL Server edition
     LibraryAgent.ps1 functions
         Get-AgentJobServer
             Returns a Microsoft.SqlServer.Management.Smo.Agent.JobServer Object. This is the top level object for Agent.Smo
@@ -157,7 +233,7 @@ Libraries
         Set-AgentJobHistoryFilter
             Sets filtering option used in Get-AgentJobHistory function
         Get-AgentJobHistory
-            Returns an DataTable of job history, filtering can be applied by using the Set-AgentJobHistoryFilter function
+            Returns an array of System.Data.DataRow of job history, filtering can be applied by using the Set-AgentJobHistoryFilter function
     LibraryRmo.ps1 functions
         Get-SqlConnection
             Returns a ServerConnection object
@@ -210,7 +286,7 @@ Libraries
         Copy-ISItemFileToSQL
             Copies a Package or SSIS folder from file to SQL
         Get-ISData
-            Executes a query and returns an ADO.NET DataTable
+            Executes a query and returns an array of System.Data.DataRow
         Get-ISItem
             Retrieves a list of SQL Server Integration Services folders and packages from the specified SQL Server instance. Returns a PackInfo Object.
             Note: Unlike the other SSIS functions this function requires a SQL instance name i.e. serverName\instanceName
@@ -265,6 +341,10 @@ Scripts
         Scripting options file for SMO
     replscriptopts.txt
         Scripting options file for RMO
+    Init-SqlParser.ps1
+        Initializes the SqlParser snap-in
+    formatsql.bat
+        Simple bat file for calling powershell.exe with the command set to out-sqlscript
 
 SQL Server Reporting Services (2005) reports
     See the screenshots_sqlpsx.docx for sample output of reports
