@@ -346,7 +346,7 @@ Scripts
     formatsql.bat
         Simple bat file for calling powershell.exe with the command set to out-sqlscript
 
-SQL Server Reporting Services (2005) reports
+SQL Server Reporting Services (2008) reports
     See the screenshots_sqlpsx.docx for sample output of reports
 
     SQLPSXChangedDatabasePermission.rdl
