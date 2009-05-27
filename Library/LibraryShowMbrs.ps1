@@ -72,13 +72,14 @@ function Get-GroupUser
             if ($domain -ne 'NT AUTHORITY' -and $domain -ne 'BUILTIN')
             {
             
+                $qry = "select * from Win32_GroupUser where GroupComponent=`"Win32_Group.Domain=`'$domain`',Name=`'$groupname`'`""
+                
                 if (Get-IsDomain $domain)
-                { $node = "" }
+                { $groupUser = get-wmiobject -query $qry }
                 else
-                { $node = "/NODE:`"$domain`"" }
+                { $groupUser = get-wmiobject -query $qry -computerName $domain }
 
-                $cmd = "wmic $node path Win32_groupuser WHERE (GroupComponent = `"Win32_Group.Domain='$domain',Name='$groupname'`") get PartComponent"
-                cmd /c $cmd | foreach { if($_ -match $p)
+                $groupUser | foreach { if($_.PartComponent -match $p)
                                         {   $account = $($matches.Domain+"\"+$matches.Name)
                                             if ($matches.type -eq 'Group')
                                             {
