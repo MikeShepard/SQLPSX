@@ -379,7 +379,7 @@ function Get-SqlDatabaseRoleMember
             $tmpMember = @()        
 
             #Although public is a role its members cannot be enumerated using EnumMembers()
-            if (!($role.Name -match "public"))
+            if (!($role.Name -eq "public"))
             {
                  #The EnumMembers() method will recursively (reports nested role members) enumerate role membership for you
                  #Thank You Microsoft SMO Developers!
@@ -569,7 +569,7 @@ function Get-SqlServerRole
         $member = @()
         
         #Although public is a role its members cannot be enumerated using EnumServerRoleMembers()
-        if (!($svrole.Name -match "public"))
+        if (!($svrole.Name -eq "public"))
         {
             #EnumMembers and flatten out Windows group membership, adding the Sqllogin Objects members array
             #However we will ensure we only list an individual login once
@@ -1920,8 +1920,21 @@ function Invoke-SqlDatabaseCheck
         if ($_)
         {
             if ($_.GetType().Name -eq 'Database')
-            { Write-Verbose "Invoke-SqlDatabaseCheck $($_.Name)"
-              $_.CheckTables('None') }
+            { 
+                Write-Verbose "Invoke-SqlDatabaseCheck $($_.Name)"
+                trap {
+                    $ex = $_.Exception
+                    Write-Output $ex.message
+                    $ex = $ex.InnerException
+                    while ($ex.InnerException)
+                    {
+                        Write-Output $ex.InnerException.message
+                        $ex = $ex.InnerException
+                    };
+                    continue
+                }
+                $_.CheckTables('None') 
+            }
             else
             { throw 'Invoke-SqlDatabaseCheck:Param db must be a database object.' }
 
@@ -1945,9 +1958,22 @@ function Invoke-SqlIndexRebuild
         if ($_)
         {
             if ($_.GetType().Name -eq 'Index')
-            { Write-Verbose "Invoke-SqlIndexRebuild $($_.Name)"
-              Write-Host "Rebuilding Index $($_.Name)"
-              $_.Rebuild() }
+            {
+                Write-Verbose "Invoke-SqlIndexRebuild $($_.Name)"
+                Write-Host "Rebuilding Index $($_.Name)"
+                trap {
+                    $ex = $_.Exception
+                    Write-Output $ex.message
+                    $ex = $ex.InnerException
+                    while ($ex.InnerException)
+                    {
+                        Write-Output $ex.InnerException.message
+                        $ex = $ex.InnerException
+                    };
+                    continue
+                }
+                $_.Rebuild()
+            }
             else
             { throw 'Invoke-SqlIndexRebuild:Param index must be a index object.' }
 
@@ -1971,9 +1997,22 @@ function Invoke-SqlIndexDefrag
         if ($_)
         {
             if ($_.GetType().Name -eq 'Index')
-            { Write-Verbose "Invoke-SqlIndexDefrag $($_.Name)"
-              Write-Host "Defraging Index $($_.Name)"
-              $_.Reorganize() }
+            {
+                Write-Verbose "Invoke-SqlIndexDefrag $($_.Name)"
+                Write-Host "Defraging Index $($_.Name)"
+                trap {
+                    $ex = $_.Exception
+                    Write-Output $ex.message
+                    $ex = $ex.InnerException
+                    while ($ex.InnerException)
+                    {
+                        Write-Output $ex.InnerException.message
+                        $ex = $ex.InnerException
+                    };
+                    continue
+                }
+                $_.Reorganize()
+            }
             else
             { throw 'Invoke-SqlIndexDefrag:Param index must be a index object.' }
 
@@ -2023,15 +2062,27 @@ function Update-Statistic
         {
             if ($_.GetType().Name -eq 'Statistic')
             { 
-              Write-Verbose "Update-Statistic $($_.Name)"
-              Write-Host "Updating statistic $($_.Name)"
+                Write-Verbose "Update-Statistic $($_.Name)"
+                Write-Host "Updating statistic $($_.Name)"
 
-              if ($sampleValue -and $recompute.IsPresent)
-              { $_.Update($scanType, $sampleValue, $true) }
-              elseif ($sampleValue)
-              { $_.Update($scanType, $sampleValue) }
-              else
-              { $_.Update($scanType) }
+                trap {
+                    $ex = $_.Exception
+                    Write-Output $ex.message
+                    $ex = $ex.InnerException
+                    while ($ex.InnerException)
+                    {
+                        Write-Output $ex.InnerException.message
+                        $ex = $ex.InnerException
+                    };
+                    continue
+                }
+                if ($sampleValue -and $recompute.IsPresent)
+                { $_.Update($scanType, $sampleValue, $true) }
+                elseif ($sampleValue)
+                { $_.Update($scanType, $sampleValue) }
+                else
+                { $_.Update($scanType) }
+
             }
             else
             { throw 'Update-Statistic:Param statistic must be a statistic object.' }
@@ -2074,14 +2125,30 @@ function Invoke-SqlBackup
     $backup.Devices.Add($backupDevice) 
     $backup.Initialize = $($force.IsPresent)
     $backup.Incremental = $($incremental.IsPresent)
-    $backup.CopyOnly = $($copyOnly.IsPresent)
-
+    if ($copyOnly.IsPresent)
+    { if ($server.Information.Version.Major -ge 10) 
+      { $backup.CopyOnly = $true }
+      else
+      { throw 'CopyOnly is supported in SQL Server 2008 or higher.' }
+    }
+    
+    trap {
+        $ex = $_.Exception
+        Write-Output $ex.message
+        $ex = $ex.InnerException
+        while ($ex.InnerException)
+        {
+            Write-Output $ex.InnerException.message
+            $ex = $ex.InnerException
+        };
+        continue
+    }
     $backup.SqlBackup($server) 
     
     if ($?)
-    { Write-Error "$action backup of $dbname to $filepath failed." }
-    else
     { Write-Host "$action backup of $dbname to $filepath complete." }
+    else
+    { Write-Host "$action backup of $dbname to $filepath failed." }
 
 } #Invoke-SqlBackup
 
@@ -2117,7 +2184,7 @@ function Invoke-SqlRestore
 
     if ($relocatefiles)
     {
-       if ($relocateFile.GetType().Name -ne 'Hashtable')
+       if ($relocateFiles.GetType().Name -ne 'Hashtable')
        { throw 'Invoke-SqlRestore:Param relocateFile must be a hashtable' }
 
        $relocateFileAR = New-Object Collections.ArrayList
@@ -2133,12 +2200,23 @@ function Invoke-SqlRestore
      
     }
 
+    trap {
+        $ex = $_.Exception
+        Write-Output $ex.message
+        $ex = $ex.InnerException
+        while ($ex.InnerException)
+        {
+            Write-Output $ex.InnerException.message
+            $ex = $ex.InnerException
+        };
+        continue
+    }
     $restore.SqlRestore($server) 
     
     if ($?)
-    { Write-Error "$action restore of $dbname from $filepath failed." }
-    else
     { Write-Host "$action restore of $dbname from $filepath complete." }
+    else
+    { Write-Host "$action restore of $dbname from $filepath failed." }
 
 } #Invoke-SqlRestore
 
@@ -2149,6 +2227,17 @@ function Remove-SqlDatabase
     param($sqlserver,$dbname)
     
     $db = Get-SqlDatabase $sqlserver $dbname
+    trap {
+        $ex = $_.Exception
+        Write-Output $ex.message
+        $ex = $ex.InnerException
+        while ($ex.InnerException)
+        {
+            Write-Output $ex.InnerException.message
+            $ex = $ex.InnerException
+        };
+        continue
+    }
     $db.Drop()
 
 } #Remove-SqlDatabase
@@ -2160,6 +2249,17 @@ function Add-SqlFileGroup
 
     $fileGroup = new-object ('Microsoft.SqlServer.Management.Smo.FileGroup') $db, $name
     
+    trap {
+        $ex = $_.Exception
+        Write-Output $ex.message
+        $ex = $ex.InnerException
+        while ($ex.InnerException)
+        {
+            Write-Output $ex.InnerException.message
+            $ex = $ex.InnerException
+        };
+        continue
+    }
     $db.FileGroups.Add($fileGroup)
 
     return $fileGroup
@@ -2183,6 +2283,17 @@ function Add-SqlDataFile
     if ($maxSize)
     { $dataFile.MaxSize = $maxSize }
 
+    trap {
+        $ex = $_.Exception
+        Write-Output $ex.message
+        $ex = $ex.InnerException
+        while ($ex.InnerException)
+        {
+            Write-Output $ex.InnerException.message
+            $ex = $ex.InnerException
+        };
+        continue
+    }
     $filegroup.Files.Add($dataFile)
 
 } #Add-SqlDataFile
@@ -2204,6 +2315,17 @@ function Add-SqlLogFile
     if ($maxSize)
     { $logFile.MaxSize = $maxSize }
 
+    trap {
+        $ex = $_.Exception
+        Write-Output $ex.message
+        $ex = $ex.InnerException
+        while ($ex.InnerException)
+        {
+            Write-Output $ex.InnerException.message
+            $ex = $ex.InnerException
+        };
+        continue
+    }
     $db.LogFiles.Add($logFile)
 
 } #Add-SqlLogFile
@@ -2244,6 +2366,17 @@ Add-SqlDataFile -filegroup $fileGroup -name $dataName -filepath $dataFilePath -s
 
 Add-SqlLogFile -db $db -name $logName -filepath $logFilePath -size $logSize -growthtype $logGrowthType -growth $logGrowth -maxsize $logMaxSize
 
+    trap {
+        $ex = $_.Exception
+        Write-Output $ex.message
+        $ex = $ex.InnerException
+        while ($ex.InnerException)
+        {
+            Write-Output $ex.InnerException.message
+            $ex = $ex.InnerException
+        };
+        continue
+    }
     $db.Create()  
 
 } #Add-SqlDatabase

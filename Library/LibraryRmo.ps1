@@ -99,11 +99,11 @@ function New-ReplTransPublication
 {
     param([string]$name=$(throw 'Get-ReplTransPublication:`$name is required.'),
           [string]$databaseName=$(throw 'Get-ReplTransPublication:`$databaseName is required.'),
-          $connectionContext=$(throw 'Get-ReplTransPublication:`$connectionContext is required.'),$createSnapshotAgentByDefault=$false)
+          $connectionContext=$(throw 'Get-ReplTransPublication:`$connectionContext is required.'),[switch]$createSnapshotAgent)
 
     Write-Verbose "New-ReplTransPublication $name"
 
-    $pub = new-object ("Microsoft.SqlServer.Replication.TransPublication") $name,$databaseName,$connectionContext,$createSnapshotAgentByDefault
+    $pub = new-object ("Microsoft.SqlServer.Replication.TransPublication") $name,$databaseName,$connectionContext,$($createSnapshotAgent.IsPresent)
 
     return $pub
 
@@ -114,11 +114,11 @@ function New-ReplMergePublication
 {
     param([string]$name=$(throw 'Get-ReplMergePublication:`$name is required.'),
           [string]$databaseName=$(throw 'Get-ReplMergePublication:`$databaseName is required.'),
-          $connectionContext=$(throw 'Get-ReplMergePublication:`$connectionContext is required.'),$createSnapshotAgentByDefault=$false)
+          $connectionContext=$(throw 'Get-ReplMergePublication:`$connectionContext is required.'),[switch]$createSnapshotAgent)
 
     Write-Verbose "New-ReplMergePublication $name"
 
-    $pub = new-object ("Microsoft.SqlServer.Replication.MergePublication") $name,$databaseName,$connectionContext,$createSnapshotAgentByDefault
+    $pub = new-object ("Microsoft.SqlServer.Replication.MergePublication") $name,$databaseName,$connectionContext,$($createSnapshotAgent.IsPresent)
 
     return $pub
 
