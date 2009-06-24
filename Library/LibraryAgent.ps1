@@ -15,11 +15,11 @@
 #######################
 function Get-AgentJobServer
 {
-    param($sqlserver=$(throw 'Get-AgentJobServer:`$sqlserver is required'))
+    param($sqlserver=$(throw 'Get-AgentJobServer:`$sqlserver is required'),[string]$Username,[string]$Password)
 
     switch ($sqlserver.GetType().Name)
     {
-        'String' { $server = Get-SqlServer $sqlserver }
+        'String' { $server = Get-SqlServer $sqlserver $Username $Password }
         'Server' { $server = $sqlserver }
         default { throw 'Get-AgentJobServer:Param `$sqlserver must be a String or Server object.' }
     }

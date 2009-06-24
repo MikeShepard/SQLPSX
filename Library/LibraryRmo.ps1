@@ -39,12 +39,15 @@
 #######################
 function Get-SqlConnection
 {
-    param([string]$sqlserver=$(throw 'Get-SqlConnection:`$sqlserver is required.'))
+    param([string]$sqlserver=$(Throw 'Get-SqlConnection:`$sqlserver is required.'),[string]$Username,[string]$Password)
 
     Write-Verbose "Get-SqlConnection $sqlserver"
     
-    $con = new-object ("Microsoft.SqlServer.Management.Common.ServerConnection") $sqlserver
-    
+    if($Username -and $Password)
+    { $con = new-object ("Microsoft.SqlServer.Management.Common.ServerConnection") $sqlserver $Username $Password }
+    else
+    { $con = new-object ("Microsoft.SqlServer.Management.Common.ServerConnection") $sqlserver }
+	
     $con.Connect()
 
     return $con
@@ -56,15 +59,10 @@ function Get-ReplServer
 {
     param($replServer=$(throw 'Get-ReplServer:`$sqlserver is required'))
 
-    switch ($replServer.GetType().Name)
-    {
-        'String' { $con = Get-SqlConnection $replServer }
-        'ServerConnection' { $con = $replServer }
-        default { throw 'Get-ReplServer:Param `$replServer must be a String or ServerConnection object.' }
-    }
-
     Write-Verbose "Get-ReplServer $($con.ServerInstance)"
     
+    $con = Get-SqlConnection $replServer $Username $Password
+
     $repl = new-object ("Microsoft.SqlServer.Replication.ReplicationServer") $con
 
     return $repl

@@ -44,7 +44,7 @@ Write-Verbose "Copy-ISItemSQLToSQL path:$path serverName:$serverName destination
 
     if (Test-ISPath $literalPath $serverName 'Package')
     {
-        if ($whatIf.IsPresent)
+        if ($whatIf)
         { Write-Host "What if:Set-ISPackage $literalPath $destination $destinationServer $($force.IsPresent)" }
         else
         { 
@@ -53,7 +53,7 @@ Write-Verbose "Copy-ISItemSQLToSQL path:$path serverName:$serverName destination
           {
               if ($connectionInfo)
               { Set-ISConnectionString $package $connectionInfo }
-              if ($force.IsPresent)
+              if ($force)
               { Set-ISPackage  -package $package -path $destination -serverName $destinationServer -force }
               else
               { Set-ISPackage  -package $package -path $destination -serverName $destinationServer }
@@ -76,7 +76,7 @@ Write-Verbose "Copy-ISItemSQLToSQL path:$path serverName:$serverName destination
                Write-Verbose "testPath:$testPath"
                if (!(Test-ISPath $testPath $destinationServer 'Folder'))
                { 
-                    if ($whatIf.IsPresent)
+                    if ($whatIf)
                     { Write-Host "What if:New-ISItem $Folder $($pInfo.Name) $destinationServer" }
                     else
                     { 
@@ -88,7 +88,7 @@ Write-Verbose "Copy-ISItemSQLToSQL path:$path serverName:$serverName destination
            elseif ($pInfo.Flags -eq 'Package')
            {
                $destPath = $($folder + "\" -replace "\\\\","\") + $pInfo.Name
-                if ($whatIf.IsPresent)
+                if ($whatIf)
                 { Write-Host "What if:Set-ISPackage -package $($pInfo.Name) -path $destPath -serverName $destinationServer -force $($force.IsPresent)" }
                 else
                 { 
@@ -98,7 +98,7 @@ Write-Verbose "Copy-ISItemSQLToSQL path:$path serverName:$serverName destination
                     Write-Progress -activity "Copying ISItems..." -status "Copying $($pInfo.Name)" -percentcomplete ($i/$count.count*100)
                     if ($connectionInfo)
                     { Set-ISConnectionString $package $connectionInfo }
-                    if ($force.IsPresent)
+                    if ($force)
                     { Set-ISPackage  -package $package -path $destPath -serverName $destinationServer -force }
                     else
                     { Set-ISPackage  -package $package -path $destPath -serverName $destinationServer }
@@ -125,7 +125,7 @@ Write-Verbose "Copy-ISItemSQLToFile path:$path serverName:$serverName destinatio
 
     if (Test-ISPath $literalPath $serverName 'Package')
     {
-        if ($whatIf.IsPresent)
+        if ($whatIf)
         { Write-Host "What if:Set-ISPackage $($package.Name) $destination $($force.IsPresent)" }
         else
         { 
@@ -134,7 +134,7 @@ Write-Verbose "Copy-ISItemSQLToFile path:$path serverName:$serverName destinatio
           {
               if ($connectionInfo)
               { Set-ISConnectionString $package $connectionInfo }
-              if ($force.IsPresent)
+              if ($force)
               { Set-ISPackage  -package $package -path $destination -force }
               else
               { Set-ISPackage  -package $package -path $destination }
@@ -157,7 +157,7 @@ Write-Verbose "Copy-ISItemSQLToFile path:$path serverName:$serverName destinatio
                Write-Verbose "testPath:$testPath"
                if (!(Test-Path -literalPath $testPath))
                {
-                if ($whatIf.IsPresent)
+                if ($whatIf)
                  { Write-Progress -activity "Copying ISItems..." -status "Copying $($pInfo.Name)" -percentcomplete ($i/$count.count*100) 
                    Write-Host "What if:New-Item -path $Folder -name $($pInfo.Name) -ltype directory" }
                 else
@@ -167,7 +167,7 @@ Write-Verbose "Copy-ISItemSQLToFile path:$path serverName:$serverName destinatio
            elseif ($pInfo.Flags -eq 'Package')
            {
                $destPath = $($folder + "\" + $pInfo.Name + ".dtsx") -replace "\\\\","\"
-                if ($whatIf.IsPresent)
+                if ($whatIf)
                 { Write-Host "What if:Set-ISPackage -package $($pInfo.Name) -path $destPath -force $($force.IsPresent)" }
                 else
                 {
@@ -177,7 +177,7 @@ Write-Verbose "Copy-ISItemSQLToFile path:$path serverName:$serverName destinatio
                     Write-Progress -activity "Copying ISItems..." -status "Copying $($pInfo.Name)" -percentcomplete ($i/$count.count*100) 
                     if ($connectionInfo)
                     { Set-ISConnectionString $package $connectionInfo }
-                     if ($force.IsPresent)
+                     if ($force)
                      { Set-ISPackage  -package $package -path $destPath -force }
                      else
                      { Set-ISPackage  -package $package -path $destPath }
@@ -220,7 +220,7 @@ function Copy-ISItemFileToSQL
            Write-Verbose "testPath:$testPath"
            if (!(Test-ISPath $testPath $destinationServer 'Folder'))
            {
-               if ($whatIf.IsPresent)
+               if ($whatIf)
                { Write-Host "What if:New-ISItem $Folder $item.Name $destinationServer" }
                else
                { New-ISItem $Folder $item.Name $destinationServer }
@@ -229,7 +229,7 @@ function Copy-ISItemFileToSQL
         else 
         {
             $destPath = $($folder + "\" + $item.BaseName) -replace "\\\\","\"
-            if ($whatIf.IsPresent)
+            if ($whatIf)
             { Write-Host "What if:Set-ISPackage $($package.Name) $folder" }
             else
             {
@@ -238,7 +238,7 @@ function Copy-ISItemFileToSQL
               {
                   if ($connectionInfo)
                   { Set-ISConnectionString $package $connectionInfo }
-                  if ($force.IsPresent)
+                  if ($force)
                   { Set-ISPackage  -package $package -path $destPath -serverName $destinationServer -force }
                   else
                   { Set-ISPackage  -package $package -path $destPath -serverName $destinationServer }
@@ -250,7 +250,7 @@ function Copy-ISItemFileToSQL
 
     if (Test-Path $path)
     { 
-       if ($recurse.IsPresent)
+       if ($recurse)
        {
            $items = Get-ChildItem -path $path -include $include -exclude $exclude -recurse
            $count = $items | Measure-Object | Select Count
@@ -258,7 +258,7 @@ function Copy-ISItemFileToSQL
            { 
              $i++
              Write-Progress -activity "Copying Items..." -status "Copying $($item.Name)" -percentcomplete ($i/$count.count*100) 
-             if ($force.IsPresent)
+             if ($force)
              { Copy-ISChildItemFileToSQL -item $item -path $path -destination $destination -destinationServer $destinationServer -force -connectionInfo $connectionInfo }
              else
              { Copy-ISChildItemFileToSQL -item $item -path $path -destination $destination -destinationServer $destinationServer -connectionInfo $connectionInfo }
@@ -272,7 +272,7 @@ function Copy-ISItemFileToSQL
            {
              $i++
              Write-Progress -activity "Copying Items..." -status "Copying $($item.Name)" -percentcomplete ($i/$count.count*100) 
-             if ($force.IsPresent)
+             if ($force)
              { Copy-ISChildItemFileToSQL -item $item -path $path -destination $destination -destinationServer $destinationServer -force -connectionInfo $connectionInfo }
              else
              { Copy-ISChildItemFileToSQL -item $item -path $path -destination $destination -destinationServer $destinationServer -connectionInfo $connectionInfo }
@@ -300,7 +300,7 @@ function Get-ISItem
 
     $app = New-ISApplication
 
-    if ($recurse.IsPresent)
+    if ($recurse)
     {
         foreach ($pInfo in $app.GetPackageInfos($path, $serverName, $null, $null))
         {
@@ -419,7 +419,7 @@ function Remove-ISItem
                 'Package' { 
                             if (Test-ISPath $pInfo.literalPath $serverName 'Package')
                             { 
-                                if ($whatIf.IsPresent)
+                                if ($whatIf)
                                 { Write-Host "What if:RemoveFromDtsServer($($pInfo.literalPath),$serverName)" }
                                 else
                                 { $app.RemoveFromDtsServer($pInfo.literalPath,$serverName) }
@@ -430,7 +430,7 @@ function Remove-ISItem
                 'Folder'  { 
                             if (Test-ISPath $pInfo.literalPath $serverName 'Folder')
                             {
-                                if ($whatIf.IsPresent)
+                                if ($whatIf)
                                 { Write-Host "What if:RemoveFolderFromDtsServer($($pInfo.literalPath),$serverName)" }
                                 else
                                 { $app.RemoveFolderFromDtsServer($pInfo.literalPath,$serverName) }
@@ -448,7 +448,7 @@ function Remove-ISItem
             if ($_.GetType().Name -eq 'PackageInfo')
             { 
               Write-Verbose "Remove-ISChildItem $($_.literalPath) $($whatIf.IsPresent)"
-              if ($whatif.IsPresent)
+              if ($whatif)
               { Remove-ISChildItem $_ -whatIf }
               else
               { Remove-ISChildItem $_ }
@@ -461,7 +461,7 @@ function Remove-ISItem
     {
         if ($pInfo)
         { 
-            if ($whatIf.IsPresent)
+            if ($whatIf)
             { $pInfo | Remove-ISChildItem -whatIf }
             else
             { $pInfo | Remove-ISChildItem }
@@ -518,7 +518,7 @@ function Set-ISPackage
     #SQL Server Store
     if ($path -and $serverName)
     { 
-        if (!(Test-ISPath $path $serverName 'Package') -or $($force.IsPresent))
+        if (!(Test-ISPath $path $serverName 'Package') -or $($force))
         { $app.SaveToDtsServer($package, $null, $path, $serverName) }
         else
         { throw "Package $path already exists on server $serverName" }
@@ -526,7 +526,7 @@ function Set-ISPackage
     #File Store
     elseif ($path -and !$serverName)
     { 
-        if (!(Test-Path -literalPath $path) -or $($force.IsPresent))
+        if (!(Test-Path -literalPath $path) -or $($force))
         { $app.SaveToXml($path, $package, $null) }
         else
         { throw "Package $path already exists" }

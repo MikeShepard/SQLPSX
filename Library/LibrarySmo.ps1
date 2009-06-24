@@ -23,15 +23,36 @@ Set-Alias Get-InvalidLogins $scriptRoot\Get-InvalidLogins.ps1
 Set-Alias Get-SessionTimeStamp $scriptRoot\Get-SessionTimeStamp.ps1
 
 #######################
+function Get-SqlConnection
+{
+    param([string]$sqlserver=$(Throw 'Get-SqlConnection:`$sqlserver is required.'),[string]$Username,[string]$Password)
+
+    Write-Verbose "Get-SqlConnection $sqlserver"
+    
+    if($Username -and $Password)
+    { $con = new-object ("Microsoft.SqlServer.Management.Common.ServerConnection") $sqlserver $Username $Password }
+    else
+    { $con = new-object ("Microsoft.SqlServer.Management.Common.ServerConnection") $sqlserver }
+	
+    $con.Connect()
+
+    return $con
+    
+} #Get-ServerConnection
+
+#######################
 function Get-SqlServer
 {
-    param([string]$sqlserver=$(throw 'Get-SqlServer:`$sqlserver is required.'))
+    param([string]$sqlserver=$(throw 'Get-SqlServer:`$sqlserver is required.'),[string]$Username,[string]$Password)
     #When $sqlserver passed in from the SMO Name property, brackets
     #are automatically inserted which then need to be removed
     $sqlserver = $sqlserver -replace "\[|\]"
 
     Write-Verbose "Get-SqlServer $sqlserver"
-    $server = new-object ("Microsoft.SqlServer.Management.Smo.Server") $sqlserver
+
+    $con = Get-SqlConnection $sqlserver $Username $Password
+
+    $server = new-object ("Microsoft.SqlServer.Management.Smo.Server") $con
     $server.SetDefaultInitFields([Microsoft.SqlServer.Management.SMO.StoredProcedure], "IsSystemObject")
     $server.SetDefaultInitFields([Microsoft.SqlServer.Management.SMO.Table], "IsSystemObject")
     $server.SetDefaultInitFields([Microsoft.SqlServer.Management.SMO.View], "IsSystemObject")
@@ -2076,7 +2097,7 @@ function Update-Statistic
                     };
                     continue
                 }
-                if ($sampleValue -and $recompute.IsPresent)
+                if ($sampleValue -and $recompute)
                 { $_.Update($scanType, $sampleValue, $true) }
                 elseif ($sampleValue)
                 { $_.Update($scanType, $sampleValue) }
@@ -2125,7 +2146,7 @@ function Invoke-SqlBackup
     $backup.Devices.Add($backupDevice) 
     $backup.Initialize = $($force.IsPresent)
     $backup.Incremental = $($incremental.IsPresent)
-    if ($copyOnly.IsPresent)
+    if ($copyOnly)
     { if ($server.Information.Version.Major -ge 10) 
       { $backup.CopyOnly = $true }
       else
