@@ -44,7 +44,7 @@ function Get-SqlConnection
     Write-Verbose "Get-SqlConnection $sqlserver"
     
     if($Username -and $Password)
-    { $con = new-object ("Microsoft.SqlServer.Management.Common.ServerConnection") $sqlserver $Username $Password }
+    { $con = new-object ("Microsoft.SqlServer.Management.Common.ServerConnection") $sqlserver,$Username,$Password }
     else
     { $con = new-object ("Microsoft.SqlServer.Management.Common.ServerConnection") $sqlserver }
 	

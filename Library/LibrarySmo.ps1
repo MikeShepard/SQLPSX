@@ -13,7 +13,9 @@
 ### </Usage>
 ### </Script>
 # ---------------------------------------------------------------------------
-[reflection.assembly]::LoadWithPartialName("Microsoft.SqlServer.Smo") > $null 
+$smoAssembly = [reflection.assembly]::LoadWithPartialName("Microsoft.SqlServer.Smo")
+if (!($smoVersion))
+{ Set-Variable -name SmoVersion  -value $smoAssembly.GetName().Version.Major -Scope Global -Option Constant -Description "SQLPSX variable" }
 [reflection.assembly]::LoadWithPartialName('Microsoft.SqlServer.SMOExtended') > $null
 
 $scriptRoot = Split-Path (Resolve-Path $myInvocation.MyCommand.Path)
@@ -30,7 +32,7 @@ function Get-SqlConnection
     Write-Verbose "Get-SqlConnection $sqlserver"
     
     if($Username -and $Password)
-    { $con = new-object ("Microsoft.SqlServer.Management.Common.ServerConnection") $sqlserver $Username $Password }
+    { $con = new-object ("Microsoft.SqlServer.Management.Common.ServerConnection") $sqlserver,$Username,$Password }
     else
     { $con = new-object ("Microsoft.SqlServer.Management.Common.ServerConnection") $sqlserver }
 	
@@ -2147,10 +2149,10 @@ function Invoke-SqlBackup
     $backup.Initialize = $($force.IsPresent)
     $backup.Incremental = $($incremental.IsPresent)
     if ($copyOnly)
-    { if ($server.Information.Version.Major -ge 10) 
+    { if ($server.Information.Version.Major -ge 9 -and $smoVersion -ge 10) 
       { $backup.CopyOnly = $true }
       else
-      { throw 'CopyOnly is supported in SQL Server 2008 or higher.' }
+      { throw 'CopyOnly is supported in SQL Server 2005(9.0) or higher with SMO version 10.0 or higher.' }
     }
     
     trap {
