@@ -13,6 +13,18 @@ Optional Database and Reporting Services Components
 8. Run Write-SmoToCsvFile.ps1 to import the csv file into the database
 
 What's New
+    Version 1.6
+        Get-SqlConnection
+        Maintenane Release
+        +Added support for SQL authentication
+        +Add better error handling using technique described in post by Allen White:
+            http://sqlblog.com/blogs/allen_white/archive/2009/06/08/handling-errors-in-powershell.aspx
+        +Changed all boolean value parameters to switch data type
+        +Added SMOVersion global variable
+        +Fixed issue with CopyOnly backups
+        +Fixed issue with role names containing the word public
+        +Fixed issue with Invoke-SqlRestore and relocatefiles param
+        +Updated SqlParser cmdlets to VSDB R2
     Version 1.5
         Invoke-SqlBackup (Database,Log) Invoke-SqlRestore (Database, Log) Invoke-SqlDatabaseCheck Invoke-SqlIndexRebuild Get-SqlIndexFragmentation
         Invoke-SqlIndexDefrag Update-SqlStatistic Add-SqlDatabase Remove-SqlDatabase Add-SqlFileGroup Add-SqlDataFile Add-SqlLogFile Get-SqlDefaultDir
