@@ -62,7 +62,11 @@ Write-Verbose "Copy-ISItemSQLToSQL path:$path serverName:$serverName destination
     }
     elseif (Test-ISPath $literalPath $serverName 'Folder')
     {
-        $pInfos = Get-ISItem -path $path $topLevelFolder $serverName -recurse $include $exclude
+        if ($recurse)
+        { $pInfos = Get-ISItem -path $path $topLevelFolder $serverName -recurse $include $exclude }
+        else
+        { $pInfos = Get-ISItem -path $path $topLevelFolder $serverName -include $include -exclude $exclude }
+
         $count = $pInfos | Measure-Object | Select Count
         foreach ($pInfo in $pInfos)
         {
@@ -80,7 +84,7 @@ Write-Verbose "Copy-ISItemSQLToSQL path:$path serverName:$serverName destination
                     { Write-Host "What if:New-ISItem $Folder $($pInfo.Name) $destinationServer" }
                     else
                     { 
-                  Write-Progress -activity "Copying ISItems..." -status "Copying $($pInfo.Name)" -percentcomplete ($i/$count.count*100) 
+                        Write-Progress -activity "Copying ISItems..." -status "Copying $($pInfo.Name)" -percentcomplete ($i/$count.count*100) 
                         New-ISItem $Folder $pInfo.Name $destinationServer
                     }
                }
@@ -143,7 +147,11 @@ Write-Verbose "Copy-ISItemSQLToFile path:$path serverName:$serverName destinatio
     }
     elseif (Test-ISPath $literalPath $serverName 'Folder')
     {
-        $pInfos = Get-ISItem -path $path $topLevelFolder $serverName -recurse $include $exclude
+        if ($recurse)
+        { $pInfos = Get-ISItem -path $path $topLevelFolder $serverName -recurse $include $exclude }
+        else
+        { $pInfos = Get-ISItem -path $path $topLevelFolder $serverName -include $include -exclude $exclude }
+
         $count = $pInfos | Measure-Object | Select Count
         foreach ($pInfo in $pInfos)
         {
@@ -157,11 +165,13 @@ Write-Verbose "Copy-ISItemSQLToFile path:$path serverName:$serverName destinatio
                Write-Verbose "testPath:$testPath"
                if (!(Test-Path -literalPath $testPath))
                {
-                if ($whatIf)
-                 { Write-Progress -activity "Copying ISItems..." -status "Copying $($pInfo.Name)" -percentcomplete ($i/$count.count*100) 
-                   Write-Host "What if:New-Item -path $Folder -name $($pInfo.Name) -ltype directory" }
-                else
-                { New-Item -path $Folder -name $pInfo.Name -type directory }
+                    if ($whatIf)
+                    { Write-Host "What if:New-Item -path $Folder -name $($pInfo.Name) -ltype directory" }
+                    else
+                    { 
+                      Write-Progress -activity "Copying ISItems..." -status "Copying $($pInfo.Name)" -percentcomplete ($i/$count.count*100)
+                      New-Item -path $Folder -name $pInfo.Name -type directory
+                    }
                }
            }
            elseif ($pInfo.Flags -eq 'Package')
@@ -207,11 +217,10 @@ function Copy-ISItemFileToSQL
     function Copy-ISChildItemFileToSQL
     {
         param($item, [string]$path, [string]$destination, [string]$destinationServer, [switch]$force, $connectionInfo)
-
-        $parentPath = $item.PSParentPath -replace 'Microsoft.PowerShell.Core\\FileSystem::'
-        $itemPath = $path -replace $($parentPath -replace '\\', '\\') -replace $item.Name
+        $parentPath = Split-Path $item.FullName -parent | Split-Path -leaf
+        $itemPath = $parentPath -replace "$([system.io.path]::getpathroot($item.FullName) -replace '\\','\\')"
         Write-Verbose "itemPath:$itemPath"
-        $folder = $destination + $itemPath 
+        $folder = $destination
         Write-Verbose "folder:$folder"
 
         if ($item.PSIsContainer)
