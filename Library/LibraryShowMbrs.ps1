@@ -24,17 +24,6 @@ function New-ShowMbrs
 } #New-ShowMbrs
 
 #######################
-function New-IsDomain
-{
-    Write-Verbose "New-IsDomain"
-
-    #__SQLPSXIsDomain is a session variable, so only create if it doesn't exist
-    if (!(Test-Path Variable:__SQLPSXIsDomain))
-    { Set-Variable __SQLPSXIsDomain @{} -Scope Global -Option AllScope -Description "SQLPSX variable" }
-    
-} #New-IsDomain
-
-#######################
 function Set-ShowMbrs
 {
     param($account,$groupkey)
@@ -65,66 +54,31 @@ function Get-GroupUser
         {
             Set-ShowMbrs $group $groupkey
 
-            $p = '.*Win32_(?<type>[^.]+)\.Domain="(?<domain>[^"]+)",Name="(?<Name>[^"]+)'
             $domain = $($group.ToString()).split("\")[0]
             $groupname = $($group.ToString()).split("\")[1]
             
             if ($domain -ne 'NT AUTHORITY' -and $domain -ne 'BUILTIN')
             {
             
-                $qry = "select * from Win32_GroupUser where GroupComponent=`"Win32_Group.Domain=`'$domain`',Name=`'$groupname`'`""
-                
-                if (Get-IsDomain $domain)
-                { $groupUser = get-wmiobject -query $qry }
-                else
-                { $groupUser = get-wmiobject -query $qry -computerName $domain }
+                $groupUser= [ADSI]"WinNT://$($domain + '/' + $groupname),group"
+	        $groupUser.psbase.Invoke("Members") | foreach {
+                    $name = $_.GetType().InvokeMember("Name", 'GetProperty', $null, $_, $null)
+                    $type = $_.GetType().InvokeMember("Class", 'GetProperty', $null, $_, $null)
+                    $path = $_.GetType().InvokeMember("AdsPath", 'GetProperty', $null, $_, $null)
+                    $arPath = $path.Split("/")
+                    $domain = $arPath[$arPath.length - 2]	
+                    $account = $domain + "\" + $name
+                    if ($type -eq 'Group')
+                    { Get-GroupUser $account $groupkey }
+                    else
+                    { Set-ShowMbrs $account $groupkey }
+                }
 
-                $groupUser | foreach { if($_.PartComponent -match $p)
-                                        {   $account = $($matches.Domain+"\"+$matches.Name)
-                                            if ($matches.type -eq 'Group')
-                                            {
-                                                Get-GroupUser $account $groupkey
-                                            }
-                                            else { Set-ShowMbrs $account $groupkey }
-                                        }
-                                       }
             }
         }
     }
 
 } #Get-GroupUser
-
-#######################
-function Get-IsDomain
-{
-    param($domain)
-
-    Write-Verbose "Get-IsDomain $domain"
-    
-    New-IsDomain
-
-    if (!($__SQLPSXIsDomain.Contains($domain)))
-    {
-       trap {$script:Exception = $_; continue} $mydomain = Get-WmiObject Win32_NTDomain | select DomainName
-         $flag = $false
-       if ($script:Exception -eq $null)
-       {
-            for ( $i=0; $i -le ($mydomain.length - 1); $i++)
-            {
-                    if ( $mydomain[$i].DomainName -eq $domain )
-                    {
-                            $flag = $true
-                            break
-                    }
-            }
-        }
-        
-        $__SQLPSXIsDomain[$domain] = $flag
-    }
-
-    return $__SQLPSXIsDomain[$domain]
-
-} #Get-IsDomain
 
 #######################
 function Get-ShowMbrs

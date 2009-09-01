@@ -45,7 +45,7 @@ function processCsv
 {
     param($csvFile,$tblname)
 
-    Get-ChildItem "$CsvDir*" -Include *."$csvFile".* | foreach {Write-ScriptLog "ImportCsv" "$_"; ImportCsv "$sqlserver" "$db" "$tblname" "$_"}
+    Get-ChildItem "$CsvDir*" -Include *."$csvFile".* | where {$_.Length -gt 0} | foreach {Write-ScriptLog "ImportCsv" "$_"; ImportCsv "$sqlserver" "$db" "$tblname" "$_"}
 
 }# processCsv
 

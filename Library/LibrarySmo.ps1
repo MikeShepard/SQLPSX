@@ -13,6 +13,7 @@
 ### </Usage>
 ### </Script>
 # ---------------------------------------------------------------------------
+[void][reflection.assembly]::LoadWithPartialName("Microsoft.SqlServer.ConnectionInfo")
 $smoAssembly = [reflection.assembly]::LoadWithPartialName("Microsoft.SqlServer.Smo")
 if (!($smoVersion))
 { Set-Variable -name SmoVersion  -value $smoAssembly.GetName().Version.Major -Scope Global -Option Constant -Description "SQLPSX variable" }

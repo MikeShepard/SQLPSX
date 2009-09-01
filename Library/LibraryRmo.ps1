@@ -33,6 +33,7 @@
 ###  </Usage>
 ### </Script>
 # ---------------------------------------------------------------------------
+[void][reflection.assembly]::LoadWithPartialName("Microsoft.SqlServer.ConnectionInfo")
 [reflection.assembly]::LoadWithPartialName("Microsoft.SqlServer.Management.Common") > $null
 [reflection.assembly]::LoadWithPartialName("Microsoft.SqlServer.RMO") > $null
 
@@ -57,11 +58,11 @@ function Get-SqlConnection
 #######################
 function Get-ReplServer
 {
-    param($replServer=$(throw 'Get-ReplServer:`$sqlserver is required'))
+    param([string]$replServer=$(throw 'Get-ReplServer:`$replServer is required.'),[string]$Username,[string]$Password)
+
+    $con = Get-SqlConnection $replServer $Username $Password
 
     Write-Verbose "Get-ReplServer $($con.ServerInstance)"
-    
-    $con = Get-SqlConnection $replServer $Username $Password
 
     $repl = new-object ("Microsoft.SqlServer.Replication.ReplicationServer") $con
 
