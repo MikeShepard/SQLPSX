@@ -1,0 +1,55 @@
+<Configuration>
+  <ViewDefinitions>
+
+    <View>
+      <Name>Table</Name>
+      <ViewSelectedBy>
+        <TypeName>Microsoft.SqlServer.Dts.Runtime.Package</TypeName>
+      </ViewSelectedBy>
+      <TableControl>
+        <TableHeaders>
+
+          <TableColumnHeader>
+            <Label>Display Name</Label>
+            <Width>30</Width>
+            <Alignment>left</Alignment>
+          </TableColumnHeader>
+
+          <TableColumnHeader>
+            <Label>Name</Label>
+            <Width>30</Width>
+            <Alignment>left</Alignment>
+          </TableColumnHeader>
+
+          <TableColumnHeader>
+            <Label>Created</Label>
+            <Width>22</Width>
+            <Alignment>left</Alignment>
+          </TableColumnHeader>
+
+        </TableHeaders>
+        <TableRowEntries>
+          <TableRowEntry>
+            <Wrap/>
+            <TableColumnItems>
+
+              <TableColumnItem>
+                <PropertyName>DisplayName</PropertyName>
+              </TableColumnItem>
+
+              <TableColumnItem>
+                <PropertyName>Name</PropertyName>
+              </TableColumnItem>
+
+              <TableColumnItem>
+                <ScriptBlock>$_.CreationDate.ToString("g")</ScriptBlock>
+              </TableColumnItem>
+
+            </TableColumnItems>
+          </TableRowEntry>
+        </TableRowEntries>
+      </TableControl>
+    </View>
+
+  </ViewDefinitions>
+</Configuration>

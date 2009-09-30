@@ -522,11 +522,14 @@ function Get-ISPackage
 
     $app = New-ISApplication
 
+    $name =  ($path -split '\\')[($path -split '\\').count -1]
+    $name = $name -replace ".dtsx"
+
     #SQL Server Store
     if ($PSCmdlet.ParameterSetName -eq "server")
     { 
         if (Test-ISPath $path $serverName 'Package')
-        { $app.LoadFromDtsServer($path, $serverName, $null) }
+        { $app.LoadFromDtsServer($path, $serverName, $null) | add-Member -memberType noteProperty -name DisplayName -value $name -passthru}
         else
         { Write-Error "Package $path does not exist on server $serverName" }
     }
@@ -534,7 +537,7 @@ function Get-ISPackage
     else
     { 
         if (Test-Path -literalPath $path)
-        { $app.LoadPackage($path, $null) }
+        { $app.LoadPackage($path, $null) | add-Member -memberType noteProperty -name DisplayName -value $name -passthru }
         else
         { Write-Error "Package $path does not exist" }
     }
@@ -546,7 +549,7 @@ function Get-ISPackage
 function Set-ISPackage
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] [Microsoft.SqlServer.Dts.Runtime.Package]$package,
+    [Parameter(Position=0, Mandatory=$true)] $package,
     [Parameter(Position=1, Mandatory=$true)] [string]$path,
     [Parameter(ParameterSetName="server", Position=2, Mandatory=$false)] [ValidateNOTNullOrEmpty()] [string]$serverName,
     [Parameter(Position=3, Mandatory=$false)] [switch]$force
@@ -601,7 +604,7 @@ function Get-ISRunningPackage
 function Set-ISConnectionString
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] [Microsoft.SqlServer.Dts.Runtime.Package]$package,
+    [Parameter(Position=0, Mandatory=$true)] $package,
     [Parameter(Position=1, Mandatory=$true)] [hashtable]$connnectionInfo
     )
 
