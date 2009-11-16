@@ -11,11 +11,10 @@
 ### </Usage>
 ### </Script>
 # ---------------------------------------------------------------------------
-#[reflection.assembly]::Load("Microsoft.SqlServer.ManagedDTS, Version=9.0.242.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91") > $null
-#[Reflection.Assembly]::LoadFile("C:\Program Files\Microsoft SQL Server\90\SDK\Assemblies\Microsoft.SQLServer.ManagedDTS.dll") > $null
-[reflection.assembly]::Load("Microsoft.SqlServer.ManagedDTS, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91") > $null
-#[Reflection.Assembly]::LoadFile("C:\Program Files\Microsoft SQL Server\100\SDK\Assemblies\Microsoft.SQLServer.ManagedDTS.dll") > $null
-#[reflection.assembly]::LoadWithPartialName("Microsoft.SqlServer.ManagedDTS") > $null
+#add-type -AssemblyName "Microsoft.SqlServer.ManagedDTS, Version=9.0.242.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91"
+#add-type -Path "C:\Program Files\Microsoft SQL Server\90\SDK\Assemblies\Microsoft.SQLServer.ManagedDTS.dll"
+add-type -AssemblyName "Microsoft.SqlServer.ManagedDTS, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91"
+#add-type -Path "C:\Program Files\Microsoft SQL Server\100\SDK\Assemblies\Microsoft.SQLServer.ManagedDTS.dll"
 
 #######################
 #  .ExternalHelp C:\Users\u00\Documents\WindowsPowerShell\Modules\SSIS\SSIS.psm1-help.xml
@@ -247,15 +246,16 @@ function Copy-ISItemFileToSQL
     function Copy-ISChildItemFileToSQL
     {
         param($item, [string]$path, [string]$destination, [string]$destinationServer, [switch]$force, [hashtable]$connectionInfo)
-        $parentPath = Split-Path $item.FullName -parent | Split-Path -leaf
-        $itemPath = $parentPath -replace "$([system.io.path]::getpathroot($item.FullName) -replace '\\','\\')"
+        #$parentPath = Split-Path $item.FullName -parent | Split-Path -leaf
+        #$itemPath = $parentPath -replace "$([system.io.path]::getpathroot($item.FullName) -replace '\\','\\')"
+        $itemPath =  "\" + $item.FullName  -replace ($path -replace "\\","\\") -replace $item.Name
         Write-Verbose "itemPath:$itemPath"
-        $folder = $destination
+        $folder = $destination + $itemPath
         Write-Verbose "folder:$folder"
 
         if ($item.PSIsContainer)
         {
-           $testPath = $($folder + "\" + $item.Name) -replace "\\\\","\"
+           $testPath = $($folder + $item.Name) -replace "\\\\","\"
            Write-Verbose "testPath:$testPath"
            if (!(Test-ISPath $testPath $destinationServer 'Folder'))
            {
@@ -264,7 +264,7 @@ function Copy-ISItemFileToSQL
         }
         else 
         {
-          $destPath = $($folder + "\" + $item.BaseName) -replace "\\\\","\"
+          $destPath = $($folder + $item.BaseName) -replace "\\\\","\"
           $package = Get-ISPackage $item.FullName
           if ($package)
           {
