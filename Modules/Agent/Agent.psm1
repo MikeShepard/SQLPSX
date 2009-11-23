@@ -7,7 +7,7 @@
 ### Defines function wrappers around many of the SMO.Agent Classes
 ### </Description>
 ### <Usage>
-### . ./LibraryAgent.ps1
+### import-module Agent 
 ### </Usage>
 ### </Script>
 # ---------------------------------------------------------------------------

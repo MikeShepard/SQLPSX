@@ -7,7 +7,7 @@
 ### Defines function wrappers around many of the Microsoft.SqlServer.Dts.Runtime (SSIS) Classes
 ### </Description>
 ### <Usage>
-### . ./LibrarySSIS.ps1
+### import-module SSIS
 ### </Usage>
 ### </Script>
 # ---------------------------------------------------------------------------
@@ -17,7 +17,23 @@ add-type -AssemblyName "Microsoft.SqlServer.ManagedDTS, Version=10.0.0.0, Cultur
 #add-type -Path "C:\Program Files\Microsoft SQL Server\100\SDK\Assemblies\Microsoft.SQLServer.ManagedDTS.dll"
 
 #######################
-#  .ExternalHelp C:\Users\u00\Documents\WindowsPowerShell\Modules\SSIS\SSIS.psm1-help.xml
+<#
+.SYNOPSIS
+Creates a new Microsoft.SqlServer.Dts.Runtime.Application.
+.DESCRIPTION
+The New-ISApplication function creates a new Microsoft.SqlServer.Dts.Runtime.Application. This is the base class used by ManagedDTS.
+.INPUTS
+None
+    You cannot pipe objects to New-ISApplication
+.OUTPUTS
+Microsoft.SqlServer.Dts.Runtime.Application
+    New-ISApplication returns a Microsoft.SqlServer.Dts.Runtime.Application object.
+.EXAMPLE
+$app = New-ISApplication
+This command creates a new IS Application object and assigns output to $app variable.
+.LINK
+New-ISApplication
+#>
 function New-ISApplication
 {
    Write-Verbose "New-ISApplication"
@@ -28,7 +44,23 @@ function New-ISApplication
 
 
 #######################
-#  .ExternalHelp C:\Users\u00\Documents\WindowsPowerShell\Modules\SSIS\SSIS.psm1-help.xml
+<#
+.SYNOPSIS
+Copies an SSIS item from one SQL Server to another.
+.DESCRIPTION
+The Copy-ISItemSQLToSQL function copies SSIS item from one SQL Server to another. The item can be an SSIS folder or package. Recursive copies are supported.
+.INPUTS
+None
+    You cannot pipe objects to Copy-ISItemSQLToSQL.
+.OUTPUTS
+None
+    This function does not generate any output.
+.EXAMPLE
+copy-isitemsqltosql -path '\sqlpsx' -topLevelFolder 'msdb' -serverName 'Z002\SQL2K8' -destination 'msdb\sqlpsx2' -destinationServer 'Z002' -recurse -connectionInfo @{SSISCONFIG='.\SQL2K8'}
+This command Recursively copies all SSIS packages and folders from the Integration Server Z002 folder sqlpsx to Z002 sqlpsx2. In addition changes the Connection Manager named SSISCONFIG data source to .\SQL2K8 during the copy process.
+.LINK
+Copy-ISItemSQLToSQL
+#>
 function Copy-ISItemSQLToSQL
 {
     [CmdletBinding(SupportsShouldProcess=$true)] param(
@@ -129,7 +161,23 @@ Write-Verbose "Copy-ISItemSQLToSQL path:$path serverName:$serverName destination
 } #Copy-ISItemSQLToSQL
 
 #######################
-#  .ExternalHelp C:\Users\u00\Documents\WindowsPowerShell\Modules\SSIS\SSIS.psm1-help.xml
+<#
+.SYNOPSIS
+Copies an SSIS item from SQL Server to File System.
+.DESCRIPTION
+The Copy-ISItemSQLToFile function copies SSIS item from SQL Server to File System. The item can be an SSIS folder or package. Recursive copies are supported.
+.INPUTS
+None
+    You cannot pipe objects to Copy-ISItemSQLToFile.
+.OUTPUTS
+None
+    This function does not generate any output.
+.EXAMPLE
+copy-isitemsqltofile -path '\sqlpsx' -topLevelFolder 'msdb' -serverName 'Z002\SQL2K8' -destination 'c:\Users\u00\SSIS' -recurse -connectionInfo @{SSISCONFIG='.\SQLEXPRESS'}
+This command Recursively copies all SSIS packages and folders from the Integration Server Z002 folder sqlpsx to the file system path C:\Users\u00\SSIS. In addition changes the Connection Manager named SSISCONFIG data source to .\SQLExpress during the copy process.
+.LINK
+Copy-ISItemSQLToFile
+#>
 function Copy-ISItemSQLToFile
 {
     [CmdletBinding(SupportsShouldProcess=$true)] param(
@@ -223,7 +271,23 @@ Write-Verbose "Copy-ISItemSQLToFile path:$path serverName:$serverName destinatio
 } #Copy-ISItemSQLToFile
 
 #######################
-#  .ExternalHelp C:\Users\u00\Documents\WindowsPowerShell\Modules\SSIS\SSIS.psm1-help.xml
+<#
+.SYNOPSIS
+Copies an SSIS item from File System to SQL Server.
+.DESCRIPTION
+The Copy-ISItemFileToSQL function copies SSIS item from File System to SQL Server. The item can be a File System folder or package. Recursive copies are supported.
+.INPUTS
+None
+    You cannot pipe objects to Copy-ISItemFileToSQL.
+.OUTPUTS
+None
+    This function does not generate any output.
+.EXAMPLE
+copy-isitemfiletosql -path "C:\Program Files\Microsoft SQL Server\100\DTS\Packages\*" -destination 'msdb\sqlpsx' -destinationServer 'Z002' -connectionInfo @{SSISCONFIG='.\SQLEXPRESS'}
+This command copies all SSIS packages and folders from the File System pathC:\Program Files\Microsoft SQL Server\100\DTS\Packages to Integration Server Z002 folder sqlpsx. In addition changes the Connection Manager named SSISCONFIG data source to .\SQLEXPRESS during the copy process.
+.LINK
+Copy-ISItemFileToSQL
+#>
 function Copy-ISItemFileToSQL
 {
     [CmdletBinding(SupportsShouldProcess=$true)] param(
@@ -328,7 +392,23 @@ function Copy-ISItemFileToSQL
 } #Copy-ISItemFileToSQL
 
 #######################
-#  .ExternalHelp C:\Users\u00\Documents\WindowsPowerShell\Modules\SSIS\SSIS.psm1-help.xml
+<#
+.SYNOPSIS
+Gets the item at the specified location.
+.DESCRIPTION
+The Get-ISItem function gets the item at the specified location. It does not get the contents of the item at the location unless you use a wildcard character (*) to request all the contents of the item.
+.INPUTS
+None
+    You cannot pipe objects to Get-ISItem.
+.OUTPUTS
+Microsoft.SqlServer.Dts.Runtime.PackageInfo
+    Get-ISItem returns a Microsoft.SqlServer.Dts.Runtime.PackageInfo object.
+.EXAMPLE
+get-isitem -path '\' -topLevelFolder 'msdb' -serverName 'Z002\SQL2K8' -recurse
+This command recursively gets all of the SSIS packages and folders starting at the root ('\') level on SQL Server Z002\SQL2K8.
+.LINK
+Get-ISItem
+#>
 function Get-ISItem
 {
     param(
@@ -384,7 +464,23 @@ function Get-ISItem
 } #Get-ISItem
 
 #######################
-#  .ExternalHelp C:\Users\u00\Documents\WindowsPowerShell\Modules\SSIS\SSIS.psm1-help.xml
+<#
+.SYNOPSIS
+Determines whether all elements of a path exist.
+.DESCRIPTION
+The Test-ISPath function determines whether all elements of the path exist. It returns TRUE ($true) if all elements exist and FALSE ($false) if any are missing. It can also tell whether the path syntax is valid and whether the path leads to a container or a terminal (leaf) element.
+.INPUTS
+None
+    You cannot pipe objects to Test-ISPath.
+.OUTPUTS
+Boolean
+    Test-ISPath returns a Boolean representing whether the specified path exists.
+.EXAMPLE
+Test-ISPath 'msdb\sqlpsx' Z002 'Folder'
+This command tests whether the path msdb\sqlpsx exists on the SSIS server Z002.
+.LINK
+Test-ISPath
+#>
 function Test-ISPath
 {
     param(
@@ -412,7 +508,23 @@ function Test-ISPath
 } #Test-ISPath
 
 #######################
-#  .ExternalHelp C:\Users\u00\Documents\WindowsPowerShell\Modules\SSIS\SSIS.psm1-help.xml
+<#
+.SYNOPSIS
+Creates a new item.
+.DESCRIPTION
+The New-ISItem function creates a new item and sets its value. Only new SSIS folders are supported.
+.INPUTS
+None
+    You cannot pipe objects to New-ISItem.
+.OUTPUTS
+None
+    This function does not generate any output.
+.EXAMPLE
+new-isitem '\msdb' sqlpsx Z002
+This command creates a new SSIS folder on the SSIS server Z002 under the root msdb path.
+.LINK
+New-ISItem
+#>
 function New-ISItem
 {
     param(
@@ -438,7 +550,23 @@ function New-ISItem
 } #New-ISItem
 
 #######################
-#  .ExternalHelp C:\Users\u00\Documents\WindowsPowerShell\Modules\SSIS\SSIS.psm1-help.xml
+<#
+.SYNOPSIS
+Renames an SSIS folder.
+.DESCRIPTION
+The Rename-ISItem function changes the name of a specified item. Only SSIS folder names are supported.
+.INPUTS
+None
+    You cannot pipe objects to New-ISItem.
+.OUTPUTS
+None
+    This function does not generate any output.
+.EXAMPLE
+rename-isitem '\msdb' sqlpsx sqlpsx2 Z002
+This command renames the SSIS folder sqlpsx to sqlpsx on the SSIS server Z002. Only renaming of SSIS folders is supported by the rename-isitem function.
+.LINK
+Rename-ISItem
+#>
 function Rename-ISItem
 {
     param(
@@ -465,7 +593,23 @@ function Rename-ISItem
 } #Rename-ISItem
 
 #######################
-#  .ExternalHelp C:\Users\u00\Documents\WindowsPowerShell\Modules\SSIS\SSIS.psm1-help.xml
+<#
+.SYNOPSIS
+Deletes the specified items.
+.DESCRIPTION
+The Remove-ISItem function deletes one or more items. Both packages and SSIS folders are supported.
+.INPUTS
+Microsoft.SqlServer.Dts.Runtime.PackageInfo
+    You can pipe pInfo PackageInfo to Remove-ISItem.
+.OUTPUTS
+None
+    This function does not generate any output.
+.EXAMPLE
+get-isitem '\' 'msdb' 'Z002\sql2k8' | where {$_.name -like "sqlpsx*"} | remove-isitem
+This command first gets items stored on the root path of the SSIS server Z002\SQL2K8 where the name matches sqlpsx and then removes the items. Both packages and folders that match the criteria will be removed from the SSIS server.
+.LINK
+Remove-ISItem
+#>
 function Remove-ISItem
 {
     [CmdletBinding(SupportsShouldProcess=$true)] param(
@@ -506,7 +650,23 @@ function Remove-ISItem
 } #Remove-ISItem
 
 #######################
-#  .ExternalHelp C:\Users\u00\Documents\WindowsPowerShell\Modules\SSIS\SSIS.psm1-help.xml
+<#
+.SYNOPSIS
+Gets the SSIS package at the specified location.
+.DESCRIPTION
+The Get-ISPackage function gets the SSIS package at the specified location. Both SQL Server and File System stored packages are supported.
+.INPUTS
+None
+    You cannot pipe objects to Get-ISPackage.
+.OUTPUTS
+Microsoft.SqlServer.Dts.Runtime.Package
+    Get-ISPackage returns a Microsoft.SqlServer.Dts.Runtime.Package object.
+.EXAMPLE
+$package = get-ispackage -path "C:\Program Files\Microsoft SQL Server\100\DTS\Packages\sqlpsx1.dtsx"
+This command gets the package sqlpsx1.dtsx from the file systems and assigns it to the variable $package.
+.LINK
+Get-ISPackage
+#>
 function Get-ISPackage
 {
     param(
@@ -545,7 +705,25 @@ function Get-ISPackage
 } #Get-ISPackage
 
 #######################
-#  .ExternalHelp C:\Users\u00\Documents\WindowsPowerShell\Modules\SSIS\SSIS.psm1-help.xml
+<#
+.SYNOPSIS
+Writes or replaces the SSIS package with a new package.
+.DESCRIPTION
+The Set-ISPackage function writes or replaces the SSIS package with a new package. Both SQL Server and File System storage are supported.
+.INPUTS
+None
+    You cannot pipe objects to Set-ISPackage.
+.OUTPUTS
+Microsoft.SqlServer.Dts.Runtime.Package
+    Get-ISPackage returns a Microsoft.SqlServer.Dts.Runtime.Package object.
+.EXAMPLE
+$package = Get-ISPackage 'msdb\sqlpsx2' Z003
+Set-ISPackage  -package $package -path '\msdb' -serverName Z002
+This command gets teh SSIS package sqlpsx2 from the SSIS server Z003 and saves the package to the SSIS server Z002.
+.LINK
+Set-ISPackage
+Get-ISPackage
+#>
 function Set-ISPackage
 {
     param(
@@ -583,7 +761,23 @@ function Set-ISPackage
 } #Set-ISPackage
 
 #######################
-#  .ExternalHelp C:\Users\u00\Documents\WindowsPowerShell\Modules\SSIS\SSIS.psm1-help.xml
+<#
+.SYNOPSIS
+Gets the currently running packages on a SSIS server.
+.DESCRIPTION
+The Get-ISRunningPackage function gets the currently running packages on the specified SSIS server.
+.INPUTS
+None
+    You cannot pipe objects to Get-ISRunningPackage.
+.OUTPUTS
+Microsoft.SqlServer.Dts.Runtime.RunningPackage
+    Get-ISRunningPackage returns a Microsoft.SqlServer.Dts.Runtime.RunningPackage object.
+.EXAMPLE
+Get-ISRunningPackage Z002
+This command gets a list of the currently running packages on SSIS server Z002.
+.LINK
+Get-ISRunningPackage
+#>
 function Get-ISRunningPackage
 {
     param([Parameter(Position=0, Mandatory=$true)] [string]$serverName)
@@ -600,7 +794,24 @@ function Get-ISRunningPackage
 } #Get-ISRunningPackage
 
 #######################
-#  .ExternalHelp C:\Users\u00\Documents\WindowsPowerShell\Modules\SSIS\SSIS.psm1-help.xml
+<#
+.SYNOPSIS
+Sets the Connection Manager data source to the specified SQL Server.
+.DESCRIPTION
+The Set-ISConnectionString function sets the Connection Manager data source to the specified SQL Server.
+.INPUTS
+None
+    You cannot pipe objects to Set-ISConnectionString.
+.OUTPUTS
+None
+    This function does not generate any output.
+.EXAMPLE
+$package = Get-ISPackage 'msdb\sqlpsx2' Z002
+Set-ISConnectionString $package @{SSISCONFIG='.\SQL2K8'}
+This command gets the SSIS package sqlpsx and sets the data source to '.\SQL2K8' for the Connection Manager SSISCONFIG.
+.LINK
+Set-ISConnectionString
+#>
 function Set-ISConnectionString
 {
     param(
@@ -631,7 +842,23 @@ function Set-ISConnectionString
 } #Set-ISConnectionString
 
 #######################
-#  .ExternalHelp C:\Users\u00\Documents\WindowsPowerShell\Modules\SSIS\SSIS.psm1-help.xml
+<#
+.SYNOPSIS
+Gets data from a SQL Server.
+.DESCRIPTION
+The Get-ISData function gets data a SQL Server.
+.INPUTS
+None
+    You cannot pipe objects to Get-ISData.
+.OUTPUTS
+System.Data.DataRow
+    Get-ISData returns a System.Data.DataRow object.
+.EXAMPLE
+get-isdata 'Z002\SQL2K8' pubs 'select * from authors'
+This command executes a SQL query against the pubs database on the Z002\SQL2K8 server and returns the authors table.
+.LINK
+Get-ISData
+#>
 function Get-ISData
 {
     param(
@@ -651,7 +878,23 @@ function Get-ISData
 } #Get-ISData
 
 #######################
-#  .ExternalHelp C:\Users\u00\Documents\WindowsPowerShell\Modules\SSIS\SSIS.psm1-help.xml
+<#
+.SYNOPSIS
+Gets the SSIS configuration items.
+.DESCRIPTION
+The Get-ISSqlConfigurationItem function gets the SSIS configuration items using a SQL Server table store.
+.INPUTS
+None
+    You cannot pipe objects to Get-ISSqlConfigurationItem.
+.OUTPUTS
+System.Data.DataRow
+    Get-ISSqlConfigurationItem returns a System.Data.DataRow object.
+.EXAMPLE
+Get-ISSqlConfigurationItem 'Z002\SQL2K8' 'ssisconfig' '[SSIS Configurations]' 'sqlpsx_ssis' '\Package.Connections[Destination].Properties[ConnectionString]'
+This command gets the configuration item sqlpsx_ssis from the table [SSIS Configurations] from the database ssisconfig on the SQL Server Z002\SQL2K8. Only rows matching the \Package.Connections[Destination].Properties[ConnectionString] are returned.
+.LINK
+Get-ISSqlConfigurationItem
+#>
 function Get-ISSqlConfigurationItem
 {
     param(
