@@ -11,10 +11,10 @@
 ###  </Usage>
 ### </Script>
 # ---------------------------------------------------------------------------
-try {add-type -AssemblyName "Microsoft.SqlServer.ConnectionInfo, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91"}
-catch {add-type -AssemblyName "Microsoft.SqlServer.ConnectionInfo, Version=9.0.242.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91"}
-try {add-type -AssemblyName "Microsoft.SqlServer.Rmo, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91"}
-catch {add-type -AssemblyName "Microsoft.SqlServer.Rmo, Version=9.0.242.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91"}
+try {add-type -AssemblyName "Microsoft.SqlServer.ConnectionInfo, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91" -EA Stop}
+catch {add-type -AssemblyName "Microsoft.SqlServer.ConnectionInfo"}
+try {add-type -AssemblyName "Microsoft.SqlServer.Rmo, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91" -EA Stop}
+catch {add-type -AssemblyName "Microsoft.SqlServer.Rmo"}
 
 $scriptRoot = Split-Path (Resolve-Path $myInvocation.MyCommand.Path)
 
