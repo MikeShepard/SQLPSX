@@ -57,10 +57,10 @@ function Get-GroupUser
             $domain = $($group.ToString()).split("\")[0]
             $groupname = $($group.ToString()).split("\")[1]
             
-            if ($domain -ne 'NT AUTHORITY' -and $domain -ne 'BUILTIN')
+            if ($domain -ne 'NT AUTHORITY' -and $domain -ne 'BUILTIN' -and $domain -ne 'NT SERVICE')
             {
             
-                $groupUser= [ADSI]"WinNT://$($domain + '/' + $groupname),group"
+                $groupUser= [ADSI]"WinNT://$($domain)/$($groupname),group"
 	        $groupUser.psbase.Invoke("Members") | foreach {
                     $name = $_.GetType().InvokeMember("Name", 'GetProperty', $null, $_, $null)
                     $type = $_.GetType().InvokeMember("Class", 'GetProperty', $null, $_, $null)

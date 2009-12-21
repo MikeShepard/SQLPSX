@@ -97,11 +97,10 @@ function Get-SqlDatabase
     Write-Verbose "Get-SqlDatabase $($server.Name) $dbname"
 
     if ($dbname)
-    { if (!$server.Databases.Contains("$dbname")) {throw 'Check $dbname Name.'}
-      else { 
-        if ($server.Databases[$dbname].IsAccessible -eq $false) {throw "Database $dname not accessible."}
-        else {$server.Databases[$dbname]} 
-      }
+    { if ($server.Databases.Contains("$dbname") -and $server.Databases[$dbname].IsAccessible)
+        {$server.Databases[$dbname]} 
+      else
+        {throw "Database $dname does not exist or is not accessible."}
     }
     else
     #Skip systems databases
@@ -113,22 +112,22 @@ function Get-SqlDatabase
 function Get-SqlData
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] $sqlserver,
-    [Parameter(Position=1, Mandatory=$true)] [string]$dbname,
+    [Parameter(Position=0, Mandatory=$false)] $sqlserver,
+    [Parameter(Position=1, Mandatory=$true)] $dbname,
     [Parameter(Position=2, Mandatory=$true)] [string]$qry
     )
 
     switch ($dbname.GetType().Name)
     {
-        'String' { $db = Get-SqlDatabase $sqlserver $dbname }
-        'Database' { $db = $dbname }
+        'String' { $database = Get-SqlDatabase $sqlserver $dbname }
+        'Database' { $database = $dbname }
         default { throw "Get-SqlData:Param '`$dbname' must be a String or Database object." }
     }
 
-    #Write-Verbose "Get-SqlData $($db.Parent.Name) $($db.Name) $qry"
-    Write-Verbose "Get-SqlData $($db.Parent.Name) $($db.Name)"
+    #Write-Verbose "Get-SqlData $($database.Parent.Name) $($database.Name) $qry"
+    Write-Verbose "Get-SqlData $($database.Parent.Name) $($database.Name)"
 
-    $ds = $db.ExecuteWithResults("$qry")
+    $ds = $database.ExecuteWithResults("$qry")
     $ds.Tables | foreach { $_.Rows}    
 
 }# Get-SqlData
@@ -137,22 +136,22 @@ function Get-SqlData
 function Set-SqlData
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] $sqlserver,
+    [Parameter(Position=0, Mandatory=$false)] $sqlserver,
     [Parameter(Position=1, Mandatory=$true)] [string]$dbname,
     [Parameter(Position=2, Mandatory=$true)] [string]$qry
     )
 
     switch ($dbname.GetType().Name)
     {
-        'String' { $db = Get-SqlDatabase $sqlserver $dbname }
-        'Database' { $db = $dbname }
+        'String' { $database = Get-SqlDatabase $sqlserver $dbname }
+        'Database' { $database = $dbname }
         default { throw "Set-SqlData:Param '`$dbname' must be a String or Database object." }
     } 
     
-    #Write-Verbose "Set-SqlData $($db.Parent.Name) $($db.Name) $qry"
-    Write-Verbose "Set-SqlData $($db.Parent.Name) $($db.Name)"
+    #Write-Verbose "Set-SqlData $($database.Parent.Name) $($database.Name) $qry"
+    Write-Verbose "Set-SqlData $($database.Parent.Name) $($database.Name)"
     
-    $db.ExecuteNonQuery("$qry")
+    $database.ExecuteNonQuery("$qry")
 
 }# Set-SqlData
 
@@ -227,23 +226,23 @@ function Get-SqlShowMbrs
 function Get-SqlUser
 {
    param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$db
+    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database
     )
 
     process
     {
-            foreach ($user in $db.Users | where {$_.UserType.ToString() -ne 'Certificate'})
+            foreach ($user in $database.Users | where {$_.UserType.ToString() -ne 'Certificate'})
             {
                 $member = @()
 
-                if ($user.HasDBAccess)
+                if ($user.HasDBAccess -and $user.Login) 
                 {
                     $member += @($(Get-SqlUserMember $user))
                     $object = $null
 
                     #Get objects owned by user, this part is slow with SQL 2000, In 2005 if user owns an object only the schema is listed
                     #as the owned object, so even though SQL 2000 does really doesn't have schemas, will just report they do.
-                    if ($db.Parent.Information.Version.Major -ge 9)
+                    if ($database.Parent.Information.Version.Major -ge 9)
                     {
                         foreach ($urn in $user.EnumOwnedObjects())
                         { 
@@ -258,8 +257,8 @@ function Get-SqlUser
                             add-Member -memberType noteProperty -name Xmlmembers -value $(ConvertTo-MemberXml $member) -passthru | 
                             add-Member -memberType noteProperty -name timestamp -value $(Get-SessionTimeStamp) -passthru |
                             add-Member -memberType noteProperty -name objects -value $object -passthru |
-                            add-Member -memberType noteProperty -name Server -value $db.parent.Name -passthru |
-                            add-Member -memberType noteProperty -name dbname -value $db.Name -passthru
+                            add-Member -memberType noteProperty -name Server -value $database.parent.Name -passthru |
+                            add-Member -memberType noteProperty -name dbname -value $database.Name -passthru
                     
                 }  
              }
@@ -282,23 +281,24 @@ function New-SqlUserMember
 #######################
 function Get-SqlUserMember
 {
-    param([Microsoft.SqlServer.Management.Smo.User]$user,[Microsoft.SqlServer.Management.Smo.Database]$db)
+    param([Microsoft.SqlServer.Management.Smo.User]$user,[Microsoft.SqlServer.Management.Smo.Database]$database)
 
-    Write-Verbose "Get-SqlUserMember $($user.Name) $($db.Name)"
+    Write-Verbose "Get-SqlUserMember $($user.Name) $($database.Name)"
 
     New-SqlUserMember
 
     if ($user)
     {
         $key = $null
-        $key = $user.parent.parent.name + "." + $user.parent.name
+        $key = "$($user.parent.parent.name).$($user.parent.name)"
 
         if(!($__SQLPSXUserMember.$key.$($user.Name))) {
             $member = @()
             $tmpMember = $null        
             if ($user.LoginType -eq 1)
             {
-                $tmpMember = Get-SqlShowMbrs $user.parent.parent $user.Login
+                if ($user.Login)
+                { $tmpMember = Get-SqlShowMbrs $user.parent.parent $user.Login }
                 if ($tmpMember -ne $null)
                  {$member += $tmpMember}
             }
@@ -314,14 +314,14 @@ function Get-SqlUserMember
             Return $member
         }
         else
-            { $__SQLPSXUserMember.$key.$($user.Name) }
+            { $($__SQLPSXUserMember).$($key).$($user.Name) }
     }
-    elseif ($db)
+    elseif ($database)
     {
         $key = $null
-        $key = $db.parent.name + "." + $db.name
+        $key = "$($database.parent.name).$($database.name)"
         if(!($__SQLPSXUserMember[$key])) {
-            Get-SqlUser $db > $null
+            Get-SqlUser $database > $null
             #Return User Hash
             $__SQLPSXUserMember[$key]
         }
@@ -330,7 +330,7 @@ function Get-SqlUserMember
         { $__SQLPSXUserMember[$key] }
     }
     else
-    { throw 'Get-SqlUserMember:Param `$user or `$db missing.' }
+    { throw 'Get-SqlUserMember:Param `$user or `$database missing.' }
 
 } # Get-SqlUserMember
 
@@ -338,13 +338,13 @@ function Get-SqlUserMember
 function Get-SqlDatabaseRole
 {
    param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$db
+    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database
     )
 
     process
     {
 
-        foreach ($role in $db.Roles)
+        foreach ($role in $database.Roles)
         {
             $member = @()
             $member += @($(Get-SqlDatabaseRoleMember $role))
@@ -353,8 +353,8 @@ function Get-SqlDatabaseRole
             $role | add-Member -memberType noteProperty -name timestamp -value $(Get-SessionTimeStamp) -passthru |
                     add-Member -memberType noteProperty -name members -value $member -passthru | 
                     add-Member -memberType noteProperty -name Xmlmembers -value $(ConvertTo-MemberXml $member) -passthru | 
-                    add-Member -memberType noteProperty -name Server -value $db.parent.Name -passthru |
-                    add-Member -memberType noteProperty -name dbname -value $db.Name -passthru
+                    add-Member -memberType noteProperty -name Server -value $database.parent.Name -passthru |
+                    add-Member -memberType noteProperty -name dbname -value $database.Name -passthru
         }
 
     }
@@ -376,9 +376,9 @@ function New-SqlDatabaseRoleMember
 #######################
 function Get-SqlDatabaseRoleMember
 {
-    param([Microsoft.SqlServer.Management.Smo.DatabaseRole]$role,[Microsoft.SqlServer.Management.Smo.Database]$db)
+    param([Microsoft.SqlServer.Management.Smo.DatabaseRole]$role,[Microsoft.SqlServer.Management.Smo.Database]$database)
 
-    Write-Verbose "Get-SqlDatabaseRoleMember $($role.Name) $($db.Name)"
+    Write-Verbose "Get-SqlDatabaseRoleMember $($role.Name) $($database.Name)"
 
     New-SqlDatabaseRoleMember
 
@@ -389,7 +389,7 @@ function Get-SqlDatabaseRoleMember
 
         if(!($__SQLPSXDatabaseRoleMember.$key.$($role.Name))) {
             $user = @{}
-            $user = Get-SqlUserMember -db $role.parent
+            $user = Get-SqlUserMember -database $role.parent
 
             $member = @()
             $tmpMember = @()        
@@ -426,12 +426,12 @@ function Get-SqlDatabaseRoleMember
         else
             { $__SQLPSXDatabaseRoleMember.$key.$($role.Name) }
     }
-    elseif ($db)
+    elseif ($database)
     {
         $key = $null
-        $key = $db.parent.name + "." + $db.name
+        $key = $database.parent.name + "." + $database.name
         if(!($__SQLPSXDatabaseRoleMember[$key])) {
-            Get-SqlDatabaseRole $db > $null
+            Get-SqlDatabaseRole $database > $null
             #Return User Hash
             $__SQLPSXDatabaseRoleMember[$key]
         }
@@ -440,7 +440,7 @@ function Get-SqlDatabaseRoleMember
         { $__SQLPSXDatabaseRoleMember[$key] }
     }
     else
-    { throw 'Get-SqlDatabaseRoleMember:Param `$role or `$db missing' }
+    { throw 'Get-SqlDatabaseRoleMember:Param `$role or `$database missing' }
 
 } # Get-SqlDatabaseRoleMember
 
@@ -675,10 +675,10 @@ function Get-SqlServerPermission90
 function Get-Permission80
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] [Microsoft.SqlServer.Management.Smo.Database]$db
+    [Parameter(Position=0, Mandatory=$true)] [Microsoft.SqlServer.Management.Smo.Database]$database
     )
 
-    Write-Verbose "Get-Permission80 $($db.Name)"
+    Write-Verbose "Get-Permission80 $($database.Name)"
 
 $qry = @"
 SELECT
@@ -724,7 +724,7 @@ INNER JOIN sysusers AS grantor_principal ON grantor_principal.uid = prmssn.grant
 WHERE (prmssn.id > 0 AND OBJECTPROPERTY(prmssn.id,'IsMSShipped') = 0)
 OR prmssn.id = 0
 "@
-    Get-SqlData -dbname $db -qry $qry
+    Get-SqlData -dbname $database -qry $qry
 
 }# Get-Permission80
 
@@ -735,25 +735,25 @@ OR prmssn.id = 0
 function Get-SqlDatabasePermission
 {
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$db
+    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database
     )
 
     begin
     {
         #######################
-        function Select-SqlDatabasePermission90 ($db)
+        function Select-SqlDatabasePermission90 ($database)
         {
-                Write-Verbose "Get-SqlDatabasePermission90 $($db.Name)"
+                Write-Verbose "Get-SqlDatabasePermission90 $($database.Name)"
 
                 $user = @{}
                 $role = @{}
-                $user = Get-SqlUserMember -db $db
-                $role = Get-SqlDatabaseRoleMember -db $db
+                $user = Get-SqlUserMember -database $database
+                $role = Get-SqlDatabaseRoleMember -database $database
                 #Unfortunately on case sensitive servers you can have a role and user with the same name. So instead of using a single hash called
                 #principal we will use two different hashes and use the GranteeType to determine which one to use for listing the effective members
                 #of the permission.
 
-            foreach ($perm in $db.EnumDatabasePermissions() | where {$_.PermissionType.ToString() -ne 'CONNECT'})
+            foreach ($perm in $database.EnumDatabasePermissions() | where {$_.PermissionType.ToString() -ne 'CONNECT'})
             {
                 $member = @()
                 switch ($perm.GranteeType)
@@ -766,23 +766,23 @@ function Get-SqlDatabasePermission
                 $perm | add-Member -memberType noteProperty -name timestamp -value $(Get-SessionTimeStamp) -passthru |
                           add-Member -memberType noteProperty -name members -value $member -passthru | 
                           add-Member -memberType noteProperty -name Xmlmembers -value $(ConvertTo-MemberXml $member) -passthru | 
-                          add-Member -memberType noteProperty -name Server -value $db.parent.Name -passthru |
+                          add-Member -memberType noteProperty -name Server -value $database.parent.Name -passthru |
                           add-Member aliasproperty dbname ObjectName -passthru
             }
 
         }# Select-SqlDatabasePermission90
 
         #######################
-        function Select-SqlDatabasePermission80 ($db)
+        function Select-SqlDatabasePermission80 ($database)
         {
-                Write-Verbose "Get-SqlDatabasePermission80 $($db.Name)"
+                Write-Verbose "Get-SqlDatabasePermission80 $($database.Name)"
 
                 $user = @{}
                 $role = @{}
-                $user = Get-SqlUserMember -db $db
-                $role = Get-SqlDatabaseRoleMember -db $db
+                $user = Get-SqlUserMember -database $database
+                $role = Get-SqlDatabaseRoleMember -database $database
 
-            foreach ($perm in Get-Permission80 $db | where {$_.ObjectClass -eq 'Database'})
+            foreach ($perm in Get-Permission80 $database | where {$_.ObjectClass -eq 'Database'})
             { 
                 $member = @()
                 switch ($perm.GranteeType)
@@ -795,7 +795,7 @@ function Get-SqlDatabasePermission
                 $perm | add-member -memberType NoteProperty -name timestamp  -value $(Get-SessionTimeStamp)  -passthru |
                           add-member -memberType NoteProperty -name members -value $member -passthru |
                           add-member -memberType NoteProperty -name Xmlmembers -value $(ConvertTo-MemberXml $member) -passthru |
-                          add-member -memberType NoteProperty -name Server  -value $db.parent.Name -passthru |
+                          add-member -memberType NoteProperty -name Server  -value $database.parent.Name -passthru |
                           add-member aliasproperty dbname  ObjectName -passthru
             }
             
@@ -803,9 +803,9 @@ function Get-SqlDatabasePermission
     }
     process
     {
-        if ($db.Parent.Information.Version.Major -ge 9)
-        { Select-SqlDatabasePermission90 $db }
-        else { Select-SqlDatabasePermission80 $db }
+        if ($database.Parent.Information.Version.Major -ge 9)
+        { Select-SqlDatabasePermission90 $database }
+        else { Select-SqlDatabasePermission80 $database }
     }
 
 }# Get-SqlServerPermission
@@ -814,10 +814,10 @@ function Get-SqlDatabasePermission
 function Get-Permission90
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] [Microsoft.SqlServer.Management.Smo.Database]$db
+    [Parameter(Position=0, Mandatory=$true)] [Microsoft.SqlServer.Management.Smo.Database]$database
     )
 
-    Write-Verbose "Get-Permission90 $($db.Name)"
+    Write-Verbose "Get-Permission90 $($database.Name)"
 
 $qry = @"
 SELECT
@@ -886,7 +886,7 @@ INNER JOIN sys.database_principals AS grantor_principal ON grantor_principal.pri
 INNER JOIN sys.schemas AS obj ON obj.schema_id = prmssn.major_id and prmssn.class = 3
 "@
 
-    Get-SqlData -dbname $db -qry $qry
+    Get-SqlData -dbname $database -qry $qry
 
 }# Get-Permission90
 
@@ -894,20 +894,20 @@ INNER JOIN sys.schemas AS obj ON obj.schema_id = prmssn.major_id and prmssn.clas
 function Get-SqlObjectPermission
 {
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$db
+    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database
     )
 
     begin
     {
         #######################
-        function Select-SqlObjectPermission90 ($db)
+        function Select-SqlObjectPermission90 ($database)
         {
-            Write-Verbose "Get-SqlObjectPermission90 $($db.Name)"
+            Write-Verbose "Get-SqlObjectPermission90 $($database.Name)"
 
             $user = @{}
             $role = @{}
-            $user = Get-SqlUserMember -db $db
-            $role = Get-SqlDatabaseRoleMember -db $db
+            $user = Get-SqlUserMember -database $database
+            $role = Get-SqlDatabaseRoleMember -database $database
 
             Write-Verbose "EnumObjectPermissions"
 
@@ -916,7 +916,7 @@ function Get-SqlObjectPermission
             #in my testing a database with over 57,000 permission will take 10 min. 
             #dtproperties is an annoying little MS table used for DB diagrams it shows up as user table and
             #is automatically created when someone clicks on DB Diagrams in SSMS/EM, permissions default to public
-            foreach ($perm in $db.EnumObjectPermissions() | where {$_.ObjectID -gt 0 -and $_.ObjectName -ne 'dtproperties'})
+            foreach ($perm in $database.EnumObjectPermissions() | where {$_.ObjectID -gt 0 -and $_.ObjectName -ne 'dtproperties'})
             {
                 $member = @()
                 switch ($perm.GranteeType)
@@ -929,23 +929,23 @@ function Get-SqlObjectPermission
                 $perm |  add-Member -memberType noteProperty -name timestamp -value $(Get-SessionTimeStamp) -passthru |
                            add-Member -memberType noteProperty -name members -value $member -passthru |
                            add-Member -memberType noteProperty -name Xmlmembers -value $(ConvertTo-MemberXml $member) -passthru |
-                           add-Member -memberType noteProperty -name Server -value $db.parent.Name -passthru |
-                           add-Member -memberType noteProperty -name dbname -value $db.Name -passthru
+                           add-Member -memberType noteProperty -name Server -value $database.parent.Name -passthru |
+                           add-Member -memberType noteProperty -name dbname -value $database.Name -passthru
             }
 
         } #Select-SqlObjectPermission90
 
         #######################
-        function Select-SqlObjectPermission80 ($db)
+        function Select-SqlObjectPermission80 ($database)
         {
-            Write-Verbose "Get-SqlObjectPermission80 $($db.Name)"
+            Write-Verbose "Get-SqlObjectPermission80 $($database.Name)"
 
             $user = @{}
             $role = @{}
-            $user = Get-SqlUserMember -db $db
-            $role = Get-SqlDatabaseRoleMember -db $db
+            $user = Get-SqlUserMember -database $database
+            $role = Get-SqlDatabaseRoleMember -database $database
 
-            foreach ($perm in Get-Permission80 $db | where {$_.ObjectClass -eq 'ObjectOrColumn' -and $_.ObjectID -gt 0 -and $_.ObjectName -ne 'dtproperties'})
+            foreach ($perm in Get-Permission80 $database | where {$_.ObjectClass -eq 'ObjectOrColumn' -and $_.ObjectID -gt 0 -and $_.ObjectName -ne 'dtproperties'})
             { 
                 $member = @()
                 switch ($perm.GranteeType)
@@ -958,17 +958,17 @@ function Get-SqlObjectPermission
                 $perm | add-member -memberType NoteProperty -name timestamp  -value $(Get-SessionTimeStamp)  -passthru |
                           add-member -memberType NoteProperty -name members -value $member -passthru |
                           add-member -memberType NoteProperty -name Xmlmembers -value $(ConvertTo-MemberXml $member) -passthru |
-                          add-member -memberType NoteProperty -name Server  -value $db.parent.Name -passthru |
-                          add-member -memberType NoteProperty -name dbname -value $db.name -passthru
+                          add-member -memberType NoteProperty -name Server  -value $database.parent.Name -passthru |
+                          add-member -memberType NoteProperty -name dbname -value $database.name -passthru
             }
 
         } #Select-SqlObjectPermission80
     }
     process
     {
-        if ($db.Parent.Information.Version.Major -ge 9)
-        { Select-SqlObjectPermission90 $db }
-        else { Select-SqlObjectPermission80 $db }
+        if ($database.Parent.Information.Version.Major -ge 9)
+        { Select-SqlObjectPermission90 $database }
+        else { Select-SqlObjectPermission80 $database }
     }
 
 }# Get-SqlObjectPermission
@@ -977,21 +977,21 @@ function Get-SqlObjectPermission
 function Get-SqlTable
 {
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$db,
+    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database,
     [Parameter(Position=1, Mandatory=$false)] [String]$name="*"
     )
 
     process
     {
-        foreach ($table in $db.Tables)
+        foreach ($table in $database.Tables)
         {
             if ($table.IsSystemObject -eq $false -and ($table.name -like "*$name*" -or $name.Contains($table.name)))
             {
             #Return Table Object
             $table | add-Member -memberType noteProperty -name timestamp -value $(Get-SessionTimeStamp) -passthru |
             add-Member -memberType noteProperty -name XMLExtendedProperties -value $(ConvertTo-ExtendedPropertyXML $table.ExtendedProperties) -passthru |
-                    add-Member -memberType noteProperty -name Server -value $db.parent.Name -passthru |
-                    add-Member -memberType noteProperty -name dbname -value $db.Name -passthru
+                    add-Member -memberType noteProperty -name Server -value $database.parent.Name -passthru |
+                    add-Member -memberType noteProperty -name dbname -value $database.Name -passthru
             }
         }
 
@@ -1003,21 +1003,21 @@ function Get-SqlTable
 function Get-SqlStoredProcedure
 {
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$db,
+    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database,
     [Parameter(Position=1, Mandatory=$false)] [String]$name="*"
     )
 
     process
     {
-        foreach ($storedProcedure in $db.StoredProcedures)
+        foreach ($storedProcedure in $database.StoredProcedures)
         {
             if ($storedProcedure.IsSystemObject -eq $false -and ($storedProcedure.name -like "*$name*" -or $name.Contains($storedProcedure.name)))
             {
             #Return StoredProcedure Object
             $storedProcedure | add-Member -memberType noteProperty -name timestamp -value $(Get-SessionTimeStamp) -passthru |
       add-Member -memberType noteProperty -name XMLExtendedProperties -value $(ConvertTo-ExtendedPropertyXML $storedProcedure.ExtendedProperties) -passthru |
-                    add-Member -memberType noteProperty -name Server -value $db.parent.Name -passthru |
-                    add-Member -memberType noteProperty -name dbname -value $db.Name -passthru
+                    add-Member -memberType noteProperty -name Server -value $database.parent.Name -passthru |
+                    add-Member -memberType noteProperty -name dbname -value $database.Name -passthru
             }
         }
 
@@ -1029,21 +1029,21 @@ function Get-SqlStoredProcedure
 function Get-SqlView
 {
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$db,
+    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database,
     [Parameter(Position=1, Mandatory=$false)] [String]$name="*"
     )
 
     process
     {
-        foreach ($view in $db.Views)
+        foreach ($view in $database.Views)
         {
             if ($view.IsSystemObject -eq $false -and ($view.name -like "*$name*" -or $name.Contains($view.name)))
             {
             #Return View Object
             $view | add-Member -memberType noteProperty -name timestamp -value $(Get-SessionTimeStamp) -passthru |
             add-Member -memberType noteProperty -name XMLExtendedProperties -value $(ConvertTo-ExtendedPropertyXML $view.ExtendedProperties) -passthru |
-                    add-Member -memberType noteProperty -name Server -value $db.parent.Name -passthru |
-                    add-Member -memberType noteProperty -name dbname -value $db.Name -passthru
+                    add-Member -memberType noteProperty -name Server -value $database.parent.Name -passthru |
+                    add-Member -memberType noteProperty -name dbname -value $database.Name -passthru
             }
         }
 
@@ -1055,21 +1055,21 @@ function Get-SqlView
 function Get-SqlUserDefinedDataType
 {
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$db,
+    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database,
     [Parameter(Position=1, Mandatory=$false)] [String]$name="*"
     )
 
     process
     {
-       foreach ($userDefinedDataType in $db.UserDefinedDataTypes)
+       foreach ($userDefinedDataType in $database.UserDefinedDataTypes)
        {
-           if ($userDefinedDataType.IsSystemObject -eq $false -and ($userDefinedDataType.name -like "*$name*" -or $name.Contains($userDefinedDataType.name)))
+           if ($userDefinedDataType.name -like "*$name*" -or $name.Contains($userDefinedDataType.name))
            { 
             #Return UserDefinedDataType Object
             $userDefinedDataType | add-Member -memberType noteProperty -name timestamp -value $(Get-SessionTimeStamp) -passthru |
   add-Member -memberType noteProperty -name XMLExtendedProperties -value $(ConvertTo-ExtendedPropertyXML $userDefinedDataType.ExtendedProperties) -passthru |
-                                   add-Member -memberType noteProperty -name Server -value $db.parent.Name -passthru |
-                                   add-Member -memberType noteProperty -name dbname -value $db.Name -passthru
+                                   add-Member -memberType noteProperty -name Server -value $database.parent.Name -passthru |
+                                   add-Member -memberType noteProperty -name dbname -value $database.Name -passthru
             }
         }
 
@@ -1081,21 +1081,21 @@ function Get-SqlUserDefinedDataType
 function Get-SqlUserDefinedFunction
 {
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$db,
+    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database,
     [Parameter(Position=1, Mandatory=$false)] [String]$name="*"
     )
 
     process
     {
-        foreach ($userDefinedFunction in $db.UserDefinedFunctions)
+        foreach ($userDefinedFunction in $database.UserDefinedFunctions)
         {
            if ($userDefinedFunction.IsSystemObject -eq $false -and ($userDefinedFunction.name -like "*$name*" -or $name.Contains($userDefinedFunction.name)))
             {
             #Return UserDefinedFunction Object
             $userDefinedFunction | add-Member -memberType noteProperty -name timestamp -value $(Get-SessionTimeStamp) -passthru |
   add-Member -memberType noteProperty -name XMLExtendedProperties -value $(ConvertTo-ExtendedPropertyXML $userDefinedFunction.ExtendedProperties) -passthru |
-                                   add-Member -memberType noteProperty -name Server -value $db.parent.Name -passthru |
-                                   add-Member -memberType noteProperty -name dbname -value $db.Name -passthru
+                                   add-Member -memberType noteProperty -name Server -value $database.parent.Name -passthru |
+                                   add-Member -memberType noteProperty -name dbname -value $database.Name -passthru
             }
         }
 
@@ -1107,21 +1107,21 @@ function Get-SqlUserDefinedFunction
 function Get-SqlSynonym
 {
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$db,
+    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database,
     [Parameter(Position=1, Mandatory=$false)] [String]$name="*"
     )
 
     process
     {
-        foreach ($synonym in $db.Synonyms)
+        foreach ($synonym in $database.Synonyms)
         {
             if ($synonym.name -like "*$name*" -or $name.Contains($synonym.name))
             {
             #Return Synonym Object
             $synonym | add-Member -memberType noteProperty -name timestamp -value $(Get-SessionTimeStamp) -passthru |
   add-Member -memberType noteProperty -name XMLExtendedProperties -value $(ConvertTo-ExtendedPropertyXML $synonym.ExtendedProperties) -passthru |
-                       add-Member -memberType noteProperty -name Server -value $db.parent.Name -passthru |
-                       add-Member -memberType noteProperty -name dbname -value $db.Name -passthru
+                       add-Member -memberType noteProperty -name Server -value $database.parent.Name -passthru |
+                       add-Member -memberType noteProperty -name dbname -value $database.Name -passthru
             }
         }
 
@@ -1154,7 +1154,7 @@ function Get-SqlTrigger
                 if ($trigger -ne $null)
                 {
                 $trigger | add-Member -memberType noteProperty -name timestamp -value $(Get-SessionTimeStamp) -passthru |
-  add-Member -memberType noteProperty -name XMLExtendedProperties -value $(ConvertTo-ExtendedPropertyXML $triggr.ExtendedProperties) -passthru |
+  add-Member -memberType noteProperty -name XMLExtendedProperties -value $(ConvertTo-ExtendedPropertyXML $trigger.ExtendedProperties) -passthru |
                         add-Member -memberType noteProperty -name Server -value $server -passthru |
                         add-Member -memberType noteProperty -name dbname -value $dbname -passthru |
                         add-Member -memberType noteProperty -name Schema -value $schema -passthru |
@@ -1323,7 +1323,7 @@ function Get-SqlScripter
 function Get-Information_Schema.Tables
 {
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$db,
+    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database,
     [Parameter(Position=1, Mandatory=$false)] [String]$name='%'
     )
 
@@ -1336,7 +1336,7 @@ AND OBJECTPROPERTY(OBJECT_ID('['+TABLE_SCHEMA+'].['+TABLE_NAME+']'),'IsMSShipped
 AND TABLE_NAME NOT IN ('dtproperties','sysdiagrams')
 AND TABLE_NAME LIKE '%$name%'
 "@
-            Get-SqlData -dbname $db -qry $qry
+            Get-SqlData -dbname $database -qry $qry
     }
 
 } #Get-Information_Schema.Tables
@@ -1345,7 +1345,7 @@ AND TABLE_NAME LIKE '%$name%'
 function Get-Information_Schema.Columns
 {
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$db,
+    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database,
     [Parameter(Position=1, Mandatory=$false)] [String]$tblname='%',
     [Parameter(Position=2, Mandatory=$false)] [String]$colname='%'
     )
@@ -1359,7 +1359,7 @@ AND OBJECTPROPERTY(OBJECT_ID('['+TABLE_SCHEMA+'].['+TABLE_NAME+']'),'IsMSShipped
 AND TABLE_NAME LIKE '%$tblname%'
 AND COLUMN_NAME LIKE '%$colname%'
 "@
-            Get-SqlData -dbname $db -qry $qry
+            Get-SqlData -dbname $database -qry $qry
     }
 } #Get-Information_Schema.Columns
 
@@ -1367,7 +1367,7 @@ AND COLUMN_NAME LIKE '%$colname%'
 function Get-Information_Schema.Views
 {
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$db,
+    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database,
     [Parameter(Position=1, Mandatory=$false)] [String]$name='%'
     )
 
@@ -1378,7 +1378,7 @@ SELECT SERVERPROPERTY('ServerName') AS Server, * FROM INFORMATION_SCHEMA.VIEWS
 WHERE TABLE_NAME like '%$name%'
 AND OBJECTPROPERTY(OBJECT_ID('['+TABLE_SCHEMA+'].['+TABLE_NAME+']'),'IsMSShipped') = 0
 "@
-            Get-SqlData -dbname $db -qry $qry
+            Get-SqlData -dbname $database -qry $qry
     }
 } #Get-Information_Schema.Views
 
@@ -1386,7 +1386,7 @@ AND OBJECTPROPERTY(OBJECT_ID('['+TABLE_SCHEMA+'].['+TABLE_NAME+']'),'IsMSShipped
 function Get-Information_Schema.Routines
 {
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$db,
+    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database,
     [Parameter(Position=1, Mandatory=$false)] [String]$name='%',
     [Parameter(Position=2, Mandatory=$false)] [String]$text='%'
     )
@@ -1400,7 +1400,7 @@ AND OBJECTPROPERTY(OBJECT_ID('['+ROUTINE_SCHEMA+'].['+ROUTINE_NAME+']'),'IsMSShi
 AND ROUTINE_NAME LIKE '%$name%'
 AND ROUTINE_DEFINITION LIKE '%$text%'
 "@
-            Get-SqlData -dbname $db -qry $qry
+            Get-SqlData -dbname $database -qry $qry
     }
 } #Get-Information_Schema.Routines
 
@@ -1421,12 +1421,12 @@ function Get-SysDatabases
 
     Write-Verbose "Get-SysDatabases $($server.Name)"
 
-    $db = Get-SqlDatabase $server 'master'
+    $database = Get-SqlDatabase $server 'master'
 $qry = @"
 SELECT SERVERPROPERTY('ServerName') AS Server, name FROM sysdatabases
 WHERE name LIKE '%$name%'
 "@
-    Get-SqlData -dbname $db -qry $qry
+    Get-SqlData -dbname $database -qry $qry
 
 } #Get-SysDatabases
 
@@ -1434,19 +1434,19 @@ WHERE name LIKE '%$name%'
 function Get-SqlDataFile
 {
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$db
+    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database
     )
 
     process
     {
-        foreach ($dataFile in $db.FileGroups | % {$_.Files})
+        foreach ($dataFile in $database.FileGroups | % {$_.Files})
         {
             #Return DataFile Object
             $dataFile | add-Member -memberType noteProperty -name timestamp -value $(Get-SessionTimeStamp) -passthru |
                     add-Member -memberType noteProperty -name FileGroup -value $dataFile.parent.Name -passthru |
                     add-Member -memberType noteProperty -name FreeSpace -value $($dataFile.Size - $dataFile.UsedSpace) -passthru |
-                    add-Member -memberType noteProperty -name Server -value $db.parent.Name -passthru |
-                    add-Member -memberType noteProperty -name dbname -value $db.Name -passthru
+                    add-Member -memberType noteProperty -name Server -value $database.parent.Name -passthru |
+                    add-Member -memberType noteProperty -name dbname -value $database.Name -passthru
         }
     }
 } #Get-SqlDataFile
@@ -1455,18 +1455,18 @@ function Get-SqlDataFile
 function Get-SqlLogFile
 {
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$db
+    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database
     )
 
     process
     {
-        foreach ($logFile in $db.LogFiles)
+        foreach ($logFile in $database.LogFiles)
         {
             #Return LogFile Object
             $logFile | add-Member -memberType noteProperty -name timestamp -value $(Get-SessionTimeStamp) -passthru |
                     add-Member -memberType noteProperty -name FreeSpace -value $($logFile.Size - $logFile.UsedSpace) -passthru |
-                    add-Member -memberType noteProperty -name Server -value $db.parent.Name -passthru |
-                    add-Member -memberType noteProperty -name dbname -value $db.Name -passthru
+                    add-Member -memberType noteProperty -name Server -value $database.parent.Name -passthru |
+                    add-Member -memberType noteProperty -name dbname -value $database.Name -passthru
         }
     }
 } #Get-SqlLogFile
@@ -1520,7 +1520,7 @@ function Get-SqlPort
 function ConvertTo-ExtendedPropertyXML
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] $extendedProperty
+    [Parameter(Position=0, Mandatory=$false)] $extendedProperty
     )
 
     Write-Verbose "ConvertTo-SqlExtendedPropertyXML"
@@ -1542,9 +1542,9 @@ function Get-Sql
     [Parameter(Position=0, Mandatory=$true)] [string]$computername
     )
 
-    if((get-wmiobject win32_pingstatus -Filter "address='$computer'").protocoladdress) 
+    if((get-wmiobject win32_pingstatus -Filter "address='$computername'").protocoladdress) 
     {
-        Get-WmiObject win32_service -computer $computer |
+        Get-WmiObject win32_service -computer $computername |
 Where {($_.Name -Like "MSSQL*" -or $_.Name -Like "SQLAgent*" -or $_.Name -Like "SQLServer*" -or $_.Name -eq 'MSDTC') -and $_.Name -ne 'MSSQLServerADHelper'} | Select SystemName, Name, State, StartName
     }
 } #Get-Sql
@@ -1589,15 +1589,15 @@ $ixXML += [string] "<IndexedColumn Name=`"" + $ix.Name + "`" Descending=`"" +$($
 function Invoke-SqlDatabaseCheck
 {
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$db
+    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database
     )
 
     begin
     { $ErrorActionPreference = "Stop" }
     process
     {
-        Write-Verbose "Invoke-SqlDatabaseCheck $($db.Name)"
-        try   { $db.CheckTables('None') }
+        Write-Verbose "Invoke-SqlDatabaseCheck $($database.Name)"
+        try   { $database.CheckTables('None') }
         catch {
                 $ex = $_.Exception
                 $message = $ex.message
@@ -1685,7 +1685,7 @@ function Get-SqlIndexFragmentation
 } #Get-SqlIndexFragmentation
 
 #######################
-function Update-Statistic
+function Update-SqlStatistic
 {
     param(
     [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Statistic]$statistic,
@@ -1721,7 +1721,7 @@ function Update-Statistic
         }
     }
 
-} #Update-Statistic
+} #Update-SqlStatistic
 
 #######################
 function Invoke-SqlBackup
@@ -1827,17 +1827,12 @@ function Invoke-SqlRestore
 
     if ($relocatefiles)
     {
-       $relocateFileAR = New-Object Collections.ArrayList
-        
        foreach ($i in $relocatefiles.GetEnumerator())
         {
             $logicalName = $($i.Key); $physicalName = $($i.Value);
             $relocateFile = new-object ("Microsoft.SqlServer.Management.Smo.RelocateFile") $logicalName, $physicalName
-            [void]$relocateFileAR.Add($relocateFile)
+            [void]$restore.RelocateFiles.Add($relocateFile)
         }
-
-        $restore.RelocateFiles = $relocateFileAR
-     
     }
 
     try { $restore.SqlRestore($server) }
@@ -1866,8 +1861,8 @@ function Remove-SqlDatabase
     
     $ErrorActionPreference = "Stop"
 
-    $db = Get-SqlDatabase $sqlserver $dbname
-    try { $db.Drop() }
+    $database = Get-SqlDatabase $sqlserver $dbname
+    try { $database.Drop() }
     catch {
             $ex = $_.Exception
             $message = $ex.message
@@ -1886,15 +1881,15 @@ function Remove-SqlDatabase
 function Add-SqlFileGroup
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] [Microsoft.SqlServer.Management.Smo.Database]$db,
+    [Parameter(Position=0, Mandatory=$true)] [Microsoft.SqlServer.Management.Smo.Database]$database,
     [Parameter(Position=1, Mandatory=$true)] [string]$name
     )
 
     $ErrorActionPreference = "Stop"
 
-    $fileGroup = new-object ('Microsoft.SqlServer.Management.Smo.FileGroup') $db, $name
+    $fileGroup = new-object ('Microsoft.SqlServer.Management.Smo.FileGroup') $database, $name
     
-    try { $db.FileGroups.Add($fileGroup) }
+    try { $database.FileGroups.Add($fileGroup) }
     catch {
             $ex = $_.Exception
             $message = $ex.message
@@ -1958,7 +1953,7 @@ function Add-SqlDataFile
 function Add-SqlLogFile
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] [Microsoft.SqlServer.Management.Smo.Database]$db,
+    [Parameter(Position=0, Mandatory=$true)] [Microsoft.SqlServer.Management.Smo.Database]$database,
     [Parameter(Position=1, Mandatory=$true)] [string]$name,
     [Parameter(Position=2, Mandatory=$true)] [string]$filepath,
     [Parameter(Position=3, Mandatory=$false)] [double]$size,
@@ -1970,7 +1965,7 @@ function Add-SqlLogFile
     $ErrorActionPreference = "Stop"
 
     #GrowthType is KB, None, Percent
-    $logFile = new-object ('Microsoft.SqlServer.Management.Smo.LogFile') $db, $name
+    $logFile = new-object ('Microsoft.SqlServer.Management.Smo.LogFile') $database, $name
     $logFile.FileName = $filepath
     if ($size)
     { $logFile.Size = $size }
@@ -1981,7 +1976,7 @@ function Add-SqlLogFile
     if ($maxSize)
     { $logFile.MaxSize = $maxSize }
 
-    try { $db.LogFiles.Add($logFile) }
+    try { $database.LogFiles.Add($logFile) }
     catch {
             $ex = $_.Exception
             $message = $ex.message
@@ -2005,14 +2000,14 @@ function Add-SqlDatabase
     [Parameter(Position=2, Mandatory=$false)] [string]$dataName,
     [Parameter(Position=3, Mandatory=$false)] [string]$dataFilePath,
     [Parameter(Position=4, Mandatory=$false)] [double]$dataSize,
-    [Parameter(Position=5, Mandatory=$false)] [Microsoft.SqlServer.Management.Smo.FileGrowthType]$dataGrowthType,
-    [Parameter(Position=6, Mandatory=$false)] [double]$dataGrowth,
+    [Parameter(Position=5, Mandatory=$false)] [Microsoft.SqlServer.Management.Smo.FileGrowthType]$dataGrowthType='KB',
+    [Parameter(Position=6, Mandatory=$false)] [double]$dataGrowth=1,
     [Parameter(Position=7, Mandatory=$false)] [double]$dataMaxSize,
     [Parameter(Position=8, Mandatory=$false)] [string]$logName,
     [Parameter(Position=9, Mandatory=$false)] [string]$logFilePath,
     [Parameter(Position=10, Mandatory=$false)] [double]$logSize,
-    [Parameter(Position=11, Mandatory=$false)] [Microsoft.SqlServer.Management.Smo.FileGrowthType]$logGrowthType,
-    [Parameter(Position=12, Mandatory=$false)] [double]$logGrowth,
+    [Parameter(Position=11, Mandatory=$false)] [Microsoft.SqlServer.Management.Smo.FileGrowthType]$logGrowthType='Percent',
+    [Parameter(Position=12, Mandatory=$false)] [double]$logGrowth=10,
     [Parameter(Position=13, Mandatory=$false)] [double]$logMaxSize
     )
 
@@ -2030,7 +2025,7 @@ function Add-SqlDatabase
 
     if ($server.Databases.Contains("$dbname")) {throw 'Database $dbname already exists on $($server.Name).'}
 
-    $db = new-object ('Microsoft.SqlServer.Management.Smo.Database') $server, $dbname
+    $database = new-object ('Microsoft.SqlServer.Management.Smo.Database') $server, $dbname
 
     #Need to implement overloaded method if migrated to compiled cmdlet
 
@@ -2043,12 +2038,12 @@ function Add-SqlDatabase
     if (!($logFilePath))
     { $logFilePath = $(Get-SqlDefaultDir $server 'Log') + '\' + $dbname + '_log.ldf' }
 
-    $fileGroup = Add-SqlFileGroup $db 'PRIMARY'
+    $fileGroup = Add-SqlFileGroup $database 'PRIMARY'
 Add-SqlDataFile -filegroup $fileGroup -name $dataName -filepath $dataFilePath -size $dataSize -growthtype $dataGrowthType -growth $dataGrowth -maxsize $dataMaxSize
 
-Add-SqlLogFile -db $db -name $logName -filepath $logFilePath -size $logSize -growthtype $logGrowthType -growth $logGrowth -maxsize $logMaxSize
+Add-SqlLogFile -database $database -name $logName -filepath $logFilePath -size $logSize -growthtype $logGrowthType -growth $logGrowth -maxsize $logMaxSize
 
-    try { $db.Create() }
+    try { $database.Create() }
     catch {
             $ex = $_.Exception
             $message = $ex.message
@@ -2110,17 +2105,28 @@ function Add-SqlUser
 
     switch ($dbname.GetType().Name)
     {
-        'String' { $db = Get-SqlDatabase $sqlserver $dbname }
-        'Database' { $db = $dbname }
+        'String' { $database = Get-SqlDatabase $sqlserver $dbname }
+        'Database' { $database = $dbname }
         default { throw "Add-SqlUser:Param '`$dbname' must be a String or Database object." }
     }
 
-    Write-Verbose "Add-SqlUser $($db.Name) $name"
+    Write-Verbose "Add-SqlUser $($database.Name) $name"
 
-    $user = new-object ('Microsoft.SqlServer.Management.Smo.User') $db, $name
+    $user = new-object ('Microsoft.SqlServer.Management.Smo.User') $database, $name
     $user.Login = $login
     $user.DefaultSchema = $defaultschema
-    $user.Create()
+    try { $user.Create() }
+    catch {
+            $ex = $_.Exception
+            $message = $ex.message
+            $ex = $ex.InnerException
+            while ($ex.InnerException)
+            {
+                $message += "`n$ex.InnerException.message"
+                $ex = $ex.InnerException
+            }
+            Write-Error $message
+    }
 
 } #Add-SqlUser
 
@@ -2135,18 +2141,18 @@ function Remove-SqlUser
 
     switch ($dbname.GetType().Name)
     {
-        'String' { $db = Get-SqlDatabase $sqlserver $dbname }
-        'Database' { $db = $dbname }
+        'String' { $database = Get-SqlDatabase $sqlserver $dbname }
+        'Database' { $database = $dbname }
         default { throw "Remove-SqlUser:Param '`$dbname' must be a String or Database object." }
     }
 
-    Write-Verbose "Remove-SqlUser $($db.Name) $name"
+    Write-Verbose "Remove-SqlUser $($database.Name) $name"
 
-    $user = $db.Users[$name]
+    $user = $database.Users[$name]
     if ($user)
     { $user.Drop() }
     else
-    { throw "User $name does not exist in database $($db.Name)." }
+    { throw "User $name does not exist in database $($database.Name)." }
 
 } #Remove-SqlUser
 
@@ -2157,7 +2163,7 @@ function Add-SqlLogin
     [Parameter(Position=0, Mandatory=$true)] $sqlserver,
     [Parameter(Position=1, Mandatory=$true)] [string]$name,
     [Parameter(Position=2, Mandatory=$false)] [string]$password,
-    [Parameter(Position=3, Mandatory=$false)] [Microsoft.SqlServer.Management.Smo.LoginType]$logintype,
+    [Parameter(Position=3, Mandatory=$false)] [Microsoft.SqlServer.Management.Smo.LoginType]$logintype='WindowsUser',
     [Parameter(Position=4, Mandatory=$false)] [string]$DefaultDatabase='master',
     [Parameter(Position=5, Mandatory=$false)] [switch]$PasswordExpirationEnabled,
     [Parameter(Position=6, Mandatory=$false)] [switch]$PasswordPolicyEnforced
@@ -2182,15 +2188,36 @@ function Add-SqlLogin
         $login.LoginType = $logintype
         $login.PasswordExpirationEnabled = $($PasswordExpirationEnabled.IsPresent)
         $login.PasswordPolicyEnforced = $($PasswordPolicyEnforced.IsPresent)
-        $login.Create($password)
+        try { $login.Create($password) }
+        catch {
+                $ex = $_.Exception
+                $message = $ex.message
+                $ex = $ex.InnerException
+                while ($ex.InnerException)
+                {
+                    $message += "`n$ex.InnerException.message"
+                    $ex = $ex.InnerException
+                }
+                Write-Error $message
+        }
     }
     elseif ($logintype -eq 'WindowsUser' -or $logintype -eq 'WindowsGroup')
     { 
         $login.LoginType = $logintype
-        $login.Create()
+        try { $login.Create() }
+        catch {
+                $ex = $_.Exception
+                $message = $ex.message
+                $ex = $ex.InnerException
+                while ($ex.InnerException)
+                {
+                    $message += "`n$ex.InnerException.message"
+                    $ex = $ex.InnerException
+                }
+                Write-Error $message
+        }
+
     }
-    else
-    { throw 'logintype must be SqlLogin, WindowsUser or WindowsGroup.' }
 
 } #Add-SqlLogin
 
@@ -2295,18 +2322,18 @@ function Add-SqlDatabaseRole
 
     switch ($dbname.GetType().Name)
     {
-        'String' { $db = Get-SqlDatabase $sqlserver $dbname }
-        'Database' { $db = $dbname }
+        'String' { $database = Get-SqlDatabase $sqlserver $dbname }
+        'Database' { $database = $dbname }
         default { throw "Add-SqlDatabaseRole:Param '`$dbname' must be a String or Database object." }
     }
 
-    Write-Verbose "Add-SqlDatabaseRole $($db.Name) $name"
+    Write-Verbose "Add-SqlDatabaseRole $($database.Name) $name"
 
-    if($db.Roles | where {$_.name -eq $name})
-    { throw "DatabaseRole $name already exists in Database $($db.Name)." }
+    if($database.Roles | where {$_.name -eq $name})
+    { throw "DatabaseRole $name already exists in Database $($database.Name)." }
     else
     {
-        $role = new-object ('Microsoft.SqlServer.Management.Smo.DatabaseRole') $db, $name
+        $role = new-object ('Microsoft.SqlServer.Management.Smo.DatabaseRole') $database, $name
         $role.Create()
     }
 
@@ -2323,19 +2350,19 @@ function Remove-SqlDatabaseRole
 
     switch ($dbname.GetType().Name)
     {
-        'String' { $db = Get-SqlDatabase $sqlserver $dbname }
-        'Database' { $db = $dbname }
+        'String' { $database = Get-SqlDatabase $sqlserver $dbname }
+        'Database' { $database = $dbname }
         default { throw "Remove-SqlDatabaseRole:Param '`$dbname' must be a String or Database object." }
     }
 
-    Write-Verbose "Remove-SqlDatabaseRole $($db.Name) $name"
+    Write-Verbose "Remove-SqlDatabaseRole $($database.Name) $name"
 
-    $role = Get-SqlDatabaseRole $db | where {$_.name -eq $name}
+    $role = Get-SqlDatabaseRole $database | where {$_.name -eq $name}
 
     if ($role)
     { $role.Drop() }
     else
-    { throw "DatabaseRole $name does not exist in database $($db.Name)." }
+    { throw "DatabaseRole $name does not exist in database $($database.Name)." }
 
 } #Remove-SqlDatabaseRole
 
@@ -2351,24 +2378,24 @@ function Add-SqlDatabaseRoleMember
 
     switch ($dbname.GetType().Name)
     {
-        'String' { $db = Get-SqlDatabase $sqlserver $dbname }
-        'Database' { $db = $dbname }
+        'String' { $database = Get-SqlDatabase $sqlserver $dbname }
+        'Database' { $database = $dbname }
         default { throw "Add-SqlDatabaseRoleMember:Param '`$dbname' must be a String or Database object." }
     }
 
-    Write-Verbose "Add-SqlDatabaseRoleMember $($db.Name) $name $rolename"
+    Write-Verbose "Add-SqlDatabaseRoleMember $($database.Name) $name $rolename"
 
-    if(($db.Users | where {$_.name -eq $name}) -or ($db.Roles | where {$_.name -eq $name}))
+    if(($database.Users | where {$_.name -eq $name}) -or ($database.Roles | where {$_.name -eq $name}))
     {
-        $role = Get-SqlDatabaseRole $db | where {$_.name -eq $rolename}
+        $role = Get-SqlDatabaseRole $database | where {$_.name -eq $rolename}
 
         if ($role)
         { $role.AddMember($name) }
         else
-        { throw "DatabaseRole $rolename does not exist in database $($db.Name)." }
+        { throw "DatabaseRole $rolename does not exist in database $($database.Name)." }
     }
     else
-    { throw "Role or User $name does not exist in database $($db.Name)." }
+    { throw "Role or User $name does not exist in database $($database.Name)." }
 
 } #Add-SqlDatabaseRoleMember
 
@@ -2384,24 +2411,24 @@ function Remove-SqlDatabaseRoleMember
 
     switch ($dbname.GetType().Name)
     {
-        'String' { $db = Get-SqlDatabase $sqlserver $dbname }
-        'Database' { $db = $dbname }
+        'String' { $database = Get-SqlDatabase $sqlserver $dbname }
+        'Database' { $database = $dbname }
         default { throw "Remove-SqlDatabaseRoleMember:Param '`$dbname' must be a String or Database object." }
     }
 
-    Write-Verbose "Remove-SqlDatabaseRoleMember $($db.Name) $name $rolename"
+    Write-Verbose "Remove-SqlDatabaseRoleMember $($database.Name) $name $rolename"
 
-    if(($db.Users | where {$_.name -eq $name}) -or ($db.Roles | where {$_.name -eq $name}))
+    if(($database.Users | where {$_.name -eq $name}) -or ($database.Roles | where {$_.name -eq $name}))
     {
-        $role = Get-SqlDatabaseRole $db | where {$_.name -eq $rolename}
+        $role = Get-SqlDatabaseRole $database | where {$_.name -eq $rolename}
 
         if ($role)
         { $role.DropMember($name) }
         else
-        { throw "DatabaseRole $rolename does not exist in database $($db.Name)." }
+        { throw "DatabaseRole $rolename does not exist in database $($database.Name)." }
     }
     else
-    { throw "Role or User $name does not exist in database $($db.Name)." }
+    { throw "Role or User $name does not exist in database $($database.Name)." }
 
 } #Remove-SqlDatabaseRoleMember
 
@@ -2472,27 +2499,27 @@ function Set-SqlDatabasePermission
 
     switch ($dbname.GetType().Name)
     {
-        'String' { $db = Get-SqlDatabase $sqlserver $dbname }
-        'Database' { $db = $dbname }
+        'String' { $database = Get-SqlDatabase $sqlserver $dbname }
+        'Database' { $database = $dbname }
         default { throw "Set-SqlDatabasePermission:Param '`$dbname' must be a String or Database object." }
     }
 
-    Write-Verbose "Set-SqlDatabasePermission $($db.Name) $name $permission $action"
+    Write-Verbose "Set-SqlDatabasePermission $($database.Name) $name $permission $action"
 
-    if(($db.Users | where {$_.name -eq $name}) -or ($db.Roles | where {$_.name -eq $name}))
+    if(($database.Users | where {$_.name -eq $name}) -or ($database.Roles | where {$_.name -eq $name}))
     {
         $perm = new-object ('Microsoft.SqlServer.Management.Smo.DatabasePermissionSet')
         $perm.$($permission.ToString()) = $true 
 
         switch ($action)
         { 
-            'Grant'  { $db.Grant($perm,$name) }
-            'Deny'   { $db.Deny($perm,$name) }
-            'Revoke' { $db.Revoke($perm,$name) }
+            'Grant'  { $database.Grant($perm,$name) }
+            'Deny'   { $database.Deny($perm,$name) }
+            'Revoke' { $database.Revoke($perm,$name) }
         }
     }
     else
-    { throw "Role or User $name does not exist in database $($db.Name)." }
+    { throw "Role or User $name does not exist in database $($database.Name)." }
 
 } #Set-SqlDatabasePermission
 
@@ -2512,21 +2539,24 @@ function Set-SqlObjectPermission
 #Example: Get-SqlDatabase 'Z002\Sql1 pubs | get-sqlschema -name dbo | set-sqlobjectpermission -permission Select -name test5 -action Grant
     Write-Verbose "Set-SqlObjectPermission $($smo.Name) $permission $name $action"
 
-    if(($smo.Parent.Users | where {$_.name -eq $name}) -or ($_.Parent.Roles | where {$_.name -eq $name}))
+    process
     {
-        $perm = new-object ('Microsoft.SqlServer.Management.Smo.ObjectPermissionSet')
-        $perm.$($permission.ToString()) = $true 
+        if(($smo.Parent.Users | where {$_.name -eq $name}) -or ($_.Parent.Roles | where {$_.name -eq $name}))
+        {
+            $perm = new-object ('Microsoft.SqlServer.Management.Smo.ObjectPermissionSet')
+            $perm.$($permission.ToString()) = $true 
 
-        switch ($action)
-        { 
-            'Grant'  { $smo.Grant($perm,$name) }
-            'Deny'   { $smo.Deny($perm,$name) }
-            'Revoke' { $smo.Revoke($perm,$name) }
-            default  { throw 'Set-SqlObjectPermission:Param `$action must be Grant, Deny or Revoke.' }
+            switch ($action)
+            { 
+                'Grant'  { $smo.Grant($perm,$name) }
+                'Deny'   { $smo.Deny($perm,$name) }
+                'Revoke' { $smo.Revoke($perm,$name) }
+                default  { throw 'Set-SqlObjectPermission:Param `$action must be Grant, Deny or Revoke.' }
+            }
         }
+        else
+        { throw "Role or User $name does not exist in database $($database.Name)." }
     }
-    else
-    { throw "Role or User $name does not exist in database $($db.Name)." }
 
 } #Set-SqlObjectPermission
 
@@ -2534,22 +2564,24 @@ function Set-SqlObjectPermission
 function Get-SqlSchema
 {
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$db,
+    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database,
     [Parameter(Position=1, Mandatory=$false)] [string]$name="*"
     )
 
-    foreach ($schema in $db.Schemas)
+    process
     {
-        if ($schema.name -like "*$name*" -or $name.Contains($schema.name))
+        foreach ($schema in $database.Schemas)
         {
-            #Return schema Object
-            $schema | add-Member -memberType noteProperty -name timestamp -value $(Get-SessionTimeStamp) -passthru |
-                add-Member -memberType noteProperty -name XMLExtendedProperties -value $(ConvertTo-ExtendedPropertyXML $schema.ExtendedProperties) -passthru |
-                add-Member -memberType noteProperty -name Server -value $db.parent.Name -passthru |
-                add-Member -memberType noteProperty -name dbname -value $db.Name -passthru
+            if ($schema.name -like "*$name*" -or $name.Contains($schema.name))
+            {
+                #Return schema Object
+                $schema | add-Member -memberType noteProperty -name timestamp -value $(Get-SessionTimeStamp) -passthru |
+               add-Member -memberType noteProperty -name XMLExtendedProperties -value $(ConvertTo-ExtendedPropertyXML $schema.ExtendedProperties) -passthru |
+                    add-Member -memberType noteProperty -name Server -value $database.parent.Name -passthru |
+                    add-Member -memberType noteProperty -name dbname -value $database.Name -passthru
+            }
         }
     }
-
 
 } #Get-SqlSchema
 
@@ -2591,14 +2623,14 @@ function Get-SqlTransaction
 
     switch ($dbname.GetType().Name)
     {
-        'String' { $db = Get-SqlDatabase $sqlserver $dbname }
-        'Database' { $db = $dbname }
+        'String' { $database = Get-SqlDatabase $sqlserver $dbname }
+        'Database' { $database = $dbname }
         default { throw "Get-SqlTransaction:Param '`$dbname' must be a String or Database object." }
     }
 
-    Write-Verbose "Get-SqlTransaction $($db.Name)"
+    Write-Verbose "Get-SqlTransaction $($database.Name)"
 
-    $db.EnumTransactions()
+    $database.EnumTransactions()
 
 } #Get-SqlTransaction
 
