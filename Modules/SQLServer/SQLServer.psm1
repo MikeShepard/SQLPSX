@@ -32,6 +32,26 @@ Set-Alias Get-InvalidLogins $scriptRoot\Get-InvalidLogins.ps1
 Set-Alias Get-SessionTimeStamp $scriptRoot\Get-SessionTimeStamp.ps1
 
 #######################
+<#
+.SYNOPSIS
+Gets a ServerConnection.
+.DESCRIPTION
+The Get-SqlConnection function  gets a ServerConnection to the specified SQL Server.
+.INPUTS
+None
+    You cannot pipe objects to Get-SqlConnection 
+.OUTPUTS
+Microsoft.SqlServer.Management.Common.ServerConnection
+    Get-SqlConnection returns a Microsoft.SqlServer.Management.Common.ServerConnection object.
+.EXAMPLE
+Get-SqlConnection "Z002\sql2K8"
+This command gets a ServerConnection to SQL Server Z002\SQL2K8.
+.EXAMPLE
+Get-SqlConnection "Z002\sql2K8" "sa" "Passw0rd"
+This command gets a ServerConnection to SQL Server Z002\SQL2K8 using SQL authentication.
+.LINK
+Get-SqlConnection 
+#>
 function Get-SqlConnection
 {
     param(
@@ -54,6 +74,26 @@ function Get-SqlConnection
 } #Get-ServerConnection
 
 #######################
+<#
+.SYNOPSIS
+Gets an SMO Server object.
+.DESCRIPTION
+The Get-SqlServer function  gets a SMO Server object for the specified SQL Server.
+.INPUTS
+None
+    You cannot pipe objects to Get-SqlServer 
+.OUTPUTS
+Microsoft.SqlServer.Management.Smo.Server
+    Get-SqlServer returns a Microsoft.SqlServer.Management.Smo.Server object.
+.EXAMPLE
+Get-SqlServer "Z002\sql2K8"
+This command gets an SMO Server object for SQL Server Z002\SQL2K8.
+.EXAMPLE
+Get-SqlServer "Z002\sql2K8" "sa" "Passw0rd"
+This command gets a SMO Server object for SQL Server Z002\SQL2K8 using SQL authentication.
+.LINK
+Get-SqlServer 
+#>
 function Get-SqlServer
 {
     param(
@@ -80,6 +120,26 @@ function Get-SqlServer
 } #Get-SqlServer
 
 #######################
+<#
+.SYNOPSIS
+Gets an SMO Database object.
+.DESCRIPTION
+The Get-SqlDatabase function  gets an SMO Database object for the specified SQL Database or collection of Database objects.
+.INPUTS
+None
+    You cannot pipe objects to Get-SqlDatabase 
+.OUTPUTS
+Microsoft.SqlServer.Management.Smo.Database
+    Get-SqlDatabase returns a Microsoft.SqlServer.Management.Smo.Database object.
+.EXAMPLE
+Get-SqlDatabase "Z002\sql2K8"
+This command gets a collection of SMO Database objects for SQL Server Z002\SQL2K8.
+.EXAMPLE
+Get-SqlDatabase $(Get-SqlServer "Z002\sql2K8" "sa" "Passw0rd") "pubs"
+This command gets a SMO Database object for SQL database pubs on the SQL Server Z002\SQL2K8 using SQL authentication.
+.LINK
+Get-SqlDatabase 
+#>
 function Get-SqlDatabase
 { 
     param(
@@ -109,6 +169,27 @@ function Get-SqlDatabase
 } # Get-SqlDatabase
 
 #######################
+<#
+.SYNOPSIS
+Executes a query and returns an array of System.Data.DataRow.
+.DESCRIPTION
+The Get-SqlData function executes a query and returns an array of System.Data.DataRow.
+.INPUTS
+None
+    You cannot pipe objects to Get-SqlData 
+.OUTPUTS
+System.Data.DataRow
+    Get-SqlData returns an array of System.Data.DataRow.
+.EXAMPLE
+Get-SqlData "Z002\sql2K8" "pubs" "select * from authors"
+This command executes the specified SQL query using Windows authentication.
+.EXAMPLE
+$server = Get-SqlServer "Z002\sql2K8" "sa" "Passw0rd"
+Get-SqlData $server "pubs" "select * from authors"
+This command executes the specified SQL query using SQL authentication.
+.LINK
+Get-SqlData 
+#>
 function Get-SqlData
 {
     param(
@@ -133,6 +214,27 @@ function Get-SqlData
 }# Get-SqlData
 
 #######################
+<#
+.SYNOPSIS
+ Executes a query that does not return a result set.
+.DESCRIPTION
+The Set-SqlData function executes a query that does not return a result set.
+.INPUTS
+None
+    You cannot pipe objects to Set-SqlData 
+.OUTPUTS
+None
+    Set-SqlData does not produce any output.
+.EXAMPLE
+Set-SqlData "Z002\sql2K8" "pubs" "Update authors set au_lname = 'Brown' WHERE au_lname = 'White'"
+This command executes the specified SQL query using Windows authentication.
+.EXAMPLE
+$server = Set-SqlServer "Z002\sql2K8" "sa" "Passw0rd"
+Set-SqlData $server "pubs" "Update authors set au_lname = 'Brown' WHERE au_lname = 'White'"
+This command executes the specified SQL query using SQL authentication.
+.LINK
+Set-SqlData 
+#>
 function Set-SqlData
 {
     param(
@@ -167,6 +269,23 @@ function ConvertTo-MemberXml
 }# ConvertTo-MemberXml
 
 #######################
+<#
+.SYNOPSIS
+Recursively enumerates AD and local groups handling built-in SQL Server Windows groups.
+.DESCRIPTION
+The Get-SqlShowMbrs function recursively enumerates AD/local groups handling built-in SQL Server Windows groups.
+.INPUTS
+None
+    You cannot pipe objects to Get-SqlShowMbrs 
+.OUTPUTS
+System.String
+    Get-SqlShowMbrs returns an array of System.String.
+.EXAMPLE
+Get-SqlShowMbrs $(Get-SqlServer "Z002\sql2K8") "Z002\PayrollUsers"
+This command gets a fully recursive list of members for the Windows group Z002\PayrollUsers.
+.LINK
+Get-SqlShowMbrs 
+#>
 function Get-SqlShowMbrs
 {
     param(
@@ -223,6 +342,28 @@ function Get-SqlShowMbrs
 } #Get-SqlShowMbrs
 
 #######################
+<#
+.SYNOPSIS
+Gets an SMO User object.
+.DESCRIPTION
+The Get-SqlUser function  gets a collection of SMO User objects for the specified SQL Database.
+.INPUTS
+Microsoft.SqlServer.Management.Smo.Database
+    You can pipe database objects to Get-SqlUser 
+.OUTPUTS
+Microsoft.SqlUser.Management.Smo.User
+    Get-SqlUser returns a Microsoft.SqlServer.Management.Smo.User object.
+.NOTES
+Additional properties including all of the objects owned by the user and the effective members of the user are returned. Nested AD/local groups are recursively enumerated and returned in a flat structure.
+.EXAMPLE
+Get-SqlUser $(Get-SqlDatabase "Z002\sql2K8" pubs)
+This command gets a collection of SMO User objects for SQL Server Z002\SQL2K8, pubs database.
+.EXAMPLE
+Get-SqlDatabase "Z002\sql2K8" | Get-SqlUser
+This command gets a collection SMO User objects for all SQL databases on the SQL Server Z002\SQL2K8.
+.LINK
+Get-SqlUser 
+#>
 function Get-SqlUser
 {
    param(
@@ -237,7 +378,7 @@ function Get-SqlUser
 
                 if ($user.HasDBAccess -and $user.Login) 
                 {
-                    $member += @($(Get-SqlUserMember $user))
+                    $member += @($(Get-UserMember $user))
                     $object = $null
 
                     #Get objects owned by user, this part is slow with SQL 2000, In 2005 if user owns an object only the schema is listed
@@ -268,24 +409,24 @@ function Get-SqlUser
 } # Get-SqlUser
 
 #######################
-function New-SqlUserMember
+function New-UserMember
 {
-    Write-Verbose "New-SqlUserMember"
+    Write-Verbose "New-UserMember"
 
     #__SQLPSXUserMember is a session variable, so only create if it doesn't exist
     if (!(Test-Path Variable:__SQLPSXUserMember))
     { Set-Variable __SQLPSXUserMember @{} -Scope Global -Option AllScope -Description "SQLPSX variable" }
     
-} #New-SQLUserMember
+} #New-UserMember
 
 #######################
-function Get-SqlUserMember
+function Get-UserMember
 {
     param([Microsoft.SqlServer.Management.Smo.User]$user,[Microsoft.SqlServer.Management.Smo.Database]$database)
 
-    Write-Verbose "Get-SqlUserMember $($user.Name) $($database.Name)"
+    Write-Verbose "Get-UserMember $($user.Name) $($database.Name)"
 
-    New-SqlUserMember
+    New-UserMember
 
     if ($user)
     {
@@ -330,11 +471,33 @@ function Get-SqlUserMember
         { $__SQLPSXUserMember[$key] }
     }
     else
-    { throw 'Get-SqlUserMember:Param `$user or `$database missing.' }
+    { throw 'Get-UserMember:Param `$user or `$database missing.' }
 
-} # Get-SqlUserMember
+} # Get-UserMember
 
 #######################
+<#
+.SYNOPSIS
+Returns a SMO DatabaseRole object with additional properties.
+.DESCRIPTION
+The Get-SqlDatabaseRole function  gets a collection of SMO DatabaseRole objects for the specified SQL Database. 
+.INPUTS
+Microsoft.SqlServer.Management.Smo.Database
+    You can pipe database objects to Get-SqlDatabaseRole 
+.OUTPUTS
+Microsoft.SqlServer.Management.Smo.DatabaseRole
+    Get-SqlDatabaseRole returns a Microsoft.SqlServer.Management.Smo.DatabaseRole object.
+.NOTES
+Additional properties are returned including the effective members of a role recursiving enumerates nested roles, and Windows Groups.
+.EXAMPLE
+Get-SqlDatabaseRole $(Get-SqlDatabase "Z002\sql2K8" pubs)
+This command gets a collection of SMO DatabaseRole objects for SQL Server Z002\SQL2K8, pubs database.
+.EXAMPLE
+Get-SqlDatabase "Z002\sql2K8" | Get-SqlDatabaseRole
+This command gets a collection SMO DatabaseRole objects for all SQL databases on the SQL Server Z002\SQL2K8.
+.LINK
+Get-SqlDatabaseRole 
+#>
 function Get-SqlDatabaseRole
 {
    param(
@@ -347,7 +510,7 @@ function Get-SqlDatabaseRole
         foreach ($role in $database.Roles)
         {
             $member = @()
-            $member += @($(Get-SqlDatabaseRoleMember $role))
+            $member += @($(Get-DatabaseRoleMember $role))
 
             #Return DatabaseRole Object
             $role | add-Member -memberType noteProperty -name timestamp -value $(Get-SessionTimeStamp) -passthru |
@@ -363,24 +526,24 @@ function Get-SqlDatabaseRole
 } #Get-SqlDatabaseRole
 
 #######################
-function New-SqlDatabaseRoleMember
+function New-DatabaseRoleMember
 {
-    Write-Verbose "New-SqlDatabaseRoleMember"
+    Write-Verbose "New-DatabaseRoleMember"
 
     #__SQLPSXDatabaseRoleMember is a session variable, so only create if it doesn't exist
     if (!(Test-Path Variable:__SQLPSXDatabaseRoleMember))
     { Set-Variable __SQLPSXDatabaseRoleMember @{} -Scope Global -Option AllScope -Description "SQLPSX variable" }
     
-} #New-SqlDatabaseRoleMember
+} #New-DatabaseRoleMember
 
 #######################
-function Get-SqlDatabaseRoleMember
+function Get-DatabaseRoleMember
 {
     param([Microsoft.SqlServer.Management.Smo.DatabaseRole]$role,[Microsoft.SqlServer.Management.Smo.Database]$database)
 
-    Write-Verbose "Get-SqlDatabaseRoleMember $($role.Name) $($database.Name)"
+    Write-Verbose "Get-DatabaseRoleMember $($role.Name) $($database.Name)"
 
-    New-SqlDatabaseRoleMember
+    New-DatabaseRoleMember
 
     if ($role)
     {
@@ -389,7 +552,7 @@ function Get-SqlDatabaseRoleMember
 
         if(!($__SQLPSXDatabaseRoleMember.$key.$($role.Name))) {
             $user = @{}
-            $user = Get-SqlUserMember -database $role.parent
+            $user = Get-UserMember -database $role.parent
 
             $member = @()
             $tmpMember = @()        
@@ -440,11 +603,30 @@ function Get-SqlDatabaseRoleMember
         { $__SQLPSXDatabaseRoleMember[$key] }
     }
     else
-    { throw 'Get-SqlDatabaseRoleMember:Param `$role or `$database missing' }
+    { throw 'Get-DatabaseRoleMember:Param `$role or `$database missing' }
 
-} # Get-SqlDatabaseRoleMember
+} # Get-DatabaseRoleMember
 
 #######################
+<#
+.SYNOPSIS
+Gets an SMO Login object.
+.DESCRIPTION
+The Get-SqlLogin function  gets a collection of SMO Login objects for the specified SQL Server.
+.INPUTS
+None
+    You cannot pipe objects to Get-SqlLogin 
+.OUTPUTS
+Microsoft.SqlServer.Management.Smo.Login
+    Get-SqlLogin returns a Microsoft.SqlServer.Management.Smo.Login object.
+.NOTES
+Additional properties including the effective members of the Login are returned. Nested AD/local groups are recursively enumerated and returned in a flat structure.
+.EXAMPLE
+Get-SqlLogin "Z002\sql2K8"
+This command gets a collection of SMO Login objects for SQL Server Z002\SQL2K8.
+.LINK
+Get-SqlLogin 
+#>
 function Get-SqlLogin
 {
     param(
@@ -463,7 +645,7 @@ function Get-SqlLogin
     foreach ($login in $server.Logins | where {$_.LoginType.ToString() -ne 'Certificate'})
     {
         $member = @()
-        $member += @($(Get-SqlLoginMember $login))
+        $member += @($(Get-LoginMember $login))
 
         #Return Login Object
         $login | add-Member -memberType noteProperty -name timestamp -value $(Get-SessionTimeStamp) -passthru |
@@ -476,6 +658,25 @@ function Get-SqlLogin
 } # Get-SqlLogin
 
 #######################
+<#
+.SYNOPSIS
+Gets an SMO LinkedServerLogin object.
+.DESCRIPTION
+The Get-SqlLinkedServerLogin function  gets a collection of SMO LinkedServerLogin objects for the specified SQL Server.
+.INPUTS
+None
+    You cannot pipe objects to Get-SqlLinkedServerLogin 
+.OUTPUTS
+Microsoft.SqlServer.Management.Smo.LinkedServerLogin
+    Get-SqlLinkedServerLogin returns a Microsoft.SqlServer.Management.Smo.LinkedServerLogin object.
+.NOTES
+Additional properties including the DataSource property are returned.
+.EXAMPLE
+Get-SqlLinkedServerLogin "Z002\sql2K8"
+This command gets a collection of SMO LinkedServerLogin objects for SQL Server Z002\SQL2K8.
+.LINK
+Get-SqlLinkedServerLogin 
+#>
 function Get-SqlLinkedServerLogin
 {
     param(
@@ -509,24 +710,24 @@ function Get-SqlLinkedServerLogin
 }# Get-SqlLinkedServerLogin
 
 #######################
-function New-SqlLoginMember
+function New-LoginMember
 {
-    Write-Verbose "New-SqlLoginMember"
+    Write-Verbose "New-LoginMember"
 
     #__SQLPSXLoginMember is a session variable, so only create if it doesn't exist
     if (!(Test-Path Variable:__SQLPSXLoginMember))
     { Set-Variable __SQLPSXLoginMember @{} -Scope Global -Option AllScope -Description "SQLPSX variable" }
     
-} #New-SQLLoginMember
+} #New-LoginMember
 
 #######################
-function Get-SqlLoginMember
+function Get-LoginMember
 {
     param([Microsoft.SqlServer.Management.Smo.Login]$login,[Microsoft.SqlServer.Management.Smo.Server]$server)
 
-    Write-Verbose "Get-SqlLoginMember $($login.Name) $($server.Name)"
+    Write-Verbose "Get-LoginMember $($login.Name) $($server.Name)"
 
-    New-SqlLoginMember
+    New-LoginMember
 
     if ($login)
     {
@@ -563,11 +764,30 @@ function Get-SqlLoginMember
         { $__SQLPSXLoginMember[$server.name] }
     }
     else
-    { throw 'Get-SqlLoginMember:Param `$login or `$server missing.' }
+    { throw 'Get-LoginMember:Param `$login or `$server missing.' }
 
-} # Get-SqlLoginMember
+} # Get-LoginMember
 
 #######################
+<#
+.SYNOPSIS
+Gets an SMO ServerRole object.
+.DESCRIPTION
+The Get-SqlServerRole function  gets a collection of SMO ServerRole objects for the specified SQL Server.
+.INPUTS
+None
+    You cannot pipe objects to Get-SqlServerRole 
+.OUTPUTS
+Microsoft.SqlServer.Management.Smo.ServerRole
+    Get-SqlServerRole returns a Microsoft.SqlServer.Management.Smo.ServerRole object.
+.NOTES
+Additional properties including the effective members of the ServerRole are returned. Nested AD/local groups are recursively enumerated and returned in a flat structure.
+.EXAMPLE
+Get-SqlServerRole "Z002\sql2K8"
+This command gets a collection of SMO ServerRole objects for SQL Server Z002\SQL2K8.
+.LINK
+Get-SqlServerRole 
+#>
 function Get-SqlServerRole
 {
     param(
@@ -584,7 +804,7 @@ function Get-SqlServerRole
     Write-Verbose "Get-SqlServerRole $($server.Name)"
 
     $login = @{}
-    $login = Get-SqlLoginMember -server $server
+    $login = Get-LoginMember -server $server
  
     foreach ($svrole in $server.Roles)
     {
@@ -616,6 +836,25 @@ function Get-SqlServerRole
 } #Get-SqlServerRole
 
 #######################
+<#
+.SYNOPSIS
+Gets an SMO ServerPermissionInfo object.
+.DESCRIPTION
+The Get-SqlServerPermission function  gets a collection of SMO ServerPermissionInfo objects for the specified SQL Server.
+.INPUTS
+None
+    You cannot pipe objects to Get-SqlServerPermission 
+.OUTPUTS
+Microsoft.SqlServer.Management.Smo.ServerPermissionInfo
+    Get-SqlServerPermission returns a Microsoft.SqlServer.Management.Smo.ServerPermissionInfo object.
+.NOTES
+Additional properties including the effective members of the ServerPermissionInfo are returned. Nested AD/local groups are recursively enumerated and returned in a flat structure. There are only three grantable permissions only applicable to the master database: CREATE DATABASE; BACKUP DATABASE; BACKUP LOG. These permission are included in the output. SQL 2000 does not support this SMO method, instead a System.DataRow is returned of master database permissions.
+.EXAMPLE
+Get-SqlServerPermission "Z002\sql2K8"
+This command gets a collection of SMO ServerPermissionInfo objects for SQL Server Z002\SQL2K8.
+.LINK
+Get-SqlServerPermission 
+#>
 function Get-SqlServerPermission
 {
     param(
@@ -632,19 +871,19 @@ function Get-SqlServerPermission
     Write-Verbose "Get-SqlServerPermission $($server.Name)"
 
     if ($server.Information.Version.Major -ge 9)
-    {$perm = Get-SqlServerPermission90 $server; $perm += Get-SqlDatabasePermission $(Get-SqlDatabase $server 'master'); $perm}
+    {$perm = Get-ServerPermission90 $server; $perm += Get-SqlDatabasePermission $(Get-SqlDatabase $server 'master'); $perm}
     else {Get-SqlDatabasePermission $(Get-SqlDatabase $server 'master')}
 
 }# Get-SqlServerPermission
 
 #######################
-function Get-SqlServerPermission90
+function Get-ServerPermission90
 {
     param(
     [Parameter(Position=0, Mandatory=$true)] [Microsoft.SqlServer.Management.Smo.Server]$server
     )
 
-    Write-Verbose "Get-SqlServerPermission90 $($server.Name)"
+    Write-Verbose "Get-ServerPermission90 $($server.Name)"
     
     #SQL 2000 Does not suppport the concept of Server Permissions. SQL Server 2000 relies on Server Roles to grant server level permissions
     #There are only three grantable permissions in SQL 2000/2005 only applicable to the master database: CREATE DATABASE; BACKUP DATABASE; BACKUP LOG
@@ -654,7 +893,7 @@ function Get-SqlServerPermission90
 
     $principal = @{}
     #Get-SqlLogin $server | foreach  { $principal[$_.Name] = $_.members }
-    $principal = Get-SqlLoginMember -server $server
+    $principal = Get-LoginMember -server $server
 
         #Apparently having a login to SQL Server is considered a ServePermission in SQL 2005, all logins have this permission
         #I'd rather eliminate the CONNECT SQL permissionType from the output
@@ -669,7 +908,7 @@ function Get-SqlServerPermission90
                    add-Member -memberType noteProperty -name dbname 'master' -passthru |
                    add-Member -memberType noteProperty -name Server -value $server.Name -passthru
       }
-} #Get-SqlServerPermission90
+} #Get-ServerPermission90
 
 #######################
 function Get-Permission80
@@ -732,6 +971,28 @@ OR prmssn.id = 0
 # The output of 90 and 80 versions of Get-SqlDatabasePermission and Get-SqlObjectPermissions will not match when 
 # run against a SQL 2005 or higher server
 #######################
+<#
+.SYNOPSIS
+Gets an SMO DatabasePermissionInfo object.
+.DESCRIPTION
+The Get-SqlDatabasePermission function  gets a collection of SMO DatabasePermissionInfo objects for the specified database.
+.INPUTS
+Microsoft.SqlServer.Management.Smo.Database
+    You can pipe SMO database objects to Get-SqlDatabasePermission 
+.OUTPUTS
+Microsoft.SqlServer.Management.Smo.DatabasePermissionInfo
+    Get-SqlDatabasePermission returns a Microsoft.SqlServer.Management.Smo.DatabasePermissionInfo object.
+.NOTES
+Additional properties including the effective members of the DatabasePermissionInfo are returned. Nested AD/local groups are recursively enumerated and returned in a flat structure. SQL 2000 does not support this SMO method, instead a System.DataRow is returned of database permissions.
+.EXAMPLE
+Get-SqlDatabasePermission $(Get-SqlDatabase "Z002\sql2K8" pubs)
+This command gets a collection of SMO DatabasePermissionInfo objects for SQL Server Z002\SQL2K8, pubs database.
+.EXAMPLE
+Get-SqlDatabase "Z002\sql2K8" | Get-SqlDatabasePermission
+This command gets a collection of SMO DatabasePermissionInfo objects for all user databases on SQL Server Z002\SQL2K8.
+.LINK
+Get-SqlDatabasePermission 
+#>
 function Get-SqlDatabasePermission
 {
     param(
@@ -747,8 +1008,8 @@ function Get-SqlDatabasePermission
 
                 $user = @{}
                 $role = @{}
-                $user = Get-SqlUserMember -database $database
-                $role = Get-SqlDatabaseRoleMember -database $database
+                $user = Get-UserMember -database $database
+                $role = Get-DatabaseRoleMember -database $database
                 #Unfortunately on case sensitive servers you can have a role and user with the same name. So instead of using a single hash called
                 #principal we will use two different hashes and use the GranteeType to determine which one to use for listing the effective members
                 #of the permission.
@@ -779,8 +1040,8 @@ function Get-SqlDatabasePermission
 
                 $user = @{}
                 $role = @{}
-                $user = Get-SqlUserMember -database $database
-                $role = Get-SqlDatabaseRoleMember -database $database
+                $user = Get-UserMember -database $database
+                $role = Get-DatabaseRoleMember -database $database
 
             foreach ($perm in Get-Permission80 $database | where {$_.ObjectClass -eq 'Database'})
             { 
@@ -811,86 +1072,28 @@ function Get-SqlDatabasePermission
 }# Get-SqlServerPermission
 
 #######################
-function Get-Permission90
-{
-    param(
-    [Parameter(Position=0, Mandatory=$true)] [Microsoft.SqlServer.Management.Smo.Database]$database
-    )
-
-    Write-Verbose "Get-Permission90 $($database.Name)"
-
-$qry = @"
-SELECT
-grantee_principal.name AS [Grantee],
-grantor_principal.name AS [Grantor],
-CASE prmssn.state WHEN 'W' THEN 'GRANT_W_GRANT' WHEN 'G' THEN 'GRANT' WHEN 'D' THEN 'DENY' WHEN 'R' THEN 'REVOKE'END AS [PermissionState],
-'ObjectOrColumn' AS [ObjectClass],
-COL_NAME(prmssn.major_id,prmssn.minor_id) AS [ColumnName],
-obj.name AS [ObjectName],
-schema_name(obj.schema_id) AS [ObjectSchema],
-prmssn.major_id AS [ObjectID],
-CASE grantee_principal.type WHEN 'S' THEN 'User' WHEN 'U' THEN 'WindowsUser' WHEN 'G' THEN 'WindowsGroup' WHEN 'A' THEN 'ApplicationRole' WHEN 'R' THEN 'DatabaseRole'
-END AS [GranteeType],
-CASE grantor_principal.type WHEN 'S' THEN 'User' WHEN 'U' THEN 'WindowsUser' WHEN 'G' THEN 'WindowsGroup' WHEN 'A' THEN 'ApplicationRole' WHEN 'R' THEN 'DatabaseRole'
-END AS [GrantorType],
-CASE prmssn.type
-WHEN 'AL' THEN 'ALTER'
-WHEN 'CL' THEN 'CONTROL'
-WHEN 'DL' THEN 'DELETE'
-WHEN 'EX' THEN 'EXECUTE'
-WHEN 'IN' THEN 'INSERT'
-WHEN 'RC' THEN 'RECEIVE'
-WHEN 'RF' THEN 'REFERENCES'
-WHEN 'SL' THEN 'SELECT'
-WHEN 'TO' THEN 'TAKE OWNERSHIP'
-WHEN 'UP' THEN 'UPDATE'
-WHEN 'VW' THEN 'VIEW DEFINITION'
-END AS [PermissionType]
-FROM
-sys.database_permissions AS prmssn
-INNER JOIN sys.database_principals AS grantee_principal ON grantee_principal.principal_id = prmssn.grantee_principal_id
-INNER JOIN sys.database_principals AS grantor_principal ON grantor_principal.principal_id = prmssn.grantor_principal_id
-INNER JOIN sys.all_objects AS obj ON obj.object_id = prmssn.major_id and prmssn.class = 1
-WHERE prmssn.major_id > 0
-UNION
-SELECT
-grantee_principal.name AS [Grantee],
-grantor_principal.name AS [Grantor],
-CASE prmssn.state WHEN 'W' THEN 'GRANT_W_GRANT' WHEN 'G' THEN 'GRANT' WHEN 'D' THEN 'DENY' WHEN 'R' THEN 'REVOKE'END AS [PermissionState],
-'Schema' AS [ObjectClass],
-null AS [ColumnName],
-obj.name AS [ObjectName],
-null AS [ObjectSchema],
-prmssn.major_id AS [ObjectID],
-CASE grantee_principal.type WHEN 'S' THEN 'User' WHEN 'U' THEN 'WindowsUser' WHEN 'G' THEN 'WindowsGroup' WHEN 'A' THEN 'ApplicationRole' WHEN 'R' THEN 'DatabaseRole'
-END AS [GranteeType],
-CASE grantor_principal.type WHEN 'S' THEN 'User' WHEN 'U' THEN 'WindowsUser' WHEN 'G' THEN 'WindowsGroup' WHEN 'A' THEN 'ApplicationRole' WHEN 'R' THEN 'DatabaseRole'
-END AS [GrantorType],
-CASE prmssn.type
-WHEN 'AL' THEN 'ALTER'
-WHEN 'CL' THEN 'CONTROL'
-WHEN 'DL' THEN 'DELETE'
-WHEN 'EX' THEN 'EXECUTE'
-WHEN 'IN' THEN 'INSERT'
-WHEN 'RC' THEN 'RECEIVE'
-WHEN 'RF' THEN 'REFERENCES'
-WHEN 'SL' THEN 'SELECT'
-WHEN 'TO' THEN 'TAKE OWNERSHIP'
-WHEN 'UP' THEN 'UPDATE'
-WHEN 'VW' THEN 'VIEW DEFINITION'
-END AS [PermissionType]
-FROM
-sys.database_permissions AS prmssn
-INNER JOIN sys.database_principals AS grantee_principal ON grantee_principal.principal_id = prmssn.grantee_principal_id
-INNER JOIN sys.database_principals AS grantor_principal ON grantor_principal.principal_id = prmssn.grantor_principal_id
-INNER JOIN sys.schemas AS obj ON obj.schema_id = prmssn.major_id and prmssn.class = 3
-"@
-
-    Get-SqlData -dbname $database -qry $qry
-
-}# Get-Permission90
-
-#######################
+<#
+.SYNOPSIS
+Gets an SMO ObjectPermissionInfo object.
+.DESCRIPTION
+The Get-SqlObjectPermission function  gets a collection of SMO ObjectPermissionInfo objects for the specified database.
+.INPUTS
+Microsoft.SqlServer.Management.Smo.Database
+    You can pipe SMO database objects to Get-SqlObjectPermission 
+.OUTPUTS
+Microsoft.SqlServer.Management.Smo.ObjectPermissionInfo
+    Get-SqlObjectPermission returns a Microsoft.SqlServer.Management.Smo.ObjectPermissionInfo object.
+.NOTES
+Additional properties including the effective members of the ObjectPermissionInfo are returned. Nested AD/local groups are recursively enumerated and returned in a flat structure. SQL 2000 does not support this SMO method, instead a System.DataRow is returned of object permissions.
+.EXAMPLE
+Get-SqlObjectPermission $(Get-SqlDatabase "Z002\sql2K8" pubs)
+This command gets a collection of SMO ObjectPermissionInfo objects for SQL Server Z002\SQL2K8, pubs database.
+.EXAMPLE
+Get-SqlDatabase "Z002\sql2K8" | Get-SqlObjectPermission
+This command gets a collection of SMO ObjectPermissionInfo objects for all user databases on SQL Server Z002\SQL2K8.
+.LINK
+Get-SqlObjectPermission 
+#>
 function Get-SqlObjectPermission
 {
     param(
@@ -906,8 +1109,8 @@ function Get-SqlObjectPermission
 
             $user = @{}
             $role = @{}
-            $user = Get-SqlUserMember -database $database
-            $role = Get-SqlDatabaseRoleMember -database $database
+            $user = Get-UserMember -database $database
+            $role = Get-DatabaseRoleMember -database $database
 
             Write-Verbose "EnumObjectPermissions"
 
@@ -942,8 +1145,8 @@ function Get-SqlObjectPermission
 
             $user = @{}
             $role = @{}
-            $user = Get-SqlUserMember -database $database
-            $role = Get-SqlDatabaseRoleMember -database $database
+            $user = Get-UserMember -database $database
+            $role = Get-DatabaseRoleMember -database $database
 
             foreach ($perm in Get-Permission80 $database | where {$_.ObjectClass -eq 'ObjectOrColumn' -and $_.ObjectID -gt 0 -and $_.ObjectName -ne 'dtproperties'})
             { 
@@ -974,6 +1177,31 @@ function Get-SqlObjectPermission
 }# Get-SqlObjectPermission
 
 #######################
+<#
+.SYNOPSIS
+Gets an SMO Table object.
+.DESCRIPTION
+The Get-SqlTable function  gets a collection of SMO Table objects for the specified database.
+.INPUTS
+Microsoft.SqlServer.Management.Smo.Database
+    You can pipe SMO database objects to Get-SqlTable 
+.OUTPUTS
+Microsoft.SqlServer.Management.Smo.Table
+    Get-SqlTable returns a Microsoft.SqlServer.Management.Smo.Table object.
+.NOTES
+Additional properties including the database, server and extended properties are included in the output. 
+.EXAMPLE
+Get-SqlTable $(Get-SqlDatabase "Z002\sql2K8" pubs)
+This command gets a collection of SMO Table objects for SQL Server Z002\SQL2K8, pubs database.
+.EXAMPLE
+Get-SqlDatabase "Z002\sql2K8" | Get-SqlTable
+This command gets a collection of SMO Table objects for all user databases on SQL Server Z002\SQL2K8.
+.EXAMPLE
+Get-SqlDatabase "Z002\sql2K8" pubs | Get-SqlTable -name "authors"
+This command gets an SMO Table object for the authors table in the pubs database on SQL Server Z002\SQL2K8.
+.LINK
+Get-SqlTable 
+#>
 function Get-SqlTable
 {
     param(
@@ -1000,6 +1228,31 @@ function Get-SqlTable
 } #Get-SqlTable
 
 #######################
+<#
+.SYNOPSIS
+Gets an SMO StoredProcedure object.
+.DESCRIPTION
+The Get-SqlStoredProcedure function  gets a collection of SMO StoredProcedure objects for the specified database.
+.INPUTS
+Microsoft.SqlServer.Management.Smo.Database
+    You can pipe SMO database objects to Get-SqlStoredProcedure 
+.OUTPUTS
+Microsoft.SqlServer.Management.Smo.StoredProcedure
+    Get-SqlStoredProcedure returns a Microsoft.SqlServer.Management.Smo.StoredProcedure object.
+.NOTES
+Additional properties including the database, server and extended properties are included in the output. 
+.EXAMPLE
+Get-SqlStoredProcedure $(Get-SqlDatabase "Z002\sql2K8" pubs)
+This command gets a collection of SMO StoredProcedure objects for SQL Server Z002\SQL2K8, pubs database.
+.EXAMPLE
+Get-SqlDatabase "Z002\sql2K8" | Get-SqlStoredProcedure
+This command gets a collection of SMO StoredProcedure objects for all user databases on SQL Server Z002\SQL2K8.
+.EXAMPLE
+Get-SqlDatabase "Z002\sql2K8" pubs | Get-SqlStoredProcedure -name "byroyalty"
+This command gets an SMO StoredProcedure object for the byroyalty stored procedure in the pubs database on SQL Server Z002\SQL2K8.
+.LINK
+Get-SqlStoredProcedure 
+#>
 function Get-SqlStoredProcedure
 {
     param(
@@ -1026,6 +1279,31 @@ function Get-SqlStoredProcedure
 } #Get-SqlStoredProcedure
 
 #######################
+<#
+.SYNOPSIS
+Gets an SMO View object.
+.DESCRIPTION
+The Get-SqlView function  gets a collection of SMO View objects for the specified database.
+.INPUTS
+Microsoft.SqlServer.Management.Smo.Database
+    You can pipe SMO database objects to Get-SqlView 
+.OUTPUTS
+Microsoft.SqlServer.Management.Smo.View
+    Get-SqlView returns a Microsoft.SqlServer.Management.Smo.View object.
+.NOTES
+Additional properties including the database, server and extended properties are included in the output. 
+.EXAMPLE
+Get-SqlView $(Get-SqlDatabase "Z002\sql2K8" pubs)
+This command gets a collection of SMO View objects for SQL Server Z002\SQL2K8, pubs database.
+.EXAMPLE
+Get-SqlDatabase "Z002\sql2K8" | Get-SqlView
+This command gets a collection of SMO View objects for all user databases on SQL Server Z002\SQL2K8.
+.EXAMPLE
+Get-SqlDatabase "Z002\sql2K8" pubs | Get-SqlView -name "titleview"
+This command gets an SMO View object for the titleview view in the pubs database on SQL Server Z002\SQL2K8.
+.LINK
+Get-SqlView 
+#>
 function Get-SqlView
 {
     param(
@@ -1052,6 +1330,31 @@ function Get-SqlView
 } #Get-SqlView
 
 #######################
+<#
+.SYNOPSIS
+Gets an SMO UserDefinedDataType object.
+.DESCRIPTION
+The Get-SqlUserDefinedDataType function  gets a collection of SMO UserDefinedDataType objects for the specified database.
+.INPUTS
+Microsoft.SqlServer.Management.Smo.Database
+    You can pipe SMO database objects to Get-SqlUserDefinedDataType 
+.OUTPUTS
+Microsoft.SqlServer.Management.Smo.UserDefinedDataType
+    Get-SqlUserDefinedDataType returns a Microsoft.SqlServer.Management.Smo.UserDefinedDataType object.
+.NOTES
+Additional properties including the database, server and extended properties are included in the output. 
+.EXAMPLE
+Get-SqlUserDefinedDataType $(Get-SqlDatabase "Z002\sql2K8" pubs)
+This command gets a collection of SMO UserDefinedDataType objects for SQL Server Z002\SQL2K8, pubs database.
+.EXAMPLE
+Get-SqlDatabase "Z002\sql2K8" | Get-SqlUserDefinedDataType
+This command gets a collection of SMO UserDefinedDataType objects for all user databases on SQL Server Z002\SQL2K8.
+.EXAMPLE
+Get-SqlDatabase "Z002\sql2K8" pubs | Get-SqlUserDefinedDataType -name "empid"
+This command gets an SMO UserDefinedDataType object for the empid user defined dataType in the pubs database on SQL Server Z002\SQL2K8.
+.LINK
+Get-SqlUserDefinedDataType 
+#>
 function Get-SqlUserDefinedDataType
 {
     param(
@@ -1078,6 +1381,31 @@ function Get-SqlUserDefinedDataType
 } #Get-SqlUserDefinedDataType
 
 #######################
+<#
+.SYNOPSIS
+Gets an SMO UserDefinedFunction object.
+.DESCRIPTION
+The Get-SqlUserDefinedFunction function  gets a collection of SMO UserDefinedFunction objects for the specified database.
+.INPUTS
+Microsoft.SqlServer.Management.Smo.Database
+    You can pipe SMO database objects to Get-SqlUserDefinedFunction 
+.OUTPUTS
+Microsoft.SqlServer.Management.Smo.UserDefinedFunction
+    Get-SqlUserDefinedFunction returns a Microsoft.SqlServer.Management.Smo.UserDefinedFunction object.
+.NOTES
+Additional properties including the database, server and extended properties are included in the output. 
+.EXAMPLE
+Get-SqlUserDefinedFunction $(Get-SqlDatabase "Z002\sql2K8" AdventureWorks)
+This command gets a collection of SMO UserDefinedFunction objects for SQL Server Z002\SQL2K8, AdventureWorks database.
+.EXAMPLE
+Get-SqlDatabase "Z002\sql2K8" | Get-SqlUserDefinedFunction
+This command gets a collection of SMO UserDefinedFunction objects for all user databases on SQL Server Z002\SQL2K8.
+.EXAMPLE
+Get-SqlDatabase "Z002\sql2K8" AdventureWorks | Get-SqlUserDefinedFunction -name "ufnGetAccountingEndDate"
+This command gets an SMO UserDefinedFunction object for the ufnGetAccountingEndDate user defined function in the AdventureWorks database on SQL Server Z002\SQL2K8.
+.LINK
+Get-SqlUserDefinedFunction 
+#>
 function Get-SqlUserDefinedFunction
 {
     param(
@@ -1104,6 +1432,31 @@ function Get-SqlUserDefinedFunction
 } #Get-SqlUserDefinedFunction
 
 #######################
+<#
+.SYNOPSIS
+Gets an SMO Synonym object.
+.DESCRIPTION
+The Get-SqlSynonym function  gets a collection of SMO Synonym objects for the specified database.
+.INPUTS
+Microsoft.SqlServer.Management.Smo.Database
+    You can pipe SMO database objects to Get-SqlSynonym 
+.OUTPUTS
+Microsoft.SqlServer.Management.Smo.Synonym
+    Get-SqlSynonym returns a Microsoft.SqlServer.Management.Smo.Synonym object.
+.NOTES
+Additional properties including the database, server and extended properties are included in the output. 
+.EXAMPLE
+Get-SqlSynonym $(Get-SqlDatabase "Z002\sql2K8" AdventureWorks)
+This command gets a collection of SMO Synonym objects for SQL Server Z002\SQL2K8, AdventureWorks database.
+.EXAMPLE
+Get-SqlDatabase "Z002\sql2K8" | Get-SqlSynonym
+This command gets a collection of SMO Synonym objects for all user databases on SQL Server Z002\SQL2K8.
+.EXAMPLE
+Get-SqlDatabase "Z002\sql2K8" AdventureWorks | Get-SqlSynonym -name "GrossRevenue"
+This command gets an SMO Synonym object for the GrossRevenue synonym in the AdventureWorks database on SQL Server Z002\SQL2K8.
+.LINK
+Get-SqlSynonym 
+#>
 function Get-SqlSynonym
 {
     param(
@@ -1130,6 +1483,33 @@ function Get-SqlSynonym
 } #Get-SqlSynonym
 
 #######################
+<#
+.SYNOPSIS
+Gets an SMO Trigger object.
+.DESCRIPTION
+The Get-SqlTrigger function  gets a collection of SMO Trigger objects for the specified smo object.
+.INPUTS
+Microsoft.SqlServer.Management.Smo.Database or
+Microsoft.SqlServer.Management.Smo.Server or
+Microsoft.SqlServer.Management.Smo.Table or
+Microsoft.SqlServer.Management.Smo.View
+    You can pipe SMO objects to Get-SqlTrigger 
+.OUTPUTS
+Microsoft.SqlServer.Management.Smo.Trigger or
+Microsoft.SqlServer.Management.Smo.DatabaseDdlTrigger or
+Microsoft.SqlServer.Management.Smo.ServerDdlTrigger
+    Get-SqlTrigger returns a Microsoft.SqlServer.Management.Smo.Trigger/DatabaseDdlTrigger/ServerDdlTrigger object.
+.NOTES
+Additional properties including the database, server and extended properties are included in the output. The output type depends on whether a server, database or table/view object is passed to the smo parameter.
+.EXAMPLE
+Get-SqlDatabase "Z002\sql2K8" "pubs" | Get-SqlTrigger -name tr_MStran_alterview 
+This command gets the SMO database Trigger, tr_MStran_alterview for SQL Server Z002\SQL2K8, AdventureWorks database.
+.EXAMPLE
+ Get-SqlDatabase "Z002\sql2K8" pubs | Get-SqlTable | Get-SqlTrigger
+This command gets a collection of SMO Trigger objects for all user tables in the pubs database.
+.LINK
+Get-SqlTrigger 
+#>
 function Get-SqlTrigger
 {
     param(
@@ -1168,6 +1548,26 @@ function Get-SqlTrigger
 } #Get-SqlTrigger
 
 #######################
+<#
+.SYNOPSIS
+Gets an SMO Column object.
+.DESCRIPTION
+The Get-SqlColumn function  gets a collection of SMO Column objects for the specified table or view.
+.INPUTS
+Microsoft.SqlServer.Management.Smo.Table or
+Microsoft.SqlServer.Management.Smo.View
+    You can pipe SMO objects to Get-SqlColumn 
+.OUTPUTS
+Microsoft.SqlServer.Management.Smo.Column
+    Get-SqlColumn returns a Microsoft.SqlServer.Management.Smo.Column object.
+.NOTES
+Additional properties including the database, server and extended properties are included in the output. 
+.EXAMPLE
+Get-SqlDatabase "Z002\sql2k8" "pubs" | Get-SqlTable -name "authors" | Get-SqlColumn
+This command gets a collection of SMO Column objects for the authors table.
+.LINK
+Get-SqlColumn 
+#>
 function Get-SqlColumn
 {
     param(
@@ -1193,6 +1593,26 @@ function Get-SqlColumn
 } #Get-SqlColumn
 
 #######################
+<#
+.SYNOPSIS
+Gets an SMO Index object.
+.DESCRIPTION
+The Get-SqlIndex function  gets a collection of SMO Index objects for the specified table or view.
+.INPUTS
+Microsoft.SqlServer.Management.Smo.Table or
+Microsoft.SqlServer.Management.Smo.View
+    You can pipe SMO objects to Get-SqlIndex 
+.OUTPUTS
+Microsoft.SqlServer.Management.Smo.Index
+    Get-SqlIndex returns a Microsoft.SqlServer.Management.Smo.Index object.
+.NOTES
+Additional properties including the database, server and extended properties are included in the output. 
+.EXAMPLE
+Get-SqlDatabase "Z002\sql2k8" "pubs" | Get-SqlTable -name "authors" | Get-SqlIndex
+This command gets a collection of SMO Index objects for the authors table.
+.LINK
+Get-SqlIndex 
+#>
 function Get-SqlIndex
 {
     param(
@@ -1219,6 +1639,26 @@ function Get-SqlIndex
 } #Get-SqlIndex
 
 #######################
+<#
+.SYNOPSIS
+Gets an SMO Statistic object.
+.DESCRIPTION
+The Get-SqlStatistic function  gets a collection of SMO Statistic objects for the specified table or view.
+.INPUTS
+Microsoft.SqlServer.Management.Smo.Table or
+Microsoft.SqlServer.Management.Smo.View
+    You can pipe SMO objects to Get-SqlStatistic 
+.OUTPUTS
+Microsoft.SqlServer.Management.Smo.Statistic
+    Get-SqlStatistic returns a Microsoft.SqlServer.Management.Smo.Statistic object.
+.NOTES
+Additional properties including the database, server and extended properties are included in the output. 
+.EXAMPLE
+Get-SqlDatabase "Z002\sql2k8" "Northwind" | Get-SqlTable | Get-SqlStatistic
+This command gets a collection of SMO Statistic objects for all user tables in the Northwind database.
+.LINK
+Get-SqlStatistic 
+#>
 function Get-SqlStatistic
 {
     param(
@@ -1249,6 +1689,26 @@ function Get-SqlStatistic
 } #Get-SqlStatistic
 
 #######################
+<#
+.SYNOPSIS
+Gets an SMO Check object.
+.DESCRIPTION
+The Get-SqlCheck function  gets a collection of SMO Check objects for the specified table or view.
+.INPUTS
+Microsoft.SqlServer.Management.Smo.Table or
+Microsoft.SqlServer.Management.Smo.View
+    You can pipe SMO objects to Get-SqlCheck 
+.OUTPUTS
+Microsoft.SqlServer.Management.Smo.Check
+    Get-SqlCheck returns a Microsoft.SqlServer.Management.Smo.Check object.
+.NOTES
+Additional properties including the database, server and extended properties are included in the output. 
+.EXAMPLE
+Get-SqlDatabase "Z002\sql2k8" "pubs" | Get-SqlTable | Get-SqlCheck
+This command gets a collection of SMO Check objects for all user tables in the pubs database.
+.LINK
+Get-SqlCheck 
+#>
 function Get-SqlCheck
 {
     param(
@@ -1273,6 +1733,26 @@ function Get-SqlCheck
 } #Get-SqlCheck
 
 #######################
+<#
+.SYNOPSIS
+Gets an SMO ForeignKey object.
+.DESCRIPTION
+The Get-SqlForeignKey function  gets a collection of SMO ForeignKey objects for the specified table or view.
+.INPUTS
+Microsoft.SqlServer.Management.Smo.Table or
+Microsoft.SqlServer.Management.Smo.View
+    You can pipe SMO objects to Get-SqlForeignKey 
+.OUTPUTS
+Microsoft.SqlServer.Management.Smo.ForeignKey
+    Get-SqlForeignKey returns a Microsoft.SqlServer.Management.Smo.ForeignKey object.
+.NOTES
+Additional properties including the database, server and extended properties are included in the output. 
+.EXAMPLE
+Get-SqlDatabase "Z002\sql2k8" "pubs" | Get-SqlTable | Get-SqlForeignKey
+This command gets a collection of SMO ForeignKey objects for all user tables in the pubs database.
+.LINK
+Get-SqlForeignKey 
+#>
 function Get-SqlForeignKey
 {
     param(
@@ -1297,6 +1777,26 @@ function Get-SqlForeignKey
 } #Get-SqlForeignKey
 
 #######################
+<#
+.SYNOPSIS
+Creates a new Microsoft.SqlServer.Management.Smo.ScriptingOptions.
+.DESCRIPTION
+The New-SqlScriptingOptions function creates a new Microsoft.SqlServer.Management.Smo.ScriptingOptions. This class is used for setting various SMO scripting options.
+.INPUTS
+None
+    You cannot pipe objects to New-SqlScriptingOptions
+.OUTPUTS
+Microsoft.SqlServer.Management.Smo.ScriptingOptions
+    New-SqlScriptingOptions returns a Microsoft.SqlServer.Management.Smo.ScriptingOptions object.
+.NOTES
+ScriptingOptions can be used with Get-SqlScripter. See get-help Get-SqlScripter for additional information.
+.EXAMPLE
+$scriptingOptions = New-SqlScriptingOptions
+This command creates a new SqlScriptingOptions object and assigns output to $scriptingOptions variable.
+.LINK
+New-SqlScriptingOptions
+Get-SqlScripter
+#>
 function New-SqlScriptingOptions
 {
     Write-Verbose "New-SqlScriptingOptions"
@@ -1306,6 +1806,33 @@ function New-SqlScriptingOptions
 } #New-SqlScriptingOptions
 
 #######################
+<#
+.SYNOPSIS
+Scripts an SMO object.
+.DESCRIPTION
+The Get-SqlScripter function  calls the script method for an SMO object(s).
+.INPUTS
+Microsoft.SqlServer.Management.Smo.*
+    You can pipe SMO objects to Get-SqlScripter 
+.OUTPUTS
+System.String
+    Get-SqlScripter returns an array System.String.
+.EXAMPLE
+Get-SqlDatabase "Z002\sql2k8" "pubs" | Get-SqlTable | Get-SqlScripter
+This command scripts out all user tables in the pubs database.
+.EXAMPLE
+Get-SqlDatabase "Z002\sql2k8" "pubs" | Get-SqlTable -name "authors" | Get-SqlScripter
+This command scripts out the authors table.
+.EXAMPLE
+$scriptingOptions = New-SqlScriptingOptions
+$scriptingOptions.Permissions = $true
+$scriptingOptions.IncludeIfNotExists = $true
+Get-SqlDatabase "Z002\sql2k8" "pubs" | Get-SqlTable | Get-SqlScripter -scriptingOptions $scriptingOptions
+This command scripts out all users tables in the pubs database and passes a scriptingOptions.
+.LINK
+Get-SqlScripter 
+New-SqlScriptingOptions
+#>
 function Get-SqlScripter
 {
     param(
@@ -1320,7 +1847,27 @@ function Get-SqlScripter
 } #Get-SqlScripter
 
 #######################
-function Get-Information_Schema.Tables
+<#
+.SYNOPSIS
+Returns the result set from INFORMATION_SCHEMA.Tables for the specified database(s).
+.DESCRIPTION
+The Get-SqlInformation_Schema.Tables function returns the result set from Information_Schema.Tables for the specified database(s).
+.INPUTS
+Microsoft.SqlServer.Management.Smo.Database
+    You can pipe Database objects to Get-SqlInformation_Schema.Tables
+.OUTPUTS
+System.Data.DataRow
+    Get-SqlInformation_Schema.Tables returns an array of System.Data.DataRow.
+.EXAMPLE
+Get-SqlDatabase "Z002\sql2k8" "pubs" | Get-Information_Schema.Tables
+This command returns the result set from INFORMATION_SCHEMA.Tables for the pubs database.
+.EXAMPLE
+Get-SqlDatabase "Z002\sql2k8" "pubs" | Get-Information_Schema.Tables -name "authors"
+This command returns the result set from INFORMATION_SCHEMA.Tables for the pubs database where the table name is like authors.
+.LINK
+Get-SqlInformation_Schema.Tables
+#>
+function Get-SqlInformation_Schema.Tables
 {
     param(
     [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database,
@@ -1339,10 +1886,30 @@ AND TABLE_NAME LIKE '%$name%'
             Get-SqlData -dbname $database -qry $qry
     }
 
-} #Get-Information_Schema.Tables
+} #Get-SqlInformation_Schema.Tables
 
 #######################
-function Get-Information_Schema.Columns
+<#
+.SYNOPSIS
+Returns the result set from INFORMATION_SCHEMA.Columns for the specified database(s).
+.DESCRIPTION
+The Get-SqlInformation_Schema.Columns function returns the result set from Information_Schema.Columns for the specified database(s).
+.INPUTS
+Microsoft.SqlServer.Management.Smo.Database
+    You can pipe Database objects to Get-SqlInformation_Schema.Columns
+.OUTPUTS
+System.Data.DataRow
+    Get-SqlInformation_Schema.Columns returns an array of System.Data.DataRow.
+.EXAMPLE
+Get-SqlDatabase "Z002\sql2k8" "pubs" | Get-Information_Schema.Columns
+This command returns the result set from INFORMATION_SCHEMA.Columns for the pubs database.
+.EXAMPLE
+Get-SqlDatabase "Z002\sql2k8" "pubs" | Get-Information_Schema.Columns -tblname "authors" -colname "au_fname"
+This command returns the result set from INFORMATION_SCHEMA.Columns for the pubs database where the table name is like authors and the column name is like au_fname.
+.LINK
+Get-SqlInformation_Schema.Columns
+#>
+function Get-SqlInformation_Schema.Columns
 {
     param(
     [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database,
@@ -1361,10 +1928,30 @@ AND COLUMN_NAME LIKE '%$colname%'
 "@
             Get-SqlData -dbname $database -qry $qry
     }
-} #Get-Information_Schema.Columns
+} #Get-SqlInformation_Schema.Columns
 
 #######################
-function Get-Information_Schema.Views
+<#
+.SYNOPSIS
+Returns the result set from INFORMATION_SCHEMA.Views for the specified database(s).
+.DESCRIPTION
+The Get-SqlInformation_Schema.Views function returns the result set from Information_Schema.Views for the specified database(s).
+.INPUTS
+Microsoft.SqlServer.Management.Smo.Database
+    You can pipe Database objects to Get-SqlInformation_Schema.Views
+.OUTPUTS
+System.Data.DataRow
+    Get-SqlInformation_Schema.Views returns an array of System.Data.DataRow.
+.EXAMPLE
+Get-SqlDatabase "Z002\sql2k8" "pubs" | Get-Information_Schema.Views
+This command returns the result set from INFORMATION_SCHEMA.Views for the pubs database.
+.EXAMPLE
+Get-SqlDatabase "Z002\sql2k8" "pubs" | Get-Information_Schema.Views -name "titleview"
+This command returns the result set from INFORMATION_SCHEMA.Views for the pubs database where the view name is like titleview.
+.LINK
+Get-SqlInformation_Schema.Views
+#>
+function Get-SqlInformation_Schema.Views
 {
     param(
     [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database,
@@ -1380,10 +1967,30 @@ AND OBJECTPROPERTY(OBJECT_ID('['+TABLE_SCHEMA+'].['+TABLE_NAME+']'),'IsMSShipped
 "@
             Get-SqlData -dbname $database -qry $qry
     }
-} #Get-Information_Schema.Views
+} #Get-SqlInformation_Schema.Views
 
 #######################
-function Get-Information_Schema.Routines
+<#
+.SYNOPSIS
+Returns the result set from INFORMATION_SCHEMA.Routines for the specified database(s).
+.DESCRIPTION
+The Get-SqlInformation_Schema.Routines function returns the result set from Information_Schema.Routines for the specified database(s).
+.INPUTS
+Microsoft.SqlServer.Management.Smo.Database
+    You can pipe Database objects to Get-SqlInformation_Schema.Routines
+.OUTPUTS
+System.Data.DataRow
+    Get-SqlInformation_Schema.Routines returns an array of System.Data.DataRow.
+.EXAMPLE
+Get-SqlDatabase "Z002\sql2k8" "pubs" | Get-Information_Schema.Routines
+This command returns the result set from INFORMATION_SCHEMA.Routines for the pubs database.
+.EXAMPLE
+Get-SqlDatabase "Z002\sql2k8" "pubs" | Get-Information_Schema.Routines -name "reptq1"
+This command returns the result set from INFORMATION_SCHEMA.Routines for the pubs database where the routine name is like reptq1.
+.LINK
+Get-SqlInformation_Schema.Routines
+#>
+function Get-SqlInformation_Schema.Routines
 {
     param(
     [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database,
@@ -1402,10 +2009,30 @@ AND ROUTINE_DEFINITION LIKE '%$text%'
 "@
             Get-SqlData -dbname $database -qry $qry
     }
-} #Get-Information_Schema.Routines
+} #Get-SqlInformation_Schema.Routines
 
 #######################
-function Get-SysDatabases
+<#
+.SYNOPSIS
+Returns the result set from sysdatabases for the specified SQL server.
+.DESCRIPTION
+The Get-SqlSysDatabases function returns the result set from SysDatabases for the specified SQL server.
+.INPUTS
+None
+    You cannot pipe objects to Get-SqlSysDatabases
+.OUTPUTS
+System.Data.DataRow
+    Get-SqlSysDatabases returns an array of System.Data.DataRow.
+.EXAMPLE
+Get-SqlSysDatabases "Z002\sql2k8"
+This command returns the result set from SysDatabases for the Z002\sql2k8 SQL server.
+.EXAMPLE
+Get-SqlSysDatabases "Z002\sql2k8" -name "pubs"
+This command returns the result set from SysDatabases where the database name is like pubs.
+.LINK
+Get-SqlSysDatabases
+#>
+function Get-SqlSysDatabases
 {
     param(
     [Parameter(Position=0, Mandatory=$true)] $sqlserver,
@@ -1416,10 +2043,10 @@ function Get-SysDatabases
     {
         'String' { $server = Get-SqlServer $sqlserver }
         'Server' { $server = $sqlserver }
-        default { throw 'Get-SysDatabases:Param `$sqlserver must be a String or Server object.' }
+        default { throw 'Get-SqlSysDatabases:Param `$sqlserver must be a String or Server object.' }
     }
 
-    Write-Verbose "Get-SysDatabases $($server.Name)"
+    Write-Verbose "Get-SqlSysDatabases $($server.Name)"
 
     $database = Get-SqlDatabase $server 'master'
 $qry = @"
@@ -1428,9 +2055,28 @@ WHERE name LIKE '%$name%'
 "@
     Get-SqlData -dbname $database -qry $qry
 
-} #Get-SysDatabases
+} #Get-SqlSysDatabases
 
 #######################
+<#
+.SYNOPSIS
+Gets an SMO DataFile object.
+.DESCRIPTION
+The Get-SqlDataFile function  gets a collection of SMO DataFile objects for the database.
+.INPUTS
+Microsoft.SqlServer.Management.Smo.Database
+    You can pipe SMO database objects to Get-SqlDataFile 
+.OUTPUTS
+Microsoft.SqlServer.Management.Smo.DataFile
+    Get-SqlDataFile returns a Microsoft.SqlServer.Management.Smo.DataFile object.
+.NOTES
+Additional properties including the database, server and extended properties are included in the output. 
+.EXAMPLE
+Get-SqlDatabase "Z002\sql2k8" "pubs" | Get-SqlDataFile
+This command gets a collection of SMO DataFile objects for all data files in the pubs database.
+.LINK
+Get-SqlDataFile 
+#>
 function Get-SqlDataFile
 {
     param(
@@ -1452,6 +2098,25 @@ function Get-SqlDataFile
 } #Get-SqlDataFile
 
 #######################
+<#
+.SYNOPSIS
+Gets an SMO LogFile object.
+.DESCRIPTION
+The Get-SqlLogFile function  gets a collection of SMO LogFile objects for the database.
+.INPUTS
+Microsoft.SqlServer.Management.Smo.Database
+    You can pipe SMO database objects to Get-SqlLogFile 
+.OUTPUTS
+Microsoft.SqlServer.Management.Smo.LogFile
+    Get-SqlLogFile returns a Microsoft.SqlServer.Management.Smo.LogFile object.
+.NOTES
+Additional properties including the database, server and extended properties are included in the output. 
+.EXAMPLE
+Get-SqlDatabase "Z002\sql2k8" "pubs" | Get-SqlLogFile
+This command gets a collection of SMO LogFile objects for all data files in the pubs database.
+.LINK
+Get-SqlLogFile 
+#>
 function Get-SqlLogFile
 {
     param(
@@ -1472,6 +2137,23 @@ function Get-SqlLogFile
 } #Get-SqlLogFile
 
 #######################
+<#
+.SYNOPSIS
+Returns a custom object with the Server name and version number.
+.DESCRIPTION
+The Get-SqlVersion function returns a custom object with the Server name and version number for the specified SQL server.
+.INPUTS
+None
+    You cannot pipe objects to Get-SqlVersion 
+.OUTPUTS
+Selected.Microsoft.SqlServer.Management.Smo.Information
+    Get-SqlVersion returns a Selected.Microsoft.SqlServer.Management.Smo.Information object.
+.EXAMPLE
+Get-SqlVersion "Z002\sql2k8"
+This command returns SQL version information for the Z002\sql2k8 SQL Server. 
+.LINK
+Get-SqlVersion 
+#>
 function Get-SqlVersion
 {
     param(
@@ -1492,6 +2174,23 @@ function Get-SqlVersion
 }#Get-SqlVersion
 
 #######################
+<#
+.SYNOPSIS
+Uses SQL-DMO to return the port number of the specified SQL Server.
+.DESCRIPTION
+The Get-SqlPort function uses SQL-DMO to return the port number of the specified SQL Server for the specified SQL server.
+.INPUTS
+None
+    You cannot pipe objects to Get-SqlPort 
+.OUTPUTS
+System.Management.Automation.PSCustomObject
+    Get-SqlPort returns a System.Management.Automation.PSCustomObject object.
+.EXAMPLE
+Get-SqlPort "Z002\sql2k8" "pubs"
+This command returns SQL port information for the Z002\sql2k8 SQL Server. 
+.LINK
+Get-SqlPort 
+#>
 function Get-SqlPort
 {
     param(
@@ -1536,6 +2235,23 @@ function ConvertTo-ExtendedPropertyXML
 } #ConvertTo-ExtendedPropertyXML
 
 #######################
+<#
+.SYNOPSIS
+Uses WMI to list all of the SQL Server related services along with the service state and service account.
+.DESCRIPTION
+The Get-Sql function uses WMI to list all of the SQL Server related services running on the specified computer along with the service state and service account.
+.INPUTS
+None
+    You cannot pipe objects to Get-Sql 
+.OUTPUTS
+System.Management.Automation.PSCustomObject
+    Get-Sql returns a System.Management.Automation.PSCustomObject object.
+.EXAMPLE
+Get-Sql "Z002"
+This command returns SQL service information for the Z002 Server. 
+.LINK
+Get-Sql 
+#>
 function Get-Sql
 {
     param(
@@ -1586,6 +2302,25 @@ $ixXML += [string] "<IndexedColumn Name=`"" + $ix.Name + "`" Descending=`"" +$($
 } #ConvertTo-IndexedColumnXML
 
 #######################
+<#
+.SYNOPSIS
+Performs a database consistency check.
+.DESCRIPTION
+The Invoke-SqlDatabaseCheck function performs a database consistency check of the specified database.
+.INPUTS
+None
+    You can pipe SMO Database objects to Invoke-SqlDatabaseCheck 
+.OUTPUTS
+None
+    This function does not generate any output.
+.NOTES
+Performs the equivalent of a DBCC CHECKDB.
+.EXAMPLE
+ Get-SqlDatabase "Z002\sql2k8" "pubs" | Invoke-SqlDatabaseCheck
+This command performs a database consistency check of the pubs database. 
+.LINK
+Invoke-SqlDatabaseCheck 
+#>
 function Invoke-SqlDatabaseCheck
 {
     param(
@@ -1614,6 +2349,23 @@ function Invoke-SqlDatabaseCheck
 } #Invoke-SqlDatabaseCheck
 
 #######################
+<#
+.SYNOPSIS
+Performs a reindex.
+.DESCRIPTION
+The Invoke-SqlIndexRebuild function performs a reindex operation on the specified index. 
+.INPUTS
+None
+    You can pipe SMO Index objects to Invoke-SqlIndexRebuild 
+.OUTPUTS
+None
+    This function does not generate any output.
+.EXAMPLE
+Get-SqlDatabase "Z002\sql2k8" "pubs" | Get-SqlTable -name authors | Get-SqlIndex | Invoke-SqlIndexRebuild
+This command performs a reinidex of the authors table
+.LINK
+Invoke-SqlIndexRebuild 
+#>
 function Invoke-SqlIndexRebuild
 {
     param(
@@ -1642,6 +2394,25 @@ function Invoke-SqlIndexRebuild
 } #Invoke-SqlIndexRebuild
 
 #######################
+<#
+.SYNOPSIS
+Defragments an index.
+.DESCRIPTION
+The Invoke-SqlIndexDefrag function defragments the specified index. 
+.INPUTS
+None
+    You can pipe SMO Index objects to Invoke-SqlIndexDefrag 
+.OUTPUTS
+None
+    This function does not generate any output.
+.NOTES
+Performs the equivalent of DBCC INDEXDEFRAG
+.EXAMPLE
+Get-SqlDatabase "Z002\sql2k8" "pubs" | Get-SqlTable -name authors | Get-SqlIndex | Invoke-SqlIndexDefrag
+This command defragments the indexes of the authors table
+.LINK
+Invoke-SqlIndexDefrag 
+#>
 function Invoke-SqlIndexDefrag
 {
     param(
@@ -1670,6 +2441,25 @@ function Invoke-SqlIndexDefrag
 } #Invoke-SqlIndexDefrag
 
 #######################
+<#
+.SYNOPSIS
+Returns index fragmentation.
+.DESCRIPTION
+The Get-SqlIndexFragmentation function returns index fragmentation of the specified index. 
+.INPUTS
+None
+    You can pipe SMO Index objects to Get-SqlIndexFragmentation 
+.OUTPUTS
+System.Data.DataRow
+    Get-SqlIndexFragmentation returns an array of System.Data.DataRow.
+.NOTES
+Performs the equivalent of DBCC SHOWCONTIG
+.EXAMPLE
+Get-SqlDatabase "Z002\sql2k8" "pubs" | Get-SqlTable -name authors | Get-SqlIndex | Get-SqlIndexFragmentation
+This command gets index fragmentation of the indexes of the authors table
+.LINK
+Get-SqlIndexFragmentation 
+#>
 function Get-SqlIndexFragmentation
 {
     param(
@@ -1685,6 +2475,23 @@ function Get-SqlIndexFragmentation
 } #Get-SqlIndexFragmentation
 
 #######################
+<#
+.SYNOPSIS
+Updates statistics.
+.DESCRIPTION
+The Update-SqlStatistic function updates the specified statistic. 
+.INPUTS
+None
+    You can pipe SMO Statistic objects to Update-SqlStatistic 
+.OUTPUTS
+None
+    This function does not generate any output.
+.EXAMPLE
+Get-SqlDatabase "Z002\sql2k8" "pubs" | Get-SqlTable -name authors | Get-SqlStatistic | Update-SqlStatistic
+This command updates the SQL statistics of the authors table
+.LINK
+Update-SqlStatistic 
+#>
 function Update-SqlStatistic
 {
     param(
@@ -1724,6 +2531,23 @@ function Update-SqlStatistic
 } #Update-SqlStatistic
 
 #######################
+<#
+.SYNOPSIS
+Performs a SQL database or log backup.
+.DESCRIPTION
+The Invoke-SqlBackup function performs a SQL database or log backup of the specified database.
+.INPUTS
+None
+    You cannot pipe objects to Invoke-SqlBackup 
+.OUTPUTS
+None
+    This function does not generate any output.
+.EXAMPLE
+Invoke-SqlBackup "Z002\sql2k8" "pubs"  "C:\sqlrec\pubs.bak"
+This command backs up the pubs database to disk. 
+.LINK
+Invoke-SqlBackup 
+#>
 function Invoke-SqlBackup
 {
     param(
@@ -1785,6 +2609,26 @@ function Invoke-SqlBackup
 } #Invoke-SqlBackup
 
 #######################
+<#
+.SYNOPSIS
+Performs a SQL database or log restore.
+.DESCRIPTION
+The Invoke-SqlRestore function performs a SQL database or log restore of the specified database.
+.INPUTS
+None
+    You cannot pipe objects to Invoke-SqlRestore 
+.OUTPUTS
+None
+    This function does not generate any output.
+.EXAMPLE
+Invoke-SqlRestore "Z002\sql2k8" "pubs"  "C:\sqlrec\pubs.bak" -force
+This command restores the pubs database from disk replacing the existing database if exists.
+.EXAMPLE
+Invoke-SqlRestore "Z002\sql2k8" "NorthwindTestRestore"  "C:\sqlrec\Northwind.bak" -relocatefiles @{Northwind='C:\Program Files\Microsoft SQL Server\MSSQL10.SQL2K8\MSSQL\DATA\northwnd2.mdf'; Northwind_log='C:\Program Files\Microsoft SQL Server\MSSQL10.SQL2K8\MSSQL\DATA\northwnd2.ldf'} -force
+This command restores the Northwind database as NorthwindTestRestore, relocates database files by passing a hashtable of file names and replaces the existing database if exists.
+.LINK
+Invoke-SqlRestore 
+#>
 function Invoke-SqlRestore
 {
     param(
@@ -1851,6 +2695,23 @@ function Invoke-SqlRestore
 } #Invoke-SqlRestore
 
 #######################
+<#
+.SYNOPSIS
+Removes a database from a SQL Server.
+.DESCRIPTION
+The Remove-SqlDatabase function removes the specified database from SQL Server.
+.INPUTS
+None
+    You cannot pipe objects to Remove-SqlDatabase 
+.OUTPUTS
+None
+    This function does not generate any output.
+.EXAMPLE
+Remove-SqlDatabase "Z002\sql2k8" "NorthwindTestRestore"
+This command removes the NorthwindTestRestore database. 
+.LINK
+Remove-SqlDatabase 
+#>
 function Remove-SqlDatabase
 {
     
@@ -1878,6 +2739,29 @@ function Remove-SqlDatabase
 } #Remove-SqlDatabase
 
 #######################
+<#
+.SYNOPSIS
+Adds a new filegroup to a database.
+.DESCRIPTION
+The Add-SqlFileGroup function Adds a new filegroup to the specified database.
+.INPUTS
+None
+    You cannot pipe objects to Add-SqlFileGroup 
+.OUTPUTS
+Microsoft.SqlServer.Management.Smo.FileGroup
+    Add-SqlFileGroup returns an Microsoft.SqlServer.Management.Smo.FileGroup object.
+.NOTES
+Add-SqlFileGroup is used by Add-SqlDatabase.
+.EXAMPLE
+$database = Get-SqlDatabase "Z002\sql2k8" "pubs"
+Add-SqlFileGroup $database 'FileGroup2'
+$database.Alter()
+This command adds the filegroup FileGroup2 to the pubs database. 
+.LINK
+Add-SqlFileGroup 
+Add-SqlDatabase
+Get-SqlDatabase
+#>
 function Add-SqlFileGroup
 {
     param(
@@ -1907,6 +2791,31 @@ function Add-SqlFileGroup
 } #Add-SqlFileGroup
 
 #######################
+<#
+.SYNOPSIS
+Adds a new dataFile to a filegroup.
+.DESCRIPTION
+The Add-SqlDataFile function adds a new DataFile to the specified filegroup.
+.INPUTS
+None
+    You cannot pipe objects to Add-SqlDataFile 
+.OUTPUTS
+Microsoft.SqlServer.Management.Smo.DataFile
+    Add-SqlDataFile returns an Microsoft.SqlServer.Management.Smo.DataFile object.
+.NOTES
+Add-SqlDataFile is used by Add-SqlDatabase.
+.EXAMPLE
+$database = Get-SqlDatabase "Z002\sql2k8" "pubs"
+$fileGroup = Add-SqlFileGroup $database 'FileGroup2'
+Add-SqlDataFile -filegroup $fileGroup -name 'pubs_DataFile1'  -filepath 'C:\Program Files\Microsoft SQL Server\MSSQL10.SQL2K8\MSSQL\DATA\pubs_DataFile1.ndf'
+$database.Alter()
+This command adds the DataFile DataFile2 to the pubs database. 
+.LINK
+Add-SqlDataFile 
+Add-SqlFileGroup
+Add-SqlDatabase
+Get-SqlDatabase
+#>
 function Add-SqlDataFile
 {
     param(
@@ -1950,6 +2859,29 @@ function Add-SqlDataFile
 } #Add-SqlDataFile
 
 #######################
+<#
+.SYNOPSIS
+Adds a new LogFile to a database.
+.DESCRIPTION
+The Add-SqlLogFile function adds a new LogFile to the specified database.
+.INPUTS
+None
+    You cannot pipe objects to Add-SqlLogFile 
+.OUTPUTS
+Microsoft.SqlServer.Management.Smo.LogFile
+    Add-SqlLogFile returns an Microsoft.SqlServer.Management.Smo.LogFile object.
+.NOTES
+Add-SqlLogFile is used by Add-SqlDatabase.
+.EXAMPLE
+$database = Get-SqlDatabase "Z002\sql2k8" "pubs"
+Add-SqlLogFile -database $database -name 'pubs_LogFile1' -filepath 'C:\Program Files\Microsoft SQL Server\MSSQL10.SQL2K8\MSSQL\DATA\pubs_LogFile1.ldf'
+$database.Alter()
+This command adds the LogFile LogFile2 to the pubs database. 
+.LINK
+Add-SqlLogFile 
+Add-SqlDatabase
+Get-SqlDatabase
+#>
 function Add-SqlLogFile
 {
     param(
@@ -1992,6 +2924,23 @@ function Add-SqlLogFile
 } #Add-SqlLogFile
 
 #######################
+<#
+.SYNOPSIS
+Adds a new database to a SQL Server.
+.DESCRIPTION
+The Add-SqlDatabase function Adds a new database to the specified SQL Server.
+.INPUTS
+None
+    You cannot pipe objects to Add-SqlDatabase 
+.OUTPUTS
+None
+    This function does not generate any output.
+.EXAMPLE
+Add-SqlDatabase "Z002\sql2k8" "NorthwindCopy"
+This command adds the NorthwindCopy database to the Z002\sql2k8 server. 
+.LINK
+Add-SqlDatabase 
+#>
 function Add-SqlDatabase
 {
     param(
@@ -2059,6 +3008,30 @@ Add-SqlLogFile -database $database -name $logName -filepath $logFilePath -size $
 } #Add-SqlDatabase
 
 #######################
+<#
+.SYNOPSIS
+Returns the default location for data and log files for a SQL Server.
+.DESCRIPTION
+The Get-SqlDefaultDir function returns the default location for data and log files for the specified SQL Server.
+.INPUTS
+None
+    You cannot pipe objects to Get-SqlDefaultDir 
+.OUTPUTS
+System.String
+    Get-SqlDefaultDir returns a System.Stringt.
+.NOTES
+The DefaultFile and DefaultLog properties are only written to registry if you modify the properties in SSMS
+even setting the properties to same value will create the registry keys. If the properties have not been created
+Get-SqlDefaultDir will use the InstallDataDirectory properties. This seems to recreate how SSMS works.
+.EXAMPLE
+Get-SqlDefaultDir "Z002\sql2k8" "Data"
+This command returns the default data directory for the Z002\sql2k8 server.
+.EXAMPLE
+Get-SqlDefaultDir "Z002\sql2k8" "Log"
+This command returns the default log directory for the Z002\sql2k8 server.
+.LINK
+Get-SqlDefaultDir 
+#>
 function Get-SqlDefaultDir
 {
     param(
@@ -2076,10 +3049,7 @@ function Get-SqlDefaultDir
 
     Write-Verbose "Get-SqlDefaultDir $($server.Name)"
     
-    #The DefaultFile and DefaultLog properties are only written to registry if you modify the properties in SSMS
-    #even setting the properties to same value will create the registry keys.
-    #If the properties have not been created use the InstallDataDirectory properties. This seems to recreate how
-    #SSMS works. I thought about adding this properties to the server object in Get-SqlServer, but felt it was important
+    #I thought about adding this properties to the server object in Get-SqlServer, but felt it was important
     #not to mask whether the default directories had been set or not. You should always set the default directories as
     #a configuration task
     switch ($dirtype)
@@ -2091,6 +3061,27 @@ function Get-SqlDefaultDir
 } #Get-SqlDefaultDir
 
 #######################
+<#
+.SYNOPSIS
+Adds a new user to a database.
+.DESCRIPTION
+The Add-SqlUser function adds a new user to the specified database.
+.INPUTS
+None
+    You cannot pipe objects to Add-SqlUser
+.OUTPUTS
+None
+    This function does not generate any output.
+.EXAMPLE
+Add-SqlUser "Z002\sql2k8" "pubs" "TestPSUnit"
+This command adds the TestPSUnit login to the pubs database.
+.EXAMPLE
+$database = Get-SqlDatabase "Z002\sql2k8" "pubs"
+Add-SqlUser -dbname $database "TestPSUnit"
+This command adds the TestPSUnit login to the pubs database.
+.LINK
+Add-SqlUser 
+#>
 function Add-SqlUser
 {
     param(
@@ -2131,6 +3122,27 @@ function Add-SqlUser
 } #Add-SqlUser
 
 #######################
+<#
+.SYNOPSIS
+Removes a user from a database.
+.DESCRIPTION
+The Remove-SqlUser function removes a user from the specified database.
+.INPUTS
+None
+    You cannot pipe objects to Remove-SqlUser
+.OUTPUTS
+None
+    This function does not generate any output.
+.EXAMPLE
+Remove-SqlUser "Z002\sql2k8" "pubs" "TestPSUnit"
+This command Removes the TestPSUnit user from the pubs database.
+.EXAMPLE
+$database = Get-SqlDatabase "Z002\sql2k8" "pubs"
+Remove-SqlUser -dbname $database "TestPSUnit"
+This command Removes the TestPSUnit user from the pubs database.
+.LINK
+Remove-SqlUser 
+#>
 function Remove-SqlUser
 {
     param(
@@ -2157,6 +3169,27 @@ function Remove-SqlUser
 } #Remove-SqlUser
 
 #######################
+<#
+.SYNOPSIS
+Adds a login to a SQL Server.
+.DESCRIPTION
+The Add-SqlLogin function adds a new login to the specified SQL server.
+.INPUTS
+None
+    You cannot pipe objects to Add-SqlLogin
+.OUTPUTS
+None
+    This function does not generate any output.
+.EXAMPLE
+Add-SqlLogin "Z002\sql2k8" "TestPSUnit" "SQLPSXTesting" 'SqlLogin' 
+This command adds the TestPSUnit login to the Z002\sql2k8 server.
+.EXAMPLE
+$server = Get-SqlServer "Z002\sql2k8"
+Add-SqlLogin $server "TestPSUnit" "SQLPSXTesting" 'SqlLogin'
+This command adds the TestPSUnit login to the Z002\sql2k8 server.
+.LINK
+Add-SqlLogin 
+#>
 function Add-SqlLogin
 {
     param(
@@ -2222,6 +3255,27 @@ function Add-SqlLogin
 } #Add-SqlLogin
 
 #######################
+<#
+.SYNOPSIS
+Removes a login from a SQL Server.
+.DESCRIPTION
+The Remove-SqlLogin function removes a login from the specified SQL server.
+.INPUTS
+None
+    You cannot pipe objects to Remove-SqlLogin
+.OUTPUTS
+None
+    This function does not generate any output.
+.EXAMPLE
+Remove-SqlLogin "Z002\sql2k8" "TestPSUnit"
+This command removes the TestPSUnit login from the Z002\sql2k8 server.
+.EXAMPLE
+$server = Get-SqlServer "Z002\sql2k8"
+Remove-SqlLogin $server "TestPSUnit"
+This command removes the TestPSUnit login from the Z002\sql2k8 server.
+.LINK
+Remove-SqlLogin 
+#>
 function Remove-SqlLogin
 {
 
@@ -2248,6 +3302,27 @@ function Remove-SqlLogin
 } #Remove-SqlLogin
 
 #######################
+<#
+.SYNOPSIS
+Adds a login to a server role.
+.DESCRIPTION
+The Add-SqlServerRoleMember function adds a login to the specified server role.
+.INPUTS
+None
+    You cannot pipe objects to Add-SqlServerRoleMember
+.OUTPUTS
+None
+    This function does not generate any output.
+.EXAMPLE
+Add-SqlServerRoleMember "Z002\sql2k8" "TestPSUnit" "bulkadmin"
+This command adds the TestPSUnit login to the bulkadmin server role.
+.EXAMPLE
+$server = Get-SqlServer "Z002\sql2k8"
+Add-SqlServerRoleMember $server "TestPSUnit" "bulkadmin"
+This command adds the TestPSUnit login to the bulkadmin server role.
+.LINK
+Add-SqlServerRoleMember 
+#>
 function Add-SqlServerRoleMember
 {
     param(
@@ -2280,6 +3355,27 @@ function Add-SqlServerRoleMember
 } #Add-SqlServerRoleMember
 
 #######################
+<#
+.SYNOPSIS
+Removes a login from a server role.
+.DESCRIPTION
+The Remove-SqlServerRoleMember function removes a login from the specified server role.
+.INPUTS
+None
+    You cannot pipe objects to Remove-SqlServerRoleMember
+.OUTPUTS
+None
+    This function does not generate any output.
+.EXAMPLE
+Remove-SqlServerRoleMember "Z002\sql2k8" "TestPSUnit" "bulkadmin"
+This command Removes the TestPSUnit login from the bulkadmin server role.
+.EXAMPLE
+$server = Get-SqlServer "Z002\sql2k8"
+Remove-SqlServerRoleMember $server "TestPSUnit" "bulkadmin"
+This command Removes the TestPSUnit login from the bulkadmin server role.
+.LINK
+Remove-SqlServerRoleMember 
+#>
 function Remove-SqlServerRoleMember
 {
     param(
@@ -2312,6 +3408,27 @@ function Remove-SqlServerRoleMember
 } #Remove-SqlServerRoleMember
 
 #######################
+<#
+.SYNOPSIS
+Adds a new database role to a database.
+.DESCRIPTION
+The Add-SqlDatabaseRole function adds a new database role to the specified database.
+.INPUTS
+None
+    You cannot pipe objects to Add-SqlDatabaseRole
+.OUTPUTS
+None
+    This function does not generate any output.
+.EXAMPLE
+Add-SqlDatabaseRole "Z002\sql2k8" "pubs" "TestPSUnitDBRole"
+This command adds the TestPSUnitDBRole role to the pubs database.
+.EXAMPLE
+$database = Get-SqlDatabase "Z002\sql2k8" "pubs"
+Add-SqlDatabaseRole -dbname $database -name "TestPSUnitDBRole"
+This command adds the TestPSUnitDBRole role to the pubs database.
+.LINK
+Add-SqlDatabaseRole 
+#>
 function Add-SqlDatabaseRole
 {
     param(
@@ -2340,6 +3457,27 @@ function Add-SqlDatabaseRole
 } #Add-SqlDatabaseRole
 
 #######################
+<#
+.SYNOPSIS
+Removes a database role from a database.
+.DESCRIPTION
+The Remove-SqlDatabaseRole function removes a new database role from the specified database.
+.INPUTS
+None
+    You cannot pipe objects to Remove-SqlDatabaseRole
+.OUTPUTS
+None
+    This function does not generate any output.
+.EXAMPLE
+Remove-SqlDatabaseRole "Z002\sql2k8" "pubs" "TestPSUnitDBRole"
+This command Removes the TestPSUnitDBRole role from the pubs database.
+.EXAMPLE
+$database = Get-SqlDatabase "Z002\sql2k8" "pubs"
+Remove-SqlDatabaseRole -dbname $database -name "TestPSUnitDBRole"
+This command Removes the TestPSUnitDBRole role from the pubs database.
+.LINK
+Remove-SqlDatabaseRole 
+#>
 function Remove-SqlDatabaseRole
 {
     param(
@@ -2367,6 +3505,27 @@ function Remove-SqlDatabaseRole
 } #Remove-SqlDatabaseRole
 
 #######################
+<#
+.SYNOPSIS
+Adds a user or role to a database role.
+.DESCRIPTION
+The Add-SqlDatabaseRoleMember function adds a user or role to the specified database role.
+.INPUTS
+None
+    You cannot pipe objects to Add-SqlDatabaseRoleMember
+.OUTPUTS
+None
+    This function does not generate any output.
+.EXAMPLE
+Add-SqlDatabaseRoleMember "Z002\sql2k8" "pubs" "TestPSUnit" "TestPSUnitDBRole" 
+This command adds the TestUnit user to the TestPSUnitDBRole database role.
+.EXAMPLE
+$database = Get-SqlDatabase "Z002\sql2k8" "pubs"
+Add-SqlDatabaseRoleMember -dbname $database -name "TestPSUnit" -rolename "TestPSUnitDBRole" 
+This command adds the TestUnit user to the TestPSUnitDBRole database role.
+.LINK
+Add-SqlDatabaseRoleMember 
+#>
 function Add-SqlDatabaseRoleMember
 {
     param(
@@ -2400,6 +3559,27 @@ function Add-SqlDatabaseRoleMember
 } #Add-SqlDatabaseRoleMember
 
 #######################
+<#
+.SYNOPSIS
+Removes a user or role from a database role.
+.DESCRIPTION
+The Remove-SqlDatabaseRoleMember function removes a user or role from the specified database role.
+.INPUTS
+None
+    You cannot pipe objects to Remove-SqlDatabaseRoleMember
+.OUTPUTS
+None
+    This function does not generate any output.
+.EXAMPLE
+Remove-SqlDatabaseRoleMember "Z002\sql2k8" "pubs" "TestPSUnit" "TestPSUnitDBRole" 
+This command removes the TestUnit user to the TestPSUnitDBRole database role.
+.EXAMPLE
+$database = Get-SqlDatabase "Z002\sql2k8" "pubs"
+Remove-SqlDatabaseRoleMember -dbname $database -name "TestPSUnit" -rolename "TestPSUnitDBRole" 
+This command removes the TestUnit user to the TestPSUnitDBRole database role.
+.LINK
+Remove-SqlDatabaseRoleMember 
+#>
 function Remove-SqlDatabaseRoleMember
 {
     param(
@@ -2433,6 +3613,27 @@ function Remove-SqlDatabaseRoleMember
 } #Remove-SqlDatabaseRoleMember
 
 #######################
+<#
+.SYNOPSIS
+Sets a server level permissions.
+.DESCRIPTION
+The Set-SqlServerPermission function sets a server permission.
+.INPUTS
+None
+    You cannot pipe objects to Set-SqlServerPermission
+.OUTPUTS
+None
+    This function does not generate any output.
+.EXAMPLE
+Set-SqlServerPermission "Z002\sql2k8" "ViewServerState" "TestPSUnit" "Grant" 
+This command grants ViewServerState permission to the TestPSUnit login.
+.EXAMPLE
+$server = Get-SqlServer "Z002\sql2k8"
+Set-SqlServerPermission $server "ViewServerState" "TestPSUnit" "Grant"
+This command grants ViewServerState permission to the TestPSUnit login.
+.LINK
+Set-SqlServerPermission 
+#>
 function Set-SqlServerPermission
 {
     param(
@@ -2476,6 +3677,27 @@ function Set-SqlServerPermission
 } #Set-SqlServerPermission
 
 #######################
+<#
+.SYNOPSIS
+Sets database level permissions.
+.DESCRIPTION
+The Set-SqlDatabasePermission function sets database level permissions.
+.INPUTS
+None
+    You cannot pipe objects to Set-SqlDatabasePermission
+.OUTPUTS
+None
+    This function does not generate any output.
+.EXAMPLE
+Set-SqlDatabasePermission -sqlserver "Z002\sql2k8" -dbname $database -permission "ViewDefinition" -name "TestPSUnit" -action "Grant"
+This command grants ViewDefinition permission to the TestPSUnit user.
+.EXAMPLE
+$database = Get-SqlDatabase "Z002\sql2k8" "pubs"
+Set-SqlDatabasePermission -dbname $database -permission "ViewDefinition" -name "TestPSUnit" -action "Grant"
+This command grants ViewDefinition permission to the TestPSUnit user.
+.LINK
+Set-SqlDatabasePermission 
+#>
 function Set-SqlDatabasePermission
 {
     param(
@@ -2524,6 +3746,24 @@ function Set-SqlDatabasePermission
 } #Set-SqlDatabasePermission
 
 #######################
+<#
+.SYNOPSIS
+Sets database object level permissions.
+.DESCRIPTION
+The Set-SqlObjectPermission function sets database object level permissions.
+.INPUTS
+Microsoft.SqlServer.Management.Smo.*
+    You can pipe SMO objects to Set-SqlObjectPermission
+.OUTPUTS
+None
+    This function does not generate any output.
+.EXAMPLE
+$database = Get-SqlDatabase "Z002\sql2k8" "pubs"
+$database | get-sqlschema -name dbo | set-sqlobjectpermission -permission Select -name TestPSUnit -action Grant
+This command grants select permission on the dbo schema to the TestPSUnit user.
+.LINK
+Set-SqlObjectPermission 
+#>
 function Set-SqlObjectPermission
 {
 
@@ -2561,6 +3801,31 @@ function Set-SqlObjectPermission
 } #Set-SqlObjectPermission
 
 #######################
+<#
+.SYNOPSIS
+Gets an SMO schema object.
+.DESCRIPTION
+The Get-SqlSchema function  gets a collection of SMO schema objects for the specified database.
+.INPUTS
+Microsoft.SqlServer.Management.Smo.Database
+    You can pipe SMO database objects to Get-SqlSchema 
+.OUTPUTS
+Microsoft.SqlServer.Management.Smo.Schema
+    Get-SqlSchema returns a Microsoft.SqlServer.Management.Smo.Schema object.
+.NOTES
+Additional properties including the database, server and extended properties are included in the output. 
+.EXAMPLE
+Get-SqlSchema $(Get-SqlDatabase "Z002\sql2K8" pubs)
+This command gets a collection of SMO schema objects for SQL Server Z002\SQL2K8, pubs database.
+.EXAMPLE
+Get-SqlDatabase "Z002\sql2K8" | Get-SqlSchema
+This command gets a collection of SMO schema objects for all user databases on SQL Server Z002\SQL2K8.
+.EXAMPLE
+Get-SqlDatabase "Z002\sql2K8" pubs | Get-SqlSchema -name "dbo"
+This command gets an SMO schema object for the dbo schema in the pubs database on SQL Server Z002\SQL2K8.
+.LINK
+Get-SqlSchema 
+#>
 function Get-SqlSchema
 {
     param(
@@ -2586,6 +3851,23 @@ function Get-SqlSchema
 } #Get-SqlSchema
 
 #######################
+<#
+.SYNOPSIS
+Returns the current proccesses on a SQL Server. Equivalent to sp_who.
+.DESCRIPTION
+The Get-SqlProcess function returns the current proccesses on a SQL Server. Equivalent to sp_who.
+.INPUTS
+None
+    You cannot pipe objects to Get-SqlProcess
+.OUTPUTS
+System.Data.DataRow
+    Get-SqlProcess returns an array of System.Data.DataRow.
+.EXAMPLE
+Get-SqlProcess "Z002\sql2k8"
+This command returns the current processes on the Z002\sql2k8 server.
+.LINK
+Get-SqlProcess
+#>
 function Get-SqlProcess
 {
     param(
@@ -2614,6 +3896,23 @@ function Get-SqlProcess
 } #Get-SqlProcess
 
 #######################
+<#
+.SYNOPSIS
+Returns the current open transactions for a database.
+.DESCRIPTION
+The Get-SqlTransaction function returns returns the current open transactions for a database.
+.INPUTS
+None
+    You cannot pipe objects to Get-SqlTransaction
+.OUTPUTS
+System.Data.DataRow
+    Get-SqlTransaction returns an array of System.Data.DataRow.
+.EXAMPLE
+Get-SqlTransaction "Z002\sql2k8" "pubs"
+This command returns the current open transactoin in the pubs database.
+.LINK
+Get-SqlTransaction
+#>
 function Get-SqlTransaction
 {
     param(
@@ -2635,6 +3934,23 @@ function Get-SqlTransaction
 } #Get-SqlTransaction
 
 #######################
+<#
+.SYNOPSIS
+Returns the SQL Server Errorlog.
+.DESCRIPTION
+The Get-SqlErrorLog function returns the SQL Server Errorlog.
+.INPUTS
+None
+    You cannot pipe objects to Get-SqlErrorLog
+.OUTPUTS
+System.Data.DataRow
+    Get-SqlErrorLog returns an array of System.Data.DataRow.
+.EXAMPLE
+Get-SqlErrorLog "Z002\sql2k8"
+This command returns the current SQL ErrorLog on the Z002\sql2k8 server.
+.LINK
+Get-SqlErrorLog
+#>
 function Get-SqlErrorLog
 {
     param(
@@ -2655,6 +3971,23 @@ function Get-SqlErrorLog
 } #Get-SqlErrorLog
 
 #######################
+<#
+.SYNOPSIS
+Returns a custom object with the Server name and Edition.
+.DESCRIPTION
+The Get-SqlEdition function returns a custom object with the Server name and Edition for the specified SQL server.
+.INPUTS
+None
+    You cannot pipe objects to Get-SqlEdition 
+.OUTPUTS
+Selected.Microsoft.SqlServer.Management.Smo.Information
+    Get-SqlEdition returns a Selected.Microsoft.SqlServer.Management.Smo.Information object.
+.EXAMPLE
+Get-SqlEdition "Z002\sql2k8"
+This command returns SQL Edition information for the Z002\sql2k8 SQL Server. 
+.LINK
+Get-SqlEdition 
+#>
 function Get-SqlEdition
 {
     param(
