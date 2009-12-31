@@ -11,6 +11,54 @@
 ### </Usage>
 ### </Script>
 # ---------------------------------------------------------------------------
+try {add-type -AssemblyName "Microsoft.SqlServer.ConnectionInfo, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91" -EA Stop}
+catch {add-type -AssemblyName "Microsoft.SqlServer.ConnectionInfo"}
+
+try {add-type -AssemblyName "Microsoft.SqlServer.Smo, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91" -EA Stop}
+catch {add-type -AssemblyName "Microsoft.SqlServer.Smo"; $smoVersion = 9}
+
+#######################
+function Get-SqlConnection
+{
+    param(
+    [Parameter(Position=0, Mandatory=$true)] [string]$sqlserver,
+    [Parameter(Position=1, Mandatory=$false)] [string]$username, 
+    [Parameter(Position=2, Mandatory=$false)] [string]$password
+    )
+
+    Write-Verbose "Get-SqlConnection $sqlserver"
+    
+    if($Username -and $Password)
+    { $con = new-object ("Microsoft.SqlServer.Management.Common.ServerConnection") $sqlserver,$username,$password }
+    else
+    { $con = new-object ("Microsoft.SqlServer.Management.Common.ServerConnection") $sqlserver }
+	
+    $con.Connect()
+
+    Write-Output $con
+    
+} #Get-ServerConnection
+
+#######################
+function Get-SqlServer
+{
+    param(
+    [Parameter(Position=0, Mandatory=$true)] [string]$sqlserver,
+    [Parameter(Position=1, Mandatory=$false)] [string]$username, 
+    [Parameter(Position=2, Mandatory=$false)] [string]$password
+    )
+    #When $sqlserver passed in from the SMO Name property, brackets
+    #are automatically inserted which then need to be removed
+    $sqlserver = $sqlserver -replace "\[|\]"
+
+    Write-Verbose "Get-SqlServer $sqlserver"
+
+    $con = Get-SqlConnection $sqlserver $Username $Password
+
+    $server = new-object ("Microsoft.SqlServer.Management.Smo.Server") $con
+    Write-Output $server
+    
+} #Get-SqlServer
 
 #######################
 <#

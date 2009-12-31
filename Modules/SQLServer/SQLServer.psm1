@@ -4007,3 +4007,11 @@ function Get-SqlEdition
 
 }#Get-SqlEdition
 
+#Aliases
+New-Alias -name Get-Information_Schema.Tables -value Get-SqlInformation_Schema.Tables -Description "SQLPSX Alias"
+New-Alias -name Get-Information_Schema.Columns -value Get-SqlInformation_Schema.Columns -Description "SQLPSX Alias"
+New-Alias -name Get-Information_Schema.Views -value Get-SqlInformation_Schema.Views -Description "SQLPSX Alias"
+New-Alias -name Get-Information_Schema.Routines -value Get-SqlInformation_Schema.Routines -Description "SQLPSX Alias"
+New-Alias -name Get-SysDatabases -value Get-SqlSysDatabases -Description "SQLPSX Alias"
+
+Export-ModuleMember -function * -alias *
