@@ -1,18 +1,50 @@
 Getting Started with SQLPSX
 ** NOTE: You must have SMO installed to run the SQLPSX, SMO is installed with SQL Server Management Studio ***
-1. Copy all Library and Script files to the same directory. Add sourcing of Library Files to
-   your Profile if desired
+** Powershell 2.0 is required **
+1. Copy all Modules to %USERPROFILE%\Documents\WindowsPowershell\Modules and Script files to the your any directory. 
+2. Run import-module 
+    import-module SQLServer
+    import-module Agent
+    import-module Repl
+    import-module SSIS
+    import-module SQLParser
+    import-module Showmbrs
+3. Add import-module commands to your Profile if desired
 
 Optional Database and Reporting Services Components
-2. Create a database, for example SQLPSX and run the SQLPSX.AllObject.sql script to create the all database objects
-3. Modify SSRS Data Source file SQLPSX.rds to point to the newly created database
-4. Deploy the SSRS reports and Data Source files to a SSRS Server or run locally
-5. Modify Run-SmoToCsvFile.ps1, Write-SmoCsvToDb.ps1 and Write-SmoToCsvFile.ps1 scripts with your parameters
-6. Insert the SQL Server instances you wish to report into the SqlServer table
-7. Run Run-SmoToCsvFile.ps1 to create csv files of all available security information
-8. Run Write-SmoToCsvFile.ps1 to import the csv file into the database
+4. Create a database, for example SQLPSX and run the SQLPSX.AllObject.sql script to create the all database objects
+5. Modify SSRS Data Source file SQLPSX.rds to point to the newly created database
+6. Deploy the SSRS reports and Data Source files to a SSRS Server or run locally
+7. Modify Run-SmoToCsvFile.ps1, Write-SmoCsvToDb.ps1 and Write-SmoToCsvFile.ps1 scripts with your parameters
+8. Insert the SQL Server instances you wish to report into the SqlServer table
+9. Run Run-SmoToCsvFile.ps1 to create csv files of all available security information
+10. Run Write-SmoToCsvFile.ps1 to import the csv file into the database
 
 What's New
+    Version 2.0
+        Converted function libraries and snapins to modules
+        Created comment-based help for all functions
+        Made helper functions private through use of module manifests (psd1 files)
+        Converted functions to advanced functions with parameter bindings
+        Refactored code to use Powershell V2 features:
+            try/catch
+            valuefrompipeline
+            validatescript
+            validateset
+            new-object -property hashtable
+            add-type
+        Renamed Set-SqlScriptingOptions to New-SqlScriptingOptions
+        Renamed Get-ReplScriptOptions to New-ReplScriptOptions
+        Removed scriptopts and replscriptopts text files in favor of script option objects
+        Moved Get-InvalidLogins.ps1 and Get-SessionTimeStamp.ps1 into SQLServer module
+        Removed Init-SqlParser.ps1 script (not needed since SQLParser is now a module)
+        Added new ADO.NET module
+        Added format file for SSIS packages
+        More rigorous testing was performed using PSUnit testing framework
+        Fixed issues discovered in testing
+        Added 5 aliases for Information_Schema and sysdatabases functions. These functions were renamed with a Get-Sql* prefix
+        All parameters are strongly typed where possible
+                        
     Version 1.6
         Get-SqlConnection
         Maintenane Release
@@ -53,15 +85,13 @@ What's New
         Get-Information_Schema.Columns Get-Information_Schema.Views Get-Information_Schema.Routines Get-SysDatabases Get-SqlDataFile Get-SqlLogFile
         Get-SqlVersion Get-SqlPort ConvertTo-ExtendedPropertyXML Get-Sql ConvertTo-StatisticColumnXML ConvertTo-IndexedColumnXML
 
-Snap-ins
-    SqlParser
+Modules
+    SqlParser Module cmdlets
         Test-SqlScript
             Determines whether a SQL script is valid.
         Out-SqlScript
             Sends out to the host as a SQL script.
-
-Libraries
-    LibrarySmo.ps1 functions
+    SQLServer Module functions
         Get-SqlServer
             Returns a Microsoft.SqlServer.Management.Smo.Server Object
         Get-SqlDatabase
@@ -75,19 +105,13 @@ Libraries
         Get-SqlUser
             Returns a SMO User object with additional properties including all of the objects owned by the user
             and the effective members of the user. Recursively enumerates nested AD/local groups
-        Get-SqlUserMember
-            Helper function enumerates effective members of a user.
         Get-SqlDatabaseRole
             Returns a SMO DatabaseRole object with additional properties including the effective members of a
             role recursively enumerates nested roles, and users
-        Get-SqlDatabaseRoleMember
-            Helper function enumerates effective members of a role
         Get-SqlLogin
             Returns a SMO Login object with additional properties including the effective members of the login
         Get-SqlLinkedServerLogin
             Returns a SMO LinkedServerLogin object with additional properties including LinkedServer and DataSource
-        Get-SqlLoginMember
-            Helper function enumerates effective members of a login
         Get-SqlServerRole
             Returns a SMO ServerRole object with additional properties including the effective members of a role.
             Recursively enumerates nested AD/local groups
@@ -124,20 +148,20 @@ Libraries
             Returns a SMO Check object with additional properites. Note: A Check can have either a Table or View parent object.
         Get-SqlForeignKey
             Returns a SMO ForeignKey object with additional properites
-        Set-SqlScriptingOptions
+        New-SqlScriptingOptions
             Sets scripting option used in Get-SqlScripter function by reading in the text file scriptopts.txt
         Get-SqlScripter
             Returns a SMO Scripter object. Any function which returns a SMO object can pipe to Get-SqlScripter. For example to script out all table
             in the pubs database: Get-SqlDatabase MyServer | Get-SqlTable | Get-SqlScripter
-        Get-Information_Schema.Tables
+        Get-SqlInformation_Schema.Tables
             Returns the result set from INFORMATION_SCHEMA.Tables for the specified database(s) along with the Server name
-        Get-Information_Schema.Columns
+        Get-SqlInformation_Schema.Columns
             Returns the result set from INFORMATION_SCHEMA.Columns for the specified database(s) along with the Server name
-        Get-Information_Schema.Views
+        Get-SqlInformation_Schema.Views
             Returns the result set from INFORMATION_SCHEMA.Views for the specified database(s) along with the Server name
-        Get-Information_Schema.Routines
+        Get-SqlInformation_Schema.Routines
             Returns the result set from INFORMATION_SCHEMA.Routines for the specified database(s) along with the Server name
-        Get-SysDatabases
+        Get-SqlSysDatabases
             Returns the result set from sysdatases for the specified server along with the Server name
         Get-SqlDataFile
             Returns a SMO DataFile object with additional properties
@@ -147,14 +171,8 @@ Libraries
             Returns a custom object with the Server name and version number
         Get-SqlPort
             Uses SQL-DMO to return the port number of the specified SQL Server
-        ConvertTo-ExtendedPropertyXML
-            Helper function returns XML representation of the Extended Properties of a SMO object
         Get-Sql
             Uses WMI to list all of the SQL Server related services running on the specified computer along with the service state and service account
-        ConvertTo-StatisticColumnXML
-            Helper function returns XML representation of the Statistic Columns of a SMO Statistic object
-        ConvertTo-IndexedColumnXML
-            Helper function returns XML representation of the Indexed Columns of a SMO Index object
         Invoke-SqlBackup (Database,Log)
             Performs a SQL Backup
         Invoke-SqlRestore (Database, Log)
@@ -217,7 +235,7 @@ Libraries
             Returns the current open transactions for a database
         Get-SqlEdition
             Returns the SQL Server edition
-    LibraryAgent.ps1 functions
+    Agent Module functions
         Get-AgentJobServer
             Returns a Microsoft.SqlServer.Management.Smo.Agent.JobServer Object. This is the top level object for Agent.Smo
         Get-AgentAlertCategory
@@ -246,7 +264,7 @@ Libraries
             Sets filtering option used in Get-AgentJobHistory function
         Get-AgentJobHistory
             Returns an array of System.Data.DataRow of job history, filtering can be applied by using the Set-AgentJobHistoryFilter function
-    LibraryRmo.ps1 functions
+    Repl Module functions
         Get-SqlConnection
             Returns a ServerConnection object
         Get-ReplServer
@@ -285,12 +303,12 @@ Libraries
             Calls the EnumLogReaderReader method on a PublicationMonitor object
         Get-ReplEnumSnapshotAgent
             Calls the EnumSnapshotAgent method on a PublicationMonitor object
-        Set-ReplScriptOptions
+        New-ReplScriptOptions
             Sets the Enum ScriptOptions for scripting RMO objects. Unlike SMO which has a default script options
             RMO at at a minimum CREATION enum must be specified.
         Get-ReplScript
             Calls Script Method on RMO objects include ReplicationServer, Publication, Subscription and Articles
-    LibrarySSIS.ps1 functions:
+    SSIS Module functions:
         Copy-ISItemSQLToSQL
             Copies a Package or SSIS folder from SQL to SQL
         Copy-ISItemSQLToFile
@@ -349,12 +367,6 @@ Scripts
         Load the SMO Csv file into the specified database
     Write-SmoToCsvFile.ps1
         Generates an a csv file for all SQL Server security settings
-    scriptopts.txt
-        Scripting options file for SMO
-    replscriptopts.txt
-        Scripting options file for RMO
-    Init-SqlParser.ps1
-        Initializes the SqlParser snap-in
     formatsql.bat
         Simple bat file for calling powershell.exe with the command set to out-sqlscript
 
