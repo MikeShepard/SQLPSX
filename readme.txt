@@ -86,6 +86,15 @@ What's New
         Get-SqlVersion Get-SqlPort ConvertTo-ExtendedPropertyXML Get-Sql ConvertTo-StatisticColumnXML ConvertTo-IndexedColumnXML
 
 Modules
+    AdoLib Module functions
+        New-Connection
+            Create a SQLConnection object with the given parameters
+        Invoke-Sql
+            Execute a sql statement, ignoring the result set. Returns the number of rows modified by the statement (or -1 if it was not a DML staement
+        Invoke-Query
+            Execute a sql statement, returning the results of the query
+        Invoke-StoredProcedure
+            Execute a stored procedure, returning the results of the query
     SqlParser Module cmdlets
         Test-SqlScript
             Determines whether a SQL script is valid.
