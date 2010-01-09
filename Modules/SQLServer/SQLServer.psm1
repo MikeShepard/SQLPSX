@@ -144,7 +144,8 @@ function Get-SqlDatabase
 { 
     param(
     [Parameter(Position=0, Mandatory=$true)] $sqlserver,
-    [Parameter(Position=1, Mandatory=$false)] [string]$dbname
+    [Parameter(Position=1, Mandatory=$false)] [string]$dbname,
+    [Parameter(Position=2, Mandatory=$false)] [switch]$force
     )
 
     switch ($sqlserver.GetType().Name)
@@ -162,8 +163,10 @@ function Get-SqlDatabase
       else
         {throw "Database $dname does not exist or is not accessible."}
     }
-    else
+    elseif ($force)
+    { $server.Databases | where {$_.IsAccessible -eq $true} }
     #Skip systems databases
+    else
     { $server.Databases | where {$_.IsSystemObject -eq $false -and $_.IsAccessible -eq $true} }
 
 } # Get-SqlDatabase
