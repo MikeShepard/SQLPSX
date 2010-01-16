@@ -21,6 +21,9 @@ Optional Database and Reporting Services Components
 10. Run Write-SmoToCsvFile.ps1 to import the csv file into the database
 
 What's New
+    Version 2.01
+        Modified Get-SqlDatabase function to return system databases when -force parameter is used.
+        Added Invoke-DbMaintBackup to scripts
     Version 2.0
         Converted function libraries and snapins to modules
         Created comment-based help for all functions
@@ -376,6 +379,9 @@ Scripts
         Load the SMO Csv file into the specified database
     Write-SmoToCsvFile.ps1
         Generates an a csv file for all SQL Server security settings
+    Invoke-DbMaintBackup.ps1
+        Backs up all user, system or both user and system database, logs, or files. Includes logging and cleanup routines. See get-help 
+        invoke-DbMaintBackup.ps1 for details.
     formatsql.bat
         Simple bat file for calling powershell.exe with the command set to out-sqlscript
 
