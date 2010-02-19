@@ -1,7 +1,7 @@
 Getting Started with SQLPSX
 ** NOTE: You must have SMO installed to run the SQLPSX, SMO is installed with SQL Server Management Studio ***
 ** Powershell 2.0 is required **
-1. Copy all Modules to %USERPROFILE%\Documents\WindowsPowershell\Modules and Script files to the your any directory. 
+1. Copy all Modules to $env:psmodulepath directory and Script files to any directory. 
 2. Run import-module 
     import-module SQLServer
     import-module Agent
@@ -9,6 +9,8 @@ Getting Started with SQLPSX
     import-module SSIS
     import-module SQLParser
     import-module Showmbrs
+    import-module adolib
+    import-module sqlmaint
 3. Add import-module commands to your Profile if desired
 
 Optional Database and Reporting Services Components
@@ -21,6 +23,9 @@ Optional Database and Reporting Services Components
 10. Run Write-SmoToCsvFile.ps1 to import the csv file into the database
 
 What's New
+    Version 2.02
+        Added SQLMaint module.
+        Removed Invoke-DbMaintBackup script (replaced by SQLMaint module)
     Version 2.01
         Modified Get-SqlDatabase function to return system databases when -force parameter is used.
         Added Invoke-DbMaintBackup to scripts
@@ -89,6 +94,10 @@ What's New
         Get-SqlVersion Get-SqlPort ConvertTo-ExtendedPropertyXML Get-Sql ConvertTo-StatisticColumnXML ConvertTo-IndexedColumnXML
 
 Modules
+    SQLMaint Module functions
+        Invoke-DbMaint
+            Implements full database maintenance including backups, index maintenance, statistics, and backup cleanup. 
+            Equivalent to Database Maintenance Wizard
     AdoLib Module functions
         New-Connection
             Create a SQLConnection object with the given parameters
