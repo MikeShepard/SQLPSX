@@ -267,7 +267,7 @@
 				function invoke-dbmaintremoveoldbackups
 				
 				{
-					param ($RemoveOldBackups,$date,$ReportOn,$servername)
+					param ($RemoveOldBackups,$date,$BackupOn,$ReportOn,$servername)
 					
 					Write-ScriptLog $("Operation executed : Removing Old Backups Days $($RemoveOldBackups)") -date $($date)  -reporton $($ReportOn)
 					Write-ScriptLog -msg $("`n") -date $($date) -reporton $($ReportOn)
@@ -327,6 +327,7 @@
 				try 
 				{
 				
+					$ServerName = ((( $server -replace '\\','_') -replace '\[','') -replace '\]','')
 					#Clean error
 					$Error.Clear()
 					
@@ -346,7 +347,6 @@
 					
 					}
 					
-					$ServerName = ((( $server -replace '\\','_') -replace '\[','') -replace '\]','')
 					
 					# Only Backups
 					
@@ -374,7 +374,7 @@
 					
 						
 					if ($RemoveOldBackups -gt 0)
-					{ invoke-dbmaintremoveoldbackups $RemoveOldBackups $date $ReportOn $servername }
+					{ invoke-dbmaintremoveoldbackups $RemoveOldBackups $date $BackupOn $ReportOn $servername }
 						
 					
 						
@@ -383,10 +383,13 @@
 						
 					
 				} catch {
-							Write-ScriptLog $("$(get-date -format yyyy/MM/dd) : Invoke-DBMaint FAILED for $server $($_.name) Error details $($error[0])") -date $($date) -reporton $($ReportOn)
+							Write-ScriptLog $("$(get-date -format yyyy/MM/dd) :Invoke-DBMaint  FAILED for server $($ServerName) . Error details $($error[0])") -date $($date) -reporton $($ReportOn)
 				}
 				
 			}	
 			
 }
 		
+
+
+
