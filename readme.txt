@@ -11,6 +11,7 @@ Getting Started with SQLPSX
     import-module Showmbrs
     import-module adolib
     import-module sqlmaint
+    import-module sqlise (requires PowershellPack http://code.msdn.microsoft.com/PowerShellPack)
 3. Add import-module commands to your Profile if desired
 
 Optional Database and Reporting Services Components
@@ -23,6 +24,9 @@ Optional Database and Reporting Services Components
 10. Run Write-SmoToCsvFile.ps1 to import the csv file into the database
 
 What's New
+    Version 2.1
+        Add SQLIse module.
+        Minor fixes to SQLMaint module.
     Version 2.02
         Added SQLMaint module.
         Removed Invoke-DbMaintBackup script (replaced by SQLMaint module)
