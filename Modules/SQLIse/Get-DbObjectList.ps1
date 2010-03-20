@@ -98,6 +98,39 @@ BEGIN
 END;
 "@
 
+$vw = @"
+SELECT TABLE_CATALOG AS 'Database', TABLE_SCHEMA + '.' + TABLE_NAME AS 'Table'
+FROM INFORMATION_SCHEMA.VIEWS
+ORDER BY TABLE_SCHEMA, TABLE_NAME;
+"@
+
+$rtn = @"
+SELECT  SPECIFIC_SCHEMA + '.' + SPECIFIC_NAME AS 'ROUTINE_NAME',
+ROUTINE_CATALOG AS 'Database', ROUTINE_SCHEMA + '.' + ROUTINE_NAME + ' (' +
+CASE ROUTINE_TYPE
+WHEN 'PROCEDURE' THEN 'P'
+ELSE 'F'
+END + ')' AS 'Routine'
+FROM INFORMATION_SCHEMA.ROUTINES
+ORDER BY ROUTINE_TYPE, ROUTINE_SCHEMA, ROUTINE_NAME;
+"@
+
+$prm = @"
+SELECT SPECIFIC_SCHEMA + '.' + SPECIFIC_NAME AS 'ROUTINE_NAME',
+PARAMETER_NAME + ' (' + 
+CASE 
+WHEN CHARACTER_MAXIMUM_LENGTH > 0 THEN DATA_TYPE + '(' +  CAST(CHARACTER_MAXIMUM_LENGTH AS VARCHAR(4)) + ')'
+ELSE DATA_TYPE END + ',' +
+CASE PARAMETER_MODE
+WHEN 'IN' THEN 'Input'
+WHEN 'OUT' THEN 'Output'
+WHEN 'INOUT' THEN 'Input/Output'
+END + ')' AS 'Parameter'
+FROM INFORMATION_SCHEMA.PARAMETERS
+WHERE PARAMETER_NAME IS NOT NULL AND PARAMETER_NAME != ''
+ORDER BY SPECIFIC_SCHEMA, SPECIFIC_NAME, ORDINAL_POSITION;
+"@
+
 $cmd = @"
 $db
 $tbl
@@ -105,6 +138,9 @@ $col
 $pk
 $fk
 $op
+$vw
+$rtn
+$prm
 "@
 
 $connString = "Data Source=Z002\SQL2K8;Initial Catalog=AdventureWorks;Integrated Security=true;"
@@ -112,14 +148,17 @@ $connString = "Data Source=Z002\SQL2K8;Initial Catalog=AdventureWorks;Integrated
 $ds = New-Object system.Data.DataSet
 $da = New-Object system.Data.SqlClient.SqlDataAdapter($cmd,$connString)
 
-$da.TableMappings.Add("Table", "Database")
-$da.TableMappings.Add("Table1", "Table")
-$da.TableMappings.Add("Table2", "Column")
-$da.TableMappings.Add("Table3", "Keys")
-$da.TableMappings.Add("Table4", "Relations")
-$da.TableMappings.Add("Table5", "Operations")
+[void]$da.TableMappings.Add("Table", "Database")
+[void]$da.TableMappings.Add("Table1", "Table")
+[void]$da.TableMappings.Add("Table2", "Column")
+[void]$da.TableMappings.Add("Table3", "Keys")
+[void]$da.TableMappings.Add("Table4", "Relations")
+[void]$da.TableMappings.Add("Table5", "Operations")
+[void]$da.TableMappings.Add("Table6", "View")
+[void]$da.TableMappings.Add("Table7", "Routine")
+[void]$da.TableMappings.Add("Table8", "Parameter")
 
-$da.Fill($ds)
+[void]$da.Fill($ds)
 
 $database = $ds.Tables["Database"]
 $table = $ds.Tables["Table"]
@@ -127,6 +166,9 @@ $column = $ds.Tables["Column"]
 $keys = $ds.Tables["Keys"]
 $relations = $ds.Tables["Relations"]
 $operations = $ds.Tables["Operations"]
+$view = $ds.Tables["View"]
+$routine = $ds.Tables["Routine"]
+$parameter = $ds.Tables["Parameter"]
 
 $database2Table = new-object System.Data.DataRelation -ArgumentList "Database2Table",$database.Columns["Database"],$table.Columns["Database"],$false
 $ds.Relations.Add($database2Table)
@@ -142,3 +184,15 @@ $ds.Relations.Add($table2Relations)
 
 $table2Operations = new-object System.Data.DataRelation -ArgumentList "Table2Operations",$table.Columns["Table"],$operations.Columns["Table"],$false
 $ds.Relations.Add($table2Operations)
+
+$database2View = new-object System.Data.DataRelation -ArgumentList "Database2View",$database.Columns["Database"],$view.Columns["Database"],$false
+$ds.Relations.Add($database2View)
+
+$view2Column = new-object System.Data.DataRelation -ArgumentList "View2Column",$view.Columns["Table"],$column.Columns["Table"],$false
+$ds.Relations.Add($view2Column)
+
+$database2Routine = new-object System.Data.DataRelation -ArgumentList "Database2Routine",$database.Columns["Database"],$routine.Columns["Database"],$false
+$ds.Relations.Add($database2Routine)
+
+$routine2Parameter = new-object System.Data.DataRelation -ArgumentList "Routine2Parameter",$routine.Columns["ROUTINE_NAME"],$Parameter.Columns["ROUTINE_NAME"],$false
+$ds.Relations.Add($routine2Parameter)
