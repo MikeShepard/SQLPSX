@@ -57,7 +57,7 @@ param([Parameter(Position=0, Mandatory=$true)][string]$server,
 	$conn=new-object System.Data.SqlClient.SQLConnection
 	
 	if ($user -ne ''){
-		$conn.ConnectionString="Server=$server;$dbclause`User ID=[$user];Password=$password"
+		$conn.ConnectionString="Server=$server;$dbclause`User ID=$user;Password=$password"
 	} else {
 		$conn.ConnectionString="Server=$server;$dbclause`Integrated Security=True"
 	}

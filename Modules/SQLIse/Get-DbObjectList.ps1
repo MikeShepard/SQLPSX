@@ -1,7 +1,9 @@
-$db = @"
+function Get-DbObjectList
+{
+    $db = @"
 SELECT db_name() AS 'Database';
 "@
-$pk = @"
+    $pk = @"
 SELECT kcu.TABLE_SCHEMA + '.' + kcu.TABLE_NAME AS 'Table', kcu.COLUMN_NAME
 FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS AS tc
 JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS kcu
@@ -13,7 +15,7 @@ WHERE tc.CONSTRAINT_TYPE = 'PRIMARY KEY'
 ORDER BY kcu.COLUMN_NAME;
 "@
 
-$fk = @"
+    $fk = @"
 SELECT DISTINCT C.TABLE_SCHEMA + '.' + C.TABLE_NAME AS 'Table', 
 C2.TABLE_SCHEMA + '.' + C2.TABLE_NAME AS 'Relation'
 FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS C 
@@ -26,7 +28,7 @@ AND RC.UNIQUE_CONSTRAINT_NAME = C2.CONSTRAINT_NAME
 WHERE  C.CONSTRAINT_TYPE = 'FOREIGN KEY';
 "@
 
-$col = @"
+    $col = @"
 SELECT col.TABLE_SCHEMA + '.' + col.TABLE_NAME AS 'Table', COLUMN_NAME + ' (' +
 CASE WHEN CHARACTER_MAXIMUM_LENGTH > 0 THEN DATA_TYPE + '(' +  CAST(CHARACTER_MAXIMUM_LENGTH AS VARCHAR(4)) + ')'
 ELSE DATA_TYPE END + ',' +
@@ -40,7 +42,7 @@ AND OBJECTPROPERTY(OBJECT_ID('['+TABLE_SCHEMA+'].['+TABLE_NAME+']'),'IsMSShipped
 ORDER BY col.TABLE_SCHEMA, col.TABLE_NAME, ORDINAL_POSITION;
 "@
 
-$tbl = @"
+    $tbl = @"
 SELECT TABLE_CATALOG AS 'Database', TABLE_SCHEMA + '.' + TABLE_NAME AS 'Table'
 FROM INFORMATION_SCHEMA.TABLES class
 WHERE TABLE_TYPE = 'BASE TABLE'
@@ -49,7 +51,7 @@ AND TABLE_NAME NOT IN ('dtproperties','sysdiagrams')
 ORDER BY TABLE_SCHEMA, TABLE_NAME;
 "@
 
-$op = @"
+    $op = @"
 IF convert(varchar(100),serverproperty('ProductVersion')) like '8%'
 BEGIN
     SELECT 
@@ -98,13 +100,13 @@ BEGIN
 END;
 "@
 
-$vw = @"
+    $vw = @"
 SELECT TABLE_CATALOG AS 'Database', TABLE_SCHEMA + '.' + TABLE_NAME AS 'Table'
 FROM INFORMATION_SCHEMA.VIEWS
 ORDER BY TABLE_SCHEMA, TABLE_NAME;
 "@
 
-$rtn = @"
+    $rtn = @"
 SELECT  SPECIFIC_SCHEMA + '.' + SPECIFIC_NAME AS 'ROUTINE_NAME',
 ROUTINE_CATALOG AS 'Database', ROUTINE_SCHEMA + '.' + ROUTINE_NAME + ' (' +
 CASE ROUTINE_TYPE
@@ -115,7 +117,7 @@ FROM INFORMATION_SCHEMA.ROUTINES
 ORDER BY ROUTINE_TYPE, ROUTINE_SCHEMA, ROUTINE_NAME;
 "@
 
-$prm = @"
+    $prm = @"
 SELECT SPECIFIC_SCHEMA + '.' + SPECIFIC_NAME AS 'ROUTINE_NAME',
 PARAMETER_NAME + ' (' + 
 CASE 
@@ -131,7 +133,7 @@ WHERE PARAMETER_NAME IS NOT NULL AND PARAMETER_NAME != ''
 ORDER BY SPECIFIC_SCHEMA, SPECIFIC_NAME, ORDINAL_POSITION;
 "@
 
-$cmd = @"
+    $cmd = @"
 $db
 $tbl
 $col
@@ -143,56 +145,57 @@ $rtn
 $prm
 "@
 
-$connString = "Data Source=Z002\SQL2K8;Initial Catalog=AdventureWorks;Integrated Security=true;"
+    $ds = New-Object system.Data.DataSet
+    $da = New-Object system.Data.SqlClient.SqlDataAdapter($cmd,$conn)
 
-$ds = New-Object system.Data.DataSet
-$da = New-Object system.Data.SqlClient.SqlDataAdapter($cmd,$connString)
+    [void]$da.TableMappings.Add("Table", "Database")
+    [void]$da.TableMappings.Add("Table1", "Table")
+    [void]$da.TableMappings.Add("Table2", "Column")
+    [void]$da.TableMappings.Add("Table3", "Keys")
+    [void]$da.TableMappings.Add("Table4", "Relations")
+    [void]$da.TableMappings.Add("Table5", "Operations")
+    [void]$da.TableMappings.Add("Table6", "View")
+    [void]$da.TableMappings.Add("Table7", "Routine")
+    [void]$da.TableMappings.Add("Table8", "Parameter")
 
-[void]$da.TableMappings.Add("Table", "Database")
-[void]$da.TableMappings.Add("Table1", "Table")
-[void]$da.TableMappings.Add("Table2", "Column")
-[void]$da.TableMappings.Add("Table3", "Keys")
-[void]$da.TableMappings.Add("Table4", "Relations")
-[void]$da.TableMappings.Add("Table5", "Operations")
-[void]$da.TableMappings.Add("Table6", "View")
-[void]$da.TableMappings.Add("Table7", "Routine")
-[void]$da.TableMappings.Add("Table8", "Parameter")
+    [void]$da.Fill($ds)
 
-[void]$da.Fill($ds)
+    $database = $ds.Tables["Database"]
+    $table = $ds.Tables["Table"]
+    $column = $ds.Tables["Column"]
+    $keys = $ds.Tables["Keys"]
+    $relations = $ds.Tables["Relations"]
+    $operations = $ds.Tables["Operations"]
+    $view = $ds.Tables["View"]
+    $routine = $ds.Tables["Routine"]
+    $parameter = $ds.Tables["Parameter"]
 
-$database = $ds.Tables["Database"]
-$table = $ds.Tables["Table"]
-$column = $ds.Tables["Column"]
-$keys = $ds.Tables["Keys"]
-$relations = $ds.Tables["Relations"]
-$operations = $ds.Tables["Operations"]
-$view = $ds.Tables["View"]
-$routine = $ds.Tables["Routine"]
-$parameter = $ds.Tables["Parameter"]
+    $database2Table = new-object System.Data.DataRelation -ArgumentList "Database2Table",$database.Columns["Database"],$table.Columns["Database"],$false
+    $ds.Relations.Add($database2Table)
 
-$database2Table = new-object System.Data.DataRelation -ArgumentList "Database2Table",$database.Columns["Database"],$table.Columns["Database"],$false
-$ds.Relations.Add($database2Table)
+    $table2Column = new-object System.Data.DataRelation -ArgumentList "Table2Column",$table.Columns["Table"],$column.Columns["Table"],$false
+    $ds.Relations.Add($table2Column)
 
-$table2Column = new-object System.Data.DataRelation -ArgumentList "Table2Column",$table.Columns["Table"],$column.Columns["Table"],$false
-$ds.Relations.Add($table2Column)
+    $table2Keys = new-object System.Data.DataRelation -ArgumentList "Table2Keys",$table.Columns["Table"],$keys.Columns["Table"],$false
+    $ds.Relations.Add($table2Keys)
 
-$table2Keys = new-object System.Data.DataRelation -ArgumentList "Table2Keys",$table.Columns["Table"],$keys.Columns["Table"],$false
-$ds.Relations.Add($table2Keys)
+    $table2Relations = new-object System.Data.DataRelation -ArgumentList "Table2Relations",$table.Columns["Table"],$relations.Columns["Table"],$false
+    $ds.Relations.Add($table2Relations)
 
-$table2Relations = new-object System.Data.DataRelation -ArgumentList "Table2Relations",$table.Columns["Table"],$relations.Columns["Table"],$false
-$ds.Relations.Add($table2Relations)
+    $table2Operations = new-object System.Data.DataRelation -ArgumentList "Table2Operations",$table.Columns["Table"],$operations.Columns["Table"],$false
+    $ds.Relations.Add($table2Operations)
 
-$table2Operations = new-object System.Data.DataRelation -ArgumentList "Table2Operations",$table.Columns["Table"],$operations.Columns["Table"],$false
-$ds.Relations.Add($table2Operations)
+    $database2View = new-object System.Data.DataRelation -ArgumentList "Database2View",$database.Columns["Database"],$view.Columns["Database"],$false
+    $ds.Relations.Add($database2View)
 
-$database2View = new-object System.Data.DataRelation -ArgumentList "Database2View",$database.Columns["Database"],$view.Columns["Database"],$false
-$ds.Relations.Add($database2View)
+    $view2Column = new-object System.Data.DataRelation -ArgumentList "View2Column",$view.Columns["Table"],$column.Columns["Table"],$false
+    $ds.Relations.Add($view2Column)
 
-$view2Column = new-object System.Data.DataRelation -ArgumentList "View2Column",$view.Columns["Table"],$column.Columns["Table"],$false
-$ds.Relations.Add($view2Column)
+    $database2Routine = new-object System.Data.DataRelation -ArgumentList "Database2Routine",$database.Columns["Database"],$routine.Columns["Database"],$false
+    $ds.Relations.Add($database2Routine)
 
-$database2Routine = new-object System.Data.DataRelation -ArgumentList "Database2Routine",$database.Columns["Database"],$routine.Columns["Database"],$false
-$ds.Relations.Add($database2Routine)
+    $routine2Parameter = new-object System.Data.DataRelation -ArgumentList "Routine2Parameter",$routine.Columns["ROUTINE_NAME"],$Parameter.Columns["ROUTINE_NAME"],$false
+    $ds.Relations.Add($routine2Parameter)
 
-$routine2Parameter = new-object System.Data.DataRelation -ArgumentList "Routine2Parameter",$routine.Columns["ROUTINE_NAME"],$Parameter.Columns["ROUTINE_NAME"],$false
-$ds.Relations.Add($routine2Parameter)
+    $ds
+}

@@ -11,7 +11,8 @@ Getting Started with SQLPSX
     import-module Showmbrs
     import-module adolib
     import-module sqlmaint
-    import-module sqlise (requires PowershellPack http://code.msdn.microsoft.com/PowerShellPack)
+    import-module sqlise
+    import-module oracleise
 3. Add import-module commands to your Profile if desired
 
 Optional Database and Reporting Services Components
@@ -24,6 +25,17 @@ Optional Database and Reporting Services Components
 10. Run Write-SmoToCsvFile.ps1 to import the csv file into the database
 
 What's New
+    Version 2.2
+        Modifed SQLIse module
+            Added table and object browser
+            Added PoshMode (like sqlcmdmode)
+            Added ability to output to variable
+            Added saved connection feature
+        Added OracleIse module
+        Added OracleClient module used by OracleIse
+        Included WPK and ISECreamBasic modules from PowerShellPack and ISECream projects
+        Added SQLPSX installer
+        Fixed issue with adolib new-connection using SQL authentication
     Version 2.1
         Add SQLIse module.
         Minor fixes to SQLMaint module.
