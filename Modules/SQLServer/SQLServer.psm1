@@ -3108,7 +3108,8 @@ function Add-SqlUser
 
     $user = new-object ('Microsoft.SqlServer.Management.Smo.User') $database, $name
     $user.Login = $login
-    $user.DefaultSchema = $defaultschema
+	if ($db.parent.Information.Version.Major -ne '8')
+	{ $user.DefaultSchema = $defaultschema }
     try { $user.Create() }
     catch {
             $ex = $_.Exception
@@ -3222,8 +3223,11 @@ function Add-SqlLogin
     if ($logintype -eq 'SqlLogin')
     {
         $login.LoginType = $logintype
-        $login.PasswordExpirationEnabled = $($PasswordExpirationEnabled.IsPresent)
-        $login.PasswordPolicyEnforced = $($PasswordPolicyEnforced.IsPresent)
+        if ($server.Information.Version.Major -ne '8')
+		{
+			$login.PasswordExpirationEnabled = $($PasswordExpirationEnabled.IsPresent)
+        	$login.PasswordPolicyEnforced = $($PasswordPolicyEnforced.IsPresent)
+		}
         try { $login.Create($password) }
         catch {
                 $ex = $_.Exception

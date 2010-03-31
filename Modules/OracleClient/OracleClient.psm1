@@ -21,7 +21,7 @@
 . $psScriptRoot\get-commandresults.ps1
 
 
-export-modulemember  new-connection
+export-modulemember  new-oracle_connection
 # export-modulemember -function invoke-sql
-export-modulemember -function invoke-query
+export-modulemember -function invoke-oracle_query
 # export-modulemember -function invoke-storedprocedure
