@@ -194,7 +194,7 @@ function tabexpansion
                     '(?<![\$])(\w)+\.(\w*)' {
                             $base = $matches[1]
                             $pat = $matches[2] + '*'
-                            $sqlList = $psise.CurrentFile.Editor.Text
+                            $sqlList = $psise.CurrentFile.Editor.Text -split '\n'
                             $tableList = Get-TableList $sqlList
                             if ($tableList | where {$_.Object -eq $base -or $_.Alias -eq $base})
                             {
