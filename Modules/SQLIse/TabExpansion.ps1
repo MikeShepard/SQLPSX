@@ -83,8 +83,84 @@ function tabexpansion
 
                 } #Write-Parmeters
 
-                ### END CUSTOM functions for SQLIse
+                #######################
+                function Write-Columns
+                {
+                    param($base,$pat,$tableList)
 
+                    $objects = @()
+                    $pat = $pat.Trim('*')
+                    $pat = $pat + '%'
+                    $objQry = ''
+                    
+                    if ($tableList | where {$_.Alias -eq $base})
+                    { $tables = $tableList | where {$_.Alias -eq $base} } 
+                    else
+                    { $tables = $tableList | where {$_.Object -eq $base} } 
+
+                    foreach ($table in $tables)
+                    {
+                        if ($table.Database) {$objQry += "Database = '$($table.Database)' AND "}
+                        if ($table.Schema) {$objQry += "Schema = '$($table.Schema)' AND "}
+                        $objQry += "Object = '$($table.Object)' AND Column like '$pat'"
+                    }
+
+                    $global:dsDbObjects.Tables["Column"].select($objQry) | % {$objects += ,$_.Column}
+          
+                    foreach ($object in $objects)
+                    {
+                        if ($object -notmatch 'True|False')
+                        {$base + '.' + $object }
+                    }
+
+
+                } #Write-Columns
+
+                #######################
+                function Invoke-Coalesce
+                {
+                    param ($expression1, $expression2)
+
+                    if ($expression1)
+                    { $expression1 }
+                    else
+                    { $expression2 }
+
+                } #Invoke-Coalesce
+
+                ######################
+                function Get-TableList
+                {
+                    
+                    param($sqlList)
+
+                    $obj = '[\w]+|\"(?:[^\"]|\"\")+\"|\[(?:[^\]]|\]\])+\]'
+                    $re = "($obj)\.($obj)?\.($obj)(\s+AS\s+[']*(\w+)[']*)?|(?:($obj)\.)?($obj)(\s+AS\s+[']*(\w+)[']*)?"
+                    $from  = '(\bFROM\b|\bJOIN\b|\bUPDATE\b|\bINSERT\b|\bDELETE\b)\s+(.*$)'
+
+                    foreach ($sql in $sqlList)
+                    {
+                        if ($sql -match $from)
+                        {
+                            $expression = $matches[2]
+                            $expression -match $re | out-null
+                            $db = $matches[1] -replace '\[|\]|"'
+                            $schema = $(invoke-coalesce $matches[2] $matches[6]) -replace '\[|\]|"'
+                            $dbObj = $(invoke-coalesce $matches[3] $matches[7]) -replace '\[|\]|"'
+                            $alias = $(invoke-coalesce $matches[5] $matches[9])
+
+                             new-object PSObject -Property @{
+                                Database = $db
+                                Schema = $schema
+                                Object = $dbObj
+                                Alias = $alias
+                             }
+                         }
+                    }
+                   
+                } #Get-TableList
+
+                ### END CUSTOM functions for SQLIse
 
                 switch -regex ($line)
                 {
@@ -101,13 +177,12 @@ function tabexpansion
                         Write-DbObjects -base $base -objType 'Proc' -expression $expression
                         break;
                     }
-
-
                     ### END CUSTOM Code for SQLIse
                  }
-                 
+
                  switch -regex ($lastWord)
                  {
+                    ### START CUSTOM Code for SQLIse
                     '^@([*\w0-9]*)' {
                         $pat = $matches[1] + '*'
                         $line -match '(?<![\w\@\#\$])EXEC(UTE)?\s+(\@.+?=\s*)?([^(\s]+)' | out-null
@@ -115,6 +190,19 @@ function tabexpansion
                         Write-Parmeters -base $base -pat $pat
                         break;
                     }
-                 }
+                 
+                    '(?<![\$])(\w)+\.(\w*)' {
+                            $base = $matches[1]
+                            $pat = $matches[2] + '*'
+                            $sqlList = $psise.CurrentFile.Editor.Text
+                            $tableList = Get-TableList $sqlList
+                            if ($tableList | where {$_.Object -eq $base -or $_.Alias -eq $base})
+                            {
+                                Write-Columns -base $base -pat $pat -tableList $tableList
+                                break;
+                            }
+                      }
+                   }
 
-    }
+                    ### END CUSTOM Code for SQLIse
+}
