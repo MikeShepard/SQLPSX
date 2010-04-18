@@ -19,8 +19,8 @@ function Resolve-TableAlias
             $schema = $(invoke-coalesce $matches[2] $matches[5]) -replace '\[|\]|"'
             $dbObj = $(invoke-coalesce $matches[3] $matches[6]) -replace '\[|\]|"'
             $rest = $(invoke-coalesce $matches[4] $matches[7])
-            ($rest -replace "'") -match "(\s+AS)?\s+(\w+)" | out-null
-            $alias = $matches[2]
+            if ($($rest -replace "'") -match "(\s+AS)?\s+(\w+)")
+            { $alias = $matches[2] }
             
              new-object PSObject -Property @{
                 Database = $db
