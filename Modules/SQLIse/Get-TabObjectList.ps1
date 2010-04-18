@@ -65,5 +65,4 @@ $sch
 
     [void]$da.Fill($global:dsDbObjects)
 
-    $global:dsDbObject
 }

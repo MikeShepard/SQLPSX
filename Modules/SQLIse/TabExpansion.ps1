@@ -26,9 +26,9 @@ function tabexpansion
                        1 {$objQry = "Object like '$dbObj'"
                            $global:dsDbObjects.Tables["Database"].select("Database like '$dbObj'") | % {$objects += ,$_.Database}
                            $global:dsDbObjects.Tables["Schema"].select("Schema like '$dbObj'") | % {$objects += ,$_.Schema}}
-                       2 {if ($schema = $global:conn.database) {
+                       2 {if ($schema -eq $global:conn.database) {
                             $objQry = "Object = '0'" 
-                            $global:dsDbObjects.Tables["Schema"].select("Schema like '$dbObj'") | % {$objects += ,$_.Schema}}
+                           $global:dsDbObjects.Tables["Schema"].select("Schema like '$dbObj'") | % {$objects += ,$_.Schema}}
                           else {$objQry = "Schema = '$schema' and Object like '$dbObj'"}}
                        3 {if ($schema) { $objQry = "Database = '$db' and Schema = '$schema' and Object like '$dbObj'"}
                            else {$objQry = "Database = '$db' and Object like '$dbObj'"}}
@@ -86,19 +86,14 @@ function tabexpansion
                 #######################
                 function Write-Columns
                 {
-                    param($base,$pat,$tableList)
+                    param($base,$pat)
 
                     $objects = @()
                     $pat = $pat.Trim('*')
                     $pat = $pat + '%'
                     $objQry = ''
                     
-                    if ($tableList | where {$_.Alias -eq $base})
-                    { $tables = $tableList | where {$_.Alias -eq $base} } 
-                    else
-                    { $tables = $tableList | where {$_.Object -eq $base} } 
-
-                    foreach ($table in $tables)
+                    foreach ($table in  ($global:tableAlias | where {$_.Alias -eq $base -or $_.Object -eq $base} ))
                     {
                         if ($table.Database) {$objQry += "Database = '$($table.Database)' AND "}
                         if ($table.Schema) {$objQry += "Schema = '$($table.Schema)' AND "}
@@ -115,50 +110,6 @@ function tabexpansion
 
 
                 } #Write-Columns
-
-                #######################
-                function Invoke-Coalesce
-                {
-                    param ($expression1, $expression2)
-
-                    if ($expression1)
-                    { $expression1 }
-                    else
-                    { $expression2 }
-
-                } #Invoke-Coalesce
-
-                ######################
-                function Get-TableList
-                {
-                    
-                    param($sqlList)
-
-                    $obj = '[\w]+|\"(?:[^\"]|\"\")+\"|\[(?:[^\]]|\]\])+\]'
-                    $re = "($obj)\.($obj)?\.($obj)(\s+AS\s+[']*(\w+)[']*)?|(?:($obj)\.)?($obj)(\s+AS\s+[']*(\w+)[']*)?"
-                    $from  = '(\bFROM\b|\bJOIN\b|\bUPDATE\b|\bINSERT\b|\bDELETE\b)\s+(.*$)'
-
-                    foreach ($sql in $sqlList)
-                    {
-                        if ($sql -match $from)
-                        {
-                            $expression = $matches[2]
-                            $expression -match $re | out-null
-                            $db = $matches[1] -replace '\[|\]|"'
-                            $schema = $(invoke-coalesce $matches[2] $matches[6]) -replace '\[|\]|"'
-                            $dbObj = $(invoke-coalesce $matches[3] $matches[7]) -replace '\[|\]|"'
-                            $alias = $(invoke-coalesce $matches[5] $matches[9])
-
-                             new-object PSObject -Property @{
-                                Database = $db
-                                Schema = $schema
-                                Object = $dbObj
-                                Alias = $alias
-                             }
-                         }
-                    }
-                   
-                } #Get-TableList
 
                 ### END CUSTOM functions for SQLIse
 
@@ -191,17 +142,15 @@ function tabexpansion
                         break;
                     }
                  
-                    '(?<![\$])(\w)+\.(\w*)' {
-                            $base = $matches[1]
-                            $pat = $matches[2] + '*'
-                            $sqlList = $psise.CurrentFile.Editor.Text -split '\n'
-                            $tableList = Get-TableList $sqlList
-                            if ($tableList | where {$_.Object -eq $base -or $_.Alias -eq $base})
-                            {
-                                Write-Columns -base $base -pat $pat -tableList $tableList
+                    '(?<![\$])(\w)+\.(\w+)?' {
+                        if ($line -notmatch '\bFROM\b|\bJOIN\b|\bUPDATE\b|\bINSERT\b|\bDELETE\b')
+                        {
+                                $base = ($matches[0] -split '\.')[0]
+                                $pat = $matches[2] + '*'
+                                Write-Columns -base $base -pat $pat
                                 break;
-                            }
-                      }
+                        }
+                    }
                    }
 
                     ### END CUSTOM Code for SQLIse
