@@ -23,5 +23,5 @@
 
 export-modulemember  new-oracle_connection
 # export-modulemember -function invoke-sql
-export-modulemember -function invoke-oracle_query
+export-modulemember -function invoke-oracle_query,ConvertTo-oracleDataSource
 # export-modulemember -function invoke-storedprocedure
