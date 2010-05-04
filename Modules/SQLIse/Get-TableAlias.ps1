@@ -6,8 +6,7 @@ function Resolve-TableAlias
 
     $obj = '[\w]+|\"(?:[^\"]|\"\")+\"|\[(?:[^\]]|\]\])+\]'
     $re = "($obj)\.($obj)?\.($obj)(\s+.*$)?|(?:($obj)\.)?($obj)(\s+.*$)?"
-    $from  = '(\bFROM\b|\bJOIN\b|\bUPDATE\b|\bINSERT\b|\bDELETE\b)\s+(.*$)'
-    
+    $from  = '(\bFROM\b|\bJOIN\b|\bUPDATE\b|\bINSERT\b(?:\s+INTO\b)?|\bDELETE\b)\s+(.*$)'
 
     foreach ($sql in $sqlList)
     {
