@@ -1,28 +1,36 @@
 Getting Started with SQLPSX
 ** NOTE: You must have SMO installed to run the SQLPSX, SMO is installed with SQL Server Management Studio ***
 ** Powershell 2.0 is required **
+Installer installation
+1. Unzip SQLPSX_V2_Install.zip
+2. Run 32 or 64 bit installer
+
+Manual installation
 1. Copy all Modules to $env:psmodulepath directory and Script files to any directory. 
-2. Run import-module 
-    import-module SQLServer
-    import-module Agent
-    import-module Repl
-    import-module SSIS
-    import-module SQLParser
-    import-module Showmbrs
-    import-module adolib
-    import-module sqlmaint
-    import-module sqlise
-    import-module oracleise
+2. Run import-module
+    2a. Import the master module sqlpsx
+        import-module sqlpsx
+    2b. Or import individual modules
+        import-module SQLServer
+        import-module Agent
+        import-module Repl
+        import-module SSIS
+        import-module SQLParser
+        import-module Showmbrs
+        import-module adolib
+        import-module sqlmaint
+        import-module sqlise
+        import-module oracleise
 3. Add import-module commands to your Profile if desired
 
 Optional Database and Reporting Services Components
-4. Create a database, for example SQLPSX and run the SQLPSX.AllObject.sql script to create the all database objects
-5. Modify SSRS Data Source file SQLPSX.rds to point to the newly created database
-6. Deploy the SSRS reports and Data Source files to a SSRS Server or run locally
-7. Modify Run-SmoToCsvFile.ps1, Write-SmoCsvToDb.ps1 and Write-SmoToCsvFile.ps1 scripts with your parameters
-8. Insert the SQL Server instances you wish to report into the SqlServer table
-9. Run Run-SmoToCsvFile.ps1 to create csv files of all available security information
-10. Run Write-SmoToCsvFile.ps1 to import the csv file into the database
+1. Create a database, for example SQLPSX and run the SQLPSX.AllObject.sql script to create the all database objects
+2. Modify SSRS Data Source file SQLPSX.rds to point to the newly created database
+3. Deploy the SSRS reports and Data Source files to a SSRS Server or run locally
+4. Modify Run-SmoToCsvFile.ps1, Write-SmoCsvToDb.ps1 and Write-SmoToCsvFile.ps1 scripts with your parameters
+5. Insert the SQL Server instances you wish to report into the SqlServer table
+6. Run Run-SmoToCsvFile.ps1 to create csv files of all available security information
+7. Run Write-SmoToCsvFile.ps1 to import the csv file into the database
 
 What's New
     Version 2.2
@@ -31,11 +39,15 @@ What's New
             Added PoshMode (like sqlcmdmode)
             Added ability to output to variable
             Added saved connection feature
+            Added Tab Expansion of schemas, tables, views, functions, procedures, columns and parameters.
         Added OracleIse module
         Added OracleClient module used by OracleIse
         Included WPK and ISECreamBasic modules from PowerShellPack and ISECream projects
         Added SQLPSX installer
         Fixed issue with adolib new-connection using SQL authentication
+        Fixed issues with Add-SQLLogin and Add-SqlUser functions in SQL Server 2000
+        Changed Module folder structure to Modules\SQLPSX\Modules
+        Moved all scripts, source code, reports and database scripts under related module
     Version 2.1
         Add SQLIse module.
         Minor fixes to SQLMaint module.
