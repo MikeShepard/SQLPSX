@@ -69,4 +69,23 @@ Changes log - 0.1 - 03/18/2010, 1734 - Max Trinidad
 Changes log - 0.1a - 03/18/2010, 17:58 - Max Trinidad
 1. Put back both Installer 32/64 because the 32bit will not create the SQLPSX folder.
 
+Changes log - 0.2 - 03/24/2010, 0922 - Max Trinidad
+1. I PSscript - "SQLPSX_LoadModules.ps1", added new modules to be loaded: adolib,SQLmaint, & SQLIse.
+
+Changes log – 0.3 – 03/31/2010, 2143 – Max Trinidad
+1.Change the module location to match for User and Windows Profile.
+2.Update Installer instructions word document.
+
+Change log - 0.4 - 04/04/2010, 10:04 - Max Trinidad
+1.Changes to accomodate modules folders structure.
+2.Change to the "SQLPSX_LoadModules.ps1" to properly look for the PSModule path.
+3.Rename the "Simple SQLPSX Installer steps.docx" to "Readme SQLPSX Installer.docx".
+
+Change log - 0.5 - 04/05/2010, 21:45 - Max Trinidad/Bernd
+1. Add changes to ps script modules path in the "SQLPSX_LoadModules.ps1"
+2. Also, incorporate suggested changes by Bernd to automate the commented line to execute "SQLPSX_LoadModules.ps1"
+   for either Windows and User profile.
+
+
+
 
