@@ -94,6 +94,11 @@ Change log – 0.6 – 05/7-8/2010 14;33 – Max Trinidad
 Change log - 0.7 - 05/10/2010 17:20 - Max Trinidad
 1. Found bug missing path to Windows\system32 PowerShell modules.
 
+Change log - 0.8 - 05/11/2010 - Max Trinidad
+1. Commented out the module path to SQLPSX\Modules to go to modules by default.
+2. Included the new SQLPSX.2.2.1.zip file containing the new folder structure.
+3. Recompile and test installer.
+
 
 
 
