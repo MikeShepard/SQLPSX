@@ -87,5 +87,13 @@ Change log - 0.5 - 04/05/2010, 21:45 - Max Trinidad/Bernd
    for either Windows and User profile.
 
 
+Change log – 0.6 – 05/7-8/2010 14;33 – Max Trinidad
+1 Change import to load SQLPSX.psm1
+2 Change commented line to properly run the SQLPSX.psm1.
+
+Change log - 0.7 - 05/10/2010 17:20 - Max Trinidad
+1. Found bug missing path to Windows\system32 PowerShell modules.
+
+
 
 
