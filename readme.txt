@@ -33,7 +33,10 @@ Optional Database and Reporting Services Components
 7. Run Write-SmoToCsvFile.ps1 to import the csv file into the database
 
 What's New
-    Version 2.2.1
+    Version 2.2.2
+		Fixed issue with installer
+		Changed SQLPSX module to standard module location and sub modules under sqlpsx\modules
+	Version 2.2.1
         Fixed issue with Show-TableBrowser not displaying
         Removed connections.xml and conninfo.xml
         Fixed issue with installer when Windows profile selected

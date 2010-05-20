@@ -19,7 +19,7 @@ if ($oraAssembly) {
        $PSXloadModules += "OracleIse" 
    }
 }
-else { Write-Host  -ForegroundColor Yellow "No Oracle found" }
+else { Write-Host -BackgroundColor Black -ForegroundColor Yellow "No Oracle found" }
 
 
 $PSXremoveModules = $PSXloadModules[($PSXloadModules.count)..0]
@@ -29,7 +29,7 @@ $mInfo.OnRemove = {
    foreach($PSXmodule in $PSXremoveModules){
        if (gmo $PSXmodule)
        {    
-         Write-Host  -ForegroundColor Yellow "Removing SQLPSX Module - $PSXModule"
+         Write-Host -BackgroundColor Black -ForegroundColor Yellow "Removing SQLPSX Module - $PSXModule"
          Remove-Module $PSXmodule
        }
    }
@@ -39,7 +39,7 @@ $mInfo.OnRemove = {
    $env:PSModulePath = $pathes -join ';'
    #$env:PSModulePath   
 
-   Write-Host  -ForegroundColor Yellow "$($MyInvocation.MyCommand.ScriptBlock.Module.name) removed on $(Get-Date)"
+   Write-Host -BackgroundColor Black -ForegroundColor Yellow "$($MyInvocation.MyCommand.ScriptBlock.Module.name) removed on $(Get-Date)"
 }
 
 if (($env:PSModulePath -split ';') -notcontains "$psScriptRoot\modules")
@@ -48,7 +48,7 @@ if (($env:PSModulePath -split ';') -notcontains "$psScriptRoot\modules")
 }
 
 foreach($PSXmodule in $PSXloadModules){
- Write-Host  -ForegroundColor Yellow "Loading SQLPSX Module - $PSXModule"
+ Write-Host -BackgroundColor Black -ForegroundColor Yellow "Loading SQLPSX Module - $PSXModule"
  Import-Module $PSXmodule -global
 }
-Write-Host  -ForegroundColor Yellow "Loading SQLPSX Modules is Done!"
+Write-Host -BackgroundColor Black -ForegroundColor Yellow "Loading SQLPSX Modules is Done!"
