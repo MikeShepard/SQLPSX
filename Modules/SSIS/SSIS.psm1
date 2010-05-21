@@ -816,7 +816,7 @@ function Set-ISConnectionString
 {
     param(
     [Parameter(Position=0, Mandatory=$true)] $package,
-    [Parameter(Position=1, Mandatory=$true)] [hashtable]$connnectionInfo
+    [Parameter(Position=1, Mandatory=$true)] [hashtable]$connectionInfo
     )
 
     Write-Verbose "Set-ISConnectionString"
