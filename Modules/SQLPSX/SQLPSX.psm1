@@ -34,17 +34,7 @@ $mInfo.OnRemove = {
        }
    }
 
-   # Remomve $psScriptRoot from $env:PSModulePath
-   $pathes = $env:PSModulePath -split ';' | ? { $_ -ne "$psScriptRoot\modules"}
-   $env:PSModulePath = $pathes -join ';'
-   #$env:PSModulePath   
-
    Write-Host -BackgroundColor Black -ForegroundColor Yellow "$($MyInvocation.MyCommand.ScriptBlock.Module.name) removed on $(Get-Date)"
-}
-
-if (($env:PSModulePath -split ';') -notcontains "$psScriptRoot\modules")
-{
-   $env:PSModulePath += ";" + "$psScriptRoot\modules"
 }
 
 foreach($PSXmodule in $PSXloadModules){
