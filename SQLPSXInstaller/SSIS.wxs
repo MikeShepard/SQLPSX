@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?include $(sys.CURRENTDIR)\Config.wxi?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Fragment>
+        <ComponentGroup Id="SSIS">
+            <ComponentRef Id="SSIS.Format.ps1xml" />
+            <ComponentRef Id="SSIS.psd1" />
+            <ComponentRef Id="SSIS.psm1" />
+        </ComponentGroup>
+    </Fragment>
+    <Fragment>
+        <DirectoryRef Id="SSIS">
+            <Component Id="SSIS.Format.ps1xml" Guid="*">
+                <File Id="SSIS.Format.ps1xml" KeyPath="yes" Source="$(var.SSIS)\SSIS.Format.ps1xml" />
+            </Component>
+            <Component Id="SSIS.psd1" Guid="*">
+                <File Id="SSIS.psd1" KeyPath="yes" Source="$(var.SSIS)\SSIS.psd1" />
+            </Component>
+            <Component Id="SSIS.psm1" Guid="*">
+                <File Id="SSIS.psm1" KeyPath="yes" Source="$(var.SSIS)\SSIS.psm1" />
+            </Component>
+        </DirectoryRef>
+    </Fragment>
+</Wix>

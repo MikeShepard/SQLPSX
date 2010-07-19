@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Include>
+    <?define adoLib="adoLib" ?>
+    <?define Agent="Agent" ?>
+    <?define ISECreamBasic="ISECreamBasic" ?>
+    <?define OracleClient="OracleClient" ?>
+    <?define OracleIse="OracleIse" ?>
+    <?define Repl="Repl" ?>
+    <?define ShowMbrs="ShowMbrs" ?>
+    <?define SQLIse="SQLIse" ?>
+    <?define SQLMaint="SQLMaint" ?>
+    <?define SQLParser="SQLParser" ?>
+    <?define en="SQLParser\en-US" ?>
+    <?define SQLPSX="SQLPSX" ?>
+    <?define SQLServer="SQLServer" ?>
+    <?define Database="SQLServer\Database" ?>
+    <?define Reports="SQLServer\Reports" ?>
+    <?define SSIS="SSIS" ?>
+    <?define WPK="WPK" ?>
+    <?define Examples="WPK\Examples" ?>
+    <?define GeneratedControls="WPK\GeneratedControls" ?>
+    <?define Rules="WPK\Rules" ?>
+    <?define MajorVersion="2" ?>
+    <?define MinorVersion="2" ?>
+    <?define MicroVersion="3" ?>
+    <?define BuildVersion="1" ?>
+</Include>
+

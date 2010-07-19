@@ -15,9 +15,13 @@
 
 param ($sqlserver)
 
-$scriptRoot = Split-Path (Resolve-Path $myInvocation.MyCommand.Path)
-. $scriptRoot\LibrarySmo.ps1
-Set-Alias Test-SqlConn $scriptRoot\Test-SqlConn.ps1
+#$scriptRoot = Split-Path (Resolve-Path $myInvocation.MyCommand.Path)
+#. $scriptRoot\LibrarySmo.ps1
+#Set-Alias Test-SqlConn $scriptRoot\Test-SqlConn.ps1
+
+import-module sqlserver
+
+$scriptRoot = "C:\SQLPSX"
 
 $DBExclude = @{}
 $dir = "$scriptRoot\Data\"

@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?include $(sys.CURRENTDIR)\Config.wxi?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Fragment>
+        <ComponentGroup Id="OracleIse">
+            <ComponentRef Id="DefaultOptions.xml" />
+            <ComponentRef Id="Get_OraConnectionInfo.ps1" />
+            <ComponentRef Id="Options.xml" />
+            <ComponentRef Id="OracleIse.psm1" />
+            <ComponentRef Id="Set_OraOptions.ps1" />
+            <ComponentRef Id="OraSQLPSX.PNG" />
+            <ComponentRef Id="OraSwitch_CommentOrText.ps1" />
+            <ComponentRef Id="OraSwitch_SelectedCommentOrText.ps1" />
+        </ComponentGroup>
+    </Fragment>
+    <Fragment>
+        <DirectoryRef Id="OracleIse">
+            <Component Id="DefaultOptions.xml" Guid="*">
+                <File Id="DefaultOptions.xml" KeyPath="yes" Source="$(var.OracleIse)\DefaultOptions.xml" />
+            </Component>
+            <Component Id="Get_OraConnectionInfo.ps1" Guid="*">
+                <File Id="Get_OraConnectionInfo.ps1" KeyPath="yes" Source="$(var.OracleIse)\Get-ConnectionInfo.ps1" />
+            </Component>
+            <Component Id="Options.xml" Guid="*">
+                <File Id="Options.xml" KeyPath="yes" Source="$(var.OracleIse)\Options.xml" />
+            </Component>
+            <Component Id="OracleIse.psm1" Guid="*">
+                <File Id="OracleIse.psm1" KeyPath="yes" Source="$(var.OracleIse)\OracleIse.psm1" />
+            </Component>
+            <Component Id="Set_OraOptions.ps1" Guid="*">
+                <File Id="Set_OraOptions.ps1" KeyPath="yes" Source="$(var.OracleIse)\Set-Options.ps1" />
+            </Component>
+            <Component Id="OraSQLPSX.PNG" Guid="*">
+                <File Id="OraSQLPSX.PNG" KeyPath="yes" Source="$(var.OracleIse)\SQLPSX.PNG" />
+            </Component>
+            <Component Id="OraSwitch_CommentOrText.ps1" Guid="*">
+                <File Id="OraSwitch_CommentOrText.ps1" KeyPath="yes" Source="$(var.OracleIse)\Switch-CommentOrText.ps1" />
+            </Component>
+            <Component Id="OraSwitch_SelectedCommentOrText.ps1" Guid="*">
+                <File Id="OraSwitch_SelectedCommentOrText.ps1" KeyPath="yes" Source="$(var.OracleIse)\Switch-SelectedCommentOrText.ps1" />
+            </Component>
+        </DirectoryRef>
+    </Fragment>
+</Wix>

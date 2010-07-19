@@ -1,0 +1,326 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?include $(sys.CURRENTDIR)\Config.wxi?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Fragment>
+        <ComponentGroup Id="WPK">
+            <ComponentRef Id="Add_ChildControl.ps1" />
+            <ComponentRef Id="Add_CodeGenerationRule.ps1" />
+            <ComponentRef Id="Add_EventHandler.ps1" />
+            <ComponentRef Id="Add_GridColumn.ps1" />
+            <ComponentRef Id="Add_GridRow.ps1" />
+            <ComponentRef Id="Close_Control.ps1" />
+            <ComponentRef Id="ConvertFrom_TypeToScriptCmdlet.ps1" />
+            <ComponentRef Id="ConvertTo_DataTemplate.ps1" />
+            <ComponentRef Id="ConvertTo_GridLength.ps1" />
+            <ComponentRef Id="ConvertTo_ParameterMetaData.ps1" />
+            <ComponentRef Id="ConvertTo_Xaml.ps1" />
+            <ComponentRef Id="Copy_DependencyProperty.ps1" />
+            <ComponentRef Id="Enable_Multitouch.ps1" />
+            <ComponentRef Id="Export_Application.ps1" />
+            <ComponentRef Id="Get_ChildControl.ps1" />
+            <ComponentRef Id="Get_CommandPlugin.ps1" />
+            <ComponentRef Id="Get_CommonParentControl.ps1" />
+            <ComponentRef Id="Get_DependencyProperty.ps1" />
+            <ComponentRef Id="Get_HashtableAsObject.ps1" />
+            <ComponentRef Id="Get_PowerShellDataSource.ps1" />
+            <ComponentRef Id="Get_ReferencedCommand.ps1" />
+            <ComponentRef Id="Get_Resource.ps1" />
+            <ComponentRef Id="Get_UIElementPosition.ps1" />
+            <ComponentRef Id="Hide_UIElement.ps1" />
+            <ComponentRef Id="Join_PowerShellCommandOutput.ps1" />
+            <ComponentRef Id="license.txt" />
+            <ComponentRef Id="Move_Control.ps1" />
+            <ComponentRef Id="readme.txt" />
+            <ComponentRef Id="Register_PowerShellCommand.ps1" />
+            <ComponentRef Id="Remove_ChildControl.ps1" />
+            <ComponentRef Id="Set_DependencyProperty.ps1" />
+            <ComponentRef Id="Set_Property.ps1" />
+            <ComponentRef Id="Set_Resource.ps1" />
+            <ComponentRef Id="Show_UIElement.ps1" />
+            <ComponentRef Id="Show_Window.ps1" />
+            <ComponentRef Id="Start_Animation.ps1" />
+            <ComponentRef Id="Start_PowerShellCommand.ps1" />
+            <ComponentRef Id="Start_WPFJob.ps1" />
+            <ComponentRef Id="Stop_PowerShellCommand.ps1" />
+            <ComponentRef Id="Test_Ancestor.ps1" />
+            <ComponentRef Id="Test_Descendent.ps1" />
+            <ComponentRef Id="Unregister_PowerShellCommand.ps1" />
+            <ComponentRef Id="Update_WPFJob.ps1" />
+            <ComponentRef Id="WPF.ps1xml" />
+            <ComponentRef Id="WPK.psd1" />
+            <ComponentRef Id="WPK.psm1" />
+            <ComponentRef Id="AddGridRowExample.ps1" />
+            <ComponentRef Id="AnimatedLinesFromCenter.ps1" />
+            <ComponentRef Id="canvasfromblend.ps1" />
+            <ComponentRef Id="CanvasFromDesign.ps1" />
+            <ComponentRef Id="CmdletExample.ps1" />
+            <ComponentRef Id="DataTemplate.ps1" />
+            <ComponentRef Id="DigitalClock.ps1" />
+            <ComponentRef Id="EllipseAnimation.ps1" />
+            <ComponentRef Id="FlowDocument.ps1" />
+            <ComponentRef Id="flyin.ps1" />
+            <ComponentRef Id="Gradient.ps1" />
+            <ComponentRef Id="ImportWinForms.ps1" />
+            <ComponentRef Id="ListBoxSamples.ps1" />
+            <ComponentRef Id="ListView.ps1" />
+            <ComponentRef Id="MixingArgumentFormats.ps1" />
+            <ComponentRef Id="MoveControlExamples.ps1" />
+            <ComponentRef Id="MutlitouchDraw.ps1" />
+            <ComponentRef Id="MutlitouchImage.ps1" />
+            <ComponentRef Id="PowerShellDataSources.ps1" />
+            <ComponentRef Id="RichTextBoxAndCommands.ps1" />
+            <ComponentRef Id="RunCommand.ps1" />
+            <ComponentRef Id="Show_Module.ps1" />
+            <ComponentRef Id="SimpleDialog.ps1" />
+            <ComponentRef Id="SkewAnimation.ps1" />
+            <ComponentRef Id="Stopwatch.ps1" />
+            <ComponentRef Id="PresentationCore.ps1" />
+            <ComponentRef Id="PresentationFramework.ps1" />
+            <ComponentRef Id="WindowsBase.ps1" />
+            <ComponentRef Id="WindowsFormsIntegration.ps1" />
+            <ComponentRef Id="Winforms.ps1" />
+            <ComponentRef Id="WPFCodeGenerationRules.ps1" />
+        </ComponentGroup>
+    </Fragment>
+    <Fragment>
+        <DirectoryRef Id="WPK">
+            <Component Id="Add_ChildControl.ps1" Guid="*">
+                <File Id="Add_ChildControl.ps1" KeyPath="yes" Source="$(var.WPK)\Add-ChildControl.ps1" />
+            </Component>
+            <Component Id="Add_CodeGenerationRule.ps1" Guid="*">
+                <File Id="Add_CodeGenerationRule.ps1" KeyPath="yes" Source="$(var.WPK)\Add-CodeGenerationRule.ps1" />
+            </Component>
+            <Component Id="Add_EventHandler.ps1" Guid="*">
+                <File Id="Add_EventHandler.ps1" KeyPath="yes" Source="$(var.WPK)\Add-EventHandler.ps1" />
+            </Component>
+            <Component Id="Add_GridColumn.ps1" Guid="*">
+                <File Id="Add_GridColumn.ps1" KeyPath="yes" Source="$(var.WPK)\Add-GridColumn.ps1" />
+            </Component>
+            <Component Id="Add_GridRow.ps1" Guid="*">
+                <File Id="Add_GridRow.ps1" KeyPath="yes" Source="$(var.WPK)\Add-GridRow.ps1" />
+            </Component>
+            <Component Id="Close_Control.ps1" Guid="*">
+                <File Id="Close_Control.ps1" KeyPath="yes" Source="$(var.WPK)\Close-Control.ps1" />
+            </Component>
+            <Component Id="ConvertFrom_TypeToScriptCmdlet.ps1" Guid="*">
+                <File Id="ConvertFrom_TypeToScriptCmdlet.ps1" KeyPath="yes" Source="$(var.WPK)\ConvertFrom-TypeToScriptCmdlet.ps1" />
+            </Component>
+            <Component Id="ConvertTo_DataTemplate.ps1" Guid="*">
+                <File Id="ConvertTo_DataTemplate.ps1" KeyPath="yes" Source="$(var.WPK)\ConvertTo-DataTemplate.ps1" />
+            </Component>
+            <Component Id="ConvertTo_GridLength.ps1" Guid="*">
+                <File Id="ConvertTo_GridLength.ps1" KeyPath="yes" Source="$(var.WPK)\ConvertTo-GridLength.ps1" />
+            </Component>
+            <Component Id="ConvertTo_ParameterMetaData.ps1" Guid="*">
+                <File Id="ConvertTo_ParameterMetaData.ps1" KeyPath="yes" Source="$(var.WPK)\ConvertTo-ParameterMetaData.ps1" />
+            </Component>
+            <Component Id="ConvertTo_Xaml.ps1" Guid="*">
+                <File Id="ConvertTo_Xaml.ps1" KeyPath="yes" Source="$(var.WPK)\ConvertTo-Xaml.ps1" />
+            </Component>
+            <Component Id="Copy_DependencyProperty.ps1" Guid="*">
+                <File Id="Copy_DependencyProperty.ps1" KeyPath="yes" Source="$(var.WPK)\Copy-DependencyProperty.ps1" />
+            </Component>
+            <Component Id="Enable_Multitouch.ps1" Guid="*">
+                <File Id="Enable_Multitouch.ps1" KeyPath="yes" Source="$(var.WPK)\Enable-Multitouch.ps1" />
+            </Component>
+            <Component Id="Export_Application.ps1" Guid="*">
+                <File Id="Export_Application.ps1" KeyPath="yes" Source="$(var.WPK)\Export-Application.ps1" />
+            </Component>
+            <Component Id="Get_ChildControl.ps1" Guid="*">
+                <File Id="Get_ChildControl.ps1" KeyPath="yes" Source="$(var.WPK)\Get-ChildControl.ps1" />
+            </Component>
+            <Component Id="Get_CommandPlugin.ps1" Guid="*">
+                <File Id="Get_CommandPlugin.ps1" KeyPath="yes" Source="$(var.WPK)\Get-CommandPlugin.ps1" />
+            </Component>
+            <Component Id="Get_CommonParentControl.ps1" Guid="*">
+                <File Id="Get_CommonParentControl.ps1" KeyPath="yes" Source="$(var.WPK)\Get-CommonParentControl.ps1" />
+            </Component>
+            <Component Id="Get_DependencyProperty.ps1" Guid="*">
+                <File Id="Get_DependencyProperty.ps1" KeyPath="yes" Source="$(var.WPK)\Get-DependencyProperty.ps1" />
+            </Component>
+            <Component Id="Get_HashtableAsObject.ps1" Guid="*">
+                <File Id="Get_HashtableAsObject.ps1" KeyPath="yes" Source="$(var.WPK)\Get-HashtableAsObject.ps1" />
+            </Component>
+            <Component Id="Get_PowerShellDataSource.ps1" Guid="*">
+                <File Id="Get_PowerShellDataSource.ps1" KeyPath="yes" Source="$(var.WPK)\Get-PowerShellDataSource.ps1" />
+            </Component>
+            <Component Id="Get_ReferencedCommand.ps1" Guid="*">
+                <File Id="Get_ReferencedCommand.ps1" KeyPath="yes" Source="$(var.WPK)\Get-ReferencedCommand.ps1" />
+            </Component>
+            <Component Id="Get_Resource.ps1" Guid="*">
+                <File Id="Get_Resource.ps1" KeyPath="yes" Source="$(var.WPK)\Get-Resource.ps1" />
+            </Component>
+            <Component Id="Get_UIElementPosition.ps1" Guid="*">
+                <File Id="Get_UIElementPosition.ps1" KeyPath="yes" Source="$(var.WPK)\Get-UIElementPosition.ps1" />
+            </Component>
+            <Component Id="Hide_UIElement.ps1" Guid="*">
+                <File Id="Hide_UIElement.ps1" KeyPath="yes" Source="$(var.WPK)\Hide-UIElement.ps1" />
+            </Component>
+            <Component Id="Join_PowerShellCommandOutput.ps1" Guid="*">
+                <File Id="Join_PowerShellCommandOutput.ps1" KeyPath="yes" Source="$(var.WPK)\Join-PowerShellCommandOutput.ps1" />
+            </Component>
+            <Component Id="license.txt" Guid="*">
+                <File Id="license.txt" KeyPath="yes" Source="$(var.WPK)\license.txt" />
+            </Component>
+            <Component Id="Move_Control.ps1" Guid="*">
+                <File Id="Move_Control.ps1" KeyPath="yes" Source="$(var.WPK)\Move-Control.ps1" />
+            </Component>
+            <Component Id="readme.txt" Guid="*">
+                <File Id="readme.txt" KeyPath="yes" Source="$(var.WPK)\readme.txt" />
+            </Component>
+            <Component Id="Register_PowerShellCommand.ps1" Guid="*">
+                <File Id="Register_PowerShellCommand.ps1" KeyPath="yes" Source="$(var.WPK)\Register-PowerShellCommand.ps1" />
+            </Component>
+            <Component Id="Remove_ChildControl.ps1" Guid="*">
+                <File Id="Remove_ChildControl.ps1" KeyPath="yes" Source="$(var.WPK)\Remove-ChildControl.ps1" />
+            </Component>
+            <Component Id="Set_DependencyProperty.ps1" Guid="*">
+                <File Id="Set_DependencyProperty.ps1" KeyPath="yes" Source="$(var.WPK)\Set-DependencyProperty.ps1" />
+            </Component>
+            <Component Id="Set_Property.ps1" Guid="*">
+                <File Id="Set_Property.ps1" KeyPath="yes" Source="$(var.WPK)\Set-Property.ps1" />
+            </Component>
+            <Component Id="Set_Resource.ps1" Guid="*">
+                <File Id="Set_Resource.ps1" KeyPath="yes" Source="$(var.WPK)\Set-Resource.ps1" />
+            </Component>
+            <Component Id="Show_UIElement.ps1" Guid="*">
+                <File Id="Show_UIElement.ps1" KeyPath="yes" Source="$(var.WPK)\Show-UIElement.ps1" />
+            </Component>
+            <Component Id="Show_Window.ps1" Guid="*">
+                <File Id="Show_Window.ps1" KeyPath="yes" Source="$(var.WPK)\Show-Window.ps1" />
+            </Component>
+            <Component Id="Start_Animation.ps1" Guid="*">
+                <File Id="Start_Animation.ps1" KeyPath="yes" Source="$(var.WPK)\Start-Animation.ps1" />
+            </Component>
+            <Component Id="Start_PowerShellCommand.ps1" Guid="*">
+                <File Id="Start_PowerShellCommand.ps1" KeyPath="yes" Source="$(var.WPK)\Start-PowerShellCommand.ps1" />
+            </Component>
+            <Component Id="Start_WPFJob.ps1" Guid="*">
+                <File Id="Start_WPFJob.ps1" KeyPath="yes" Source="$(var.WPK)\Start-WPFJob.ps1" />
+            </Component>
+            <Component Id="Stop_PowerShellCommand.ps1" Guid="*">
+                <File Id="Stop_PowerShellCommand.ps1" KeyPath="yes" Source="$(var.WPK)\Stop-PowerShellCommand.ps1" />
+            </Component>
+            <Component Id="Test_Ancestor.ps1" Guid="*">
+                <File Id="Test_Ancestor.ps1" KeyPath="yes" Source="$(var.WPK)\Test-Ancestor.ps1" />
+            </Component>
+            <Component Id="Test_Descendent.ps1" Guid="*">
+                <File Id="Test_Descendent.ps1" KeyPath="yes" Source="$(var.WPK)\Test-Descendent.ps1" />
+            </Component>
+            <Component Id="Unregister_PowerShellCommand.ps1" Guid="*">
+                <File Id="Unregister_PowerShellCommand.ps1" KeyPath="yes" Source="$(var.WPK)\Unregister-PowerShellCommand.ps1" />
+            </Component>
+            <Component Id="Update_WPFJob.ps1" Guid="*">
+                <File Id="Update_WPFJob.ps1" KeyPath="yes" Source="$(var.WPK)\Update-WPFJob.ps1" />
+            </Component>
+            <Component Id="WPF.ps1xml" Guid="*">
+                <File Id="WPF.ps1xml" KeyPath="yes" Source="$(var.WPK)\WPF.ps1xml" />
+            </Component>
+            <Component Id="WPK.psd1" Guid="*">
+                <File Id="WPK.psd1" KeyPath="yes" Source="$(var.WPK)\WPK.psd1" />
+            </Component>
+            <Component Id="WPK.psm1" Guid="*">
+                <File Id="WPK.psm1" KeyPath="yes" Source="$(var.WPK)\WPK.psm1" />
+            </Component>
+            <Directory Id="Examples" Name="Examples">
+                <Component Id="AddGridRowExample.ps1" Guid="*">
+                    <File Id="AddGridRowExample.ps1" KeyPath="yes" Source="$(var.WPK)\Examples\AddGridRowExample.ps1" />
+                </Component>
+                <Component Id="AnimatedLinesFromCenter.ps1" Guid="*">
+                    <File Id="AnimatedLinesFromCenter.ps1" KeyPath="yes" Source="$(var.WPK)\Examples\AnimatedLinesFromCenter.ps1" />
+                </Component>
+                <Component Id="canvasfromblend.ps1" Guid="*">
+                    <File Id="canvasfromblend.ps1" KeyPath="yes" Source="$(var.WPK)\Examples\canvasfromblend.ps1" />
+                </Component>
+                <Component Id="CanvasFromDesign.ps1" Guid="*">
+                    <File Id="CanvasFromDesign.ps1" KeyPath="yes" Source="$(var.WPK)\Examples\CanvasFromDesign.ps1" />
+                </Component>
+                <Component Id="CmdletExample.ps1" Guid="*">
+                    <File Id="CmdletExample.ps1" KeyPath="yes" Source="$(var.WPK)\Examples\CmdletExample.ps1" />
+                </Component>
+                <Component Id="DataTemplate.ps1" Guid="*">
+                    <File Id="DataTemplate.ps1" KeyPath="yes" Source="$(var.WPK)\Examples\DataTemplate.ps1" />
+                </Component>
+                <Component Id="DigitalClock.ps1" Guid="*">
+                    <File Id="DigitalClock.ps1" KeyPath="yes" Source="$(var.WPK)\Examples\DigitalClock.ps1" />
+                </Component>
+                <Component Id="EllipseAnimation.ps1" Guid="*">
+                    <File Id="EllipseAnimation.ps1" KeyPath="yes" Source="$(var.WPK)\Examples\EllipseAnimation.ps1" />
+                </Component>
+                <Component Id="FlowDocument.ps1" Guid="*">
+                    <File Id="FlowDocument.ps1" KeyPath="yes" Source="$(var.WPK)\Examples\FlowDocument.ps1" />
+                </Component>
+                <Component Id="flyin.ps1" Guid="*">
+                    <File Id="flyin.ps1" KeyPath="yes" Source="$(var.WPK)\Examples\flyin.ps1" />
+                </Component>
+                <Component Id="Gradient.ps1" Guid="*">
+                    <File Id="Gradient.ps1" KeyPath="yes" Source="$(var.WPK)\Examples\Gradient.ps1" />
+                </Component>
+                <Component Id="ImportWinForms.ps1" Guid="*">
+                    <File Id="ImportWinForms.ps1" KeyPath="yes" Source="$(var.WPK)\Examples\ImportWinForms.ps1" />
+                </Component>
+                <Component Id="ListBoxSamples.ps1" Guid="*">
+                    <File Id="ListBoxSamples.ps1" KeyPath="yes" Source="$(var.WPK)\Examples\ListBoxSamples.ps1" />
+                </Component>
+                <Component Id="ListView.ps1" Guid="*">
+                    <File Id="ListView.ps1" KeyPath="yes" Source="$(var.WPK)\Examples\ListView.ps1" />
+                </Component>
+                <Component Id="MixingArgumentFormats.ps1" Guid="*">
+                    <File Id="MixingArgumentFormats.ps1" KeyPath="yes" Source="$(var.WPK)\Examples\MixingArgumentFormats.ps1" />
+                </Component>
+                <Component Id="MoveControlExamples.ps1" Guid="*">
+                    <File Id="MoveControlExamples.ps1" KeyPath="yes" Source="$(var.WPK)\Examples\MoveControlExamples.ps1" />
+                </Component>
+                <Component Id="MutlitouchDraw.ps1" Guid="*">
+                    <File Id="MutlitouchDraw.ps1" KeyPath="yes" Source="$(var.WPK)\Examples\MutlitouchDraw.ps1" />
+                </Component>
+                <Component Id="MutlitouchImage.ps1" Guid="*">
+                    <File Id="MutlitouchImage.ps1" KeyPath="yes" Source="$(var.WPK)\Examples\MutlitouchImage.ps1" />
+                </Component>
+                <Component Id="PowerShellDataSources.ps1" Guid="*">
+                    <File Id="PowerShellDataSources.ps1" KeyPath="yes" Source="$(var.WPK)\Examples\PowerShellDataSources.ps1" />
+                </Component>
+                <Component Id="RichTextBoxAndCommands.ps1" Guid="*">
+                    <File Id="RichTextBoxAndCommands.ps1" KeyPath="yes" Source="$(var.WPK)\Examples\RichTextBoxAndCommands.ps1" />
+                </Component>
+                <Component Id="RunCommand.ps1" Guid="*">
+                    <File Id="RunCommand.ps1" KeyPath="yes" Source="$(var.WPK)\Examples\RunCommand.ps1" />
+                </Component>
+                <Component Id="Show_Module.ps1" Guid="*">
+                    <File Id="Show_Module.ps1" KeyPath="yes" Source="$(var.WPK)\Examples\Show-Module.ps1" />
+                </Component>
+                <Component Id="SimpleDialog.ps1" Guid="*">
+                    <File Id="SimpleDialog.ps1" KeyPath="yes" Source="$(var.WPK)\Examples\SimpleDialog.ps1" />
+                </Component>
+                <Component Id="SkewAnimation.ps1" Guid="*">
+                    <File Id="SkewAnimation.ps1" KeyPath="yes" Source="$(var.WPK)\Examples\SkewAnimation.ps1" />
+                </Component>
+                <Component Id="Stopwatch.ps1" Guid="*">
+                    <File Id="Stopwatch.ps1" KeyPath="yes" Source="$(var.WPK)\Examples\Stopwatch.ps1" />
+                </Component>
+            </Directory>
+            <Directory Id="GeneratedControls" Name="GeneratedControls">
+                <Component Id="PresentationCore.ps1" Guid="*">
+                    <File Id="PresentationCore.ps1" KeyPath="yes" Source="$(var.WPK)\GeneratedControls\PresentationCore.ps1" />
+                </Component>
+                <Component Id="PresentationFramework.ps1" Guid="*">
+                    <File Id="PresentationFramework.ps1" KeyPath="yes" Source="$(var.WPK)\GeneratedControls\PresentationFramework.ps1" />
+                </Component>
+                <Component Id="WindowsBase.ps1" Guid="*">
+                    <File Id="WindowsBase.ps1" KeyPath="yes" Source="$(var.WPK)\GeneratedControls\WindowsBase.ps1" />
+                </Component>
+                <Component Id="WindowsFormsIntegration.ps1" Guid="*">
+                    <File Id="WindowsFormsIntegration.ps1" KeyPath="yes" Source="$(var.WPK)\GeneratedControls\WindowsFormsIntegration.ps1" />
+                </Component>
+                <Component Id="Winforms.ps1" Guid="*">
+                    <File Id="Winforms.ps1" KeyPath="yes" Source="$(var.WPK)\GeneratedControls\Winforms.ps1" />
+                </Component>
+            </Directory>
+            <Directory Id="Rules" Name="Rules">
+                <Component Id="WPFCodeGenerationRules.ps1" Guid="*">
+                    <File Id="WPFCodeGenerationRules.ps1" KeyPath="yes" Source="$(var.WPK)\Rules\WPFCodeGenerationRules.ps1" />
+                </Component>
+            </Directory>
+        </DirectoryRef>
+    </Fragment>
+</Wix>

@@ -13,13 +13,36 @@
 # ---------------------------------------------------------------------------
 
 
-$scriptRoot = Split-Path (Resolve-Path $myInvocation.MyCommand.Path)
-. $scriptRoot\LibrarySmo.ps1
+#$scriptRoot = Split-Path (Resolve-Path $myInvocation.MyCommand.Path)
+#. $scriptRoot\LibrarySmo.ps1
+$scriptRoot = "C:\SQLPSX"
 
 $CsvDir = "$scriptRoot\Data\"
 $arcDir = "$scriptRoot\Data\Archive\"
-$sqlserver = 'Z002\SQLEXPRESS'
+$sqlserver = 'Z002\SQL2K8'
 $db = 'SQLPSX'
+
+#######################
+function Invoke-Sqlcmd2
+{
+    param(
+    [string]$ServerInstance,
+    [string]$Database,
+    [string]$Query,
+    [Int32]$QueryTimeout=30
+    )
+
+    $conn=new-object System.Data.SqlClient.SQLConnection
+    $conn.ConnectionString="Server={0};Database={1};Integrated Security=True" -f $ServerInstance,$Database
+    $conn.Open()
+    $cmd=new-object system.Data.SqlClient.SqlCommand($Query,$conn)
+    $cmd.CommandTimeout=$QueryTimeout
+    $ds=New-Object system.Data.DataSet
+    $da=New-Object system.Data.SqlClient.SqlDataAdapter($cmd)
+    [void]$da.fill($ds)
+    $conn.Close()
+    $ds.Tables[0]
+} #Invoke-Sqlcmd2
 
 #######################
 function Write-ScriptLog
@@ -35,7 +58,7 @@ function ImportCsv
 {
     param($sqlserver, $db, $tblname, $csvfile)
 
-    Set-SqlData $sqlserver $db "BULK INSERT $db..$tblname FROM '$csvfile' WITH (FIELDTERMINATOR = ',', ROWTERMINATOR = '\n')"
+    Invoke-Sqlcmd2 $sqlserver $db "BULK INSERT $db..$tblname FROM '$csvfile' WITH (FIELDTERMINATOR = ',', ROWTERMINATOR = '\n')"
 #    Write-host "Set-SqlData $sqlserver $db `"BULK INSERT $db..$tblname FROM '$csvfile' WITH (FIELDTERMINATOR = ',', ROWTERMINATOR = '\n')`""
 
 }# ImportCsv

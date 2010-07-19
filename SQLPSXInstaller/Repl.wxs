@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?include $(sys.CURRENTDIR)\Config.wxi?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Fragment>
+        <ComponentGroup Id="Repl">
+            <ComponentRef Id="Repl.psd1" />
+            <ComponentRef Id="Repl.psm1" />
+            <ComponentRef Id="replscriptopts.ps1" />
+        </ComponentGroup>
+    </Fragment>
+    <Fragment>
+        <DirectoryRef Id="Repl">
+            <Component Id="Repl.psd1" Guid="*">
+                <File Id="Repl.psd1" KeyPath="yes" Source="$(var.Repl)\Repl.psd1" />
+            </Component>
+            <Component Id="Repl.psm1" Guid="*">
+                <File Id="Repl.psm1" KeyPath="yes" Source="$(var.Repl)\Repl.psm1" />
+            </Component>
+            <Component Id="replscriptopts.ps1" Guid="*">
+                <File Id="replscriptopts.ps1" KeyPath="yes" Source="$(var.Repl)\replscriptopts.ps1" />
+            </Component>
+        </DirectoryRef>
+    </Fragment>
+</Wix>

@@ -1,0 +1,88 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?include $(sys.CURRENTDIR)\Config.wxi?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Fragment>
+        <ComponentGroup Id="SQLIse">
+            <ComponentRef Id="ConvertFrom_Xml.ps1" />
+            <ComponentRef Id="ConvertTo_StringData.ps1" />
+            <ComponentRef Id="defaultopts.ps1" />
+            <ComponentRef Id="Expand_String.ps1" />
+            <ComponentRef Id="Get_ConnectionInfo.ps1" />
+            <ComponentRef Id="Get_DbObjectList.ps1" />
+            <ComponentRef Id="Get_TableAlias.ps1" />
+            <ComponentRef Id="Get_TabObjectList.ps1" />
+            <ComponentRef Id="Invoke_Coalesce.ps1" />
+            <ComponentRef Id="Library_UserStore.ps1" />
+            <ComponentRef Id="Set_Options.ps1" />
+            <ComponentRef Id="Show_ConnectionManager.ps1" />
+            <ComponentRef Id="Show_DbObjectList.ps1" />
+            <ComponentRef Id="Show_TableBrowser.ps1" />
+            <ComponentRef Id="SQLIse.psm1" />
+            <ComponentRef Id="SQLPSX.PNG" />
+            <ComponentRef Id="Switch_CommentOrText.ps1" />
+            <ComponentRef Id="Switch_SelectedCommentOrText.ps1" />
+            <ComponentRef Id="TabExpansion.ps1" />
+        </ComponentGroup>
+    </Fragment>
+    <Fragment>
+        <DirectoryRef Id="SQLIse">
+            <Component Id="ConvertFrom_Xml.ps1" Guid="*">
+                <File Id="ConvertFrom_Xml.ps1" KeyPath="yes" Source="$(var.SQLIse)\ConvertFrom-Xml.ps1" />
+            </Component>
+            <Component Id="ConvertTo_StringData.ps1" Guid="*">
+                <File Id="ConvertTo_StringData.ps1" KeyPath="yes" Source="$(var.SQLIse)\ConvertTo-StringData.ps1" />
+            </Component>
+            <Component Id="defaultopts.ps1" Guid="*">
+                <File Id="defaultopts.ps1" KeyPath="yes" Source="$(var.SQLIse)\defaultopts.ps1" />
+            </Component>
+            <Component Id="Expand_String.ps1" Guid="*">
+                <File Id="Expand_String.ps1" KeyPath="yes" Source="$(var.SQLIse)\Expand-String.ps1" />
+            </Component>
+            <Component Id="Get_ConnectionInfo.ps1" Guid="*">
+                <File Id="Get_ConnectionInfo.ps1" KeyPath="yes" Source="$(var.SQLIse)\Get-ConnectionInfo.ps1" />
+            </Component>
+            <Component Id="Get_DbObjectList.ps1" Guid="*">
+                <File Id="Get_DbObjectList.ps1" KeyPath="yes" Source="$(var.SQLIse)\Get-DbObjectList.ps1" />
+            </Component>
+            <Component Id="Get_TableAlias.ps1" Guid="*">
+                <File Id="Get_TableAlias.ps1" KeyPath="yes" Source="$(var.SQLIse)\Get-TableAlias.ps1" />
+            </Component>
+            <Component Id="Get_TabObjectList.ps1" Guid="*">
+                <File Id="Get_TabObjectList.ps1" KeyPath="yes" Source="$(var.SQLIse)\Get-TabObjectList.ps1" />
+            </Component>
+            <Component Id="Invoke_Coalesce.ps1" Guid="*">
+                <File Id="Invoke_Coalesce.ps1" KeyPath="yes" Source="$(var.SQLIse)\Invoke-Coalesce.ps1" />
+            </Component>
+            <Component Id="Library_UserStore.ps1" Guid="*">
+                <File Id="Library_UserStore.ps1" KeyPath="yes" Source="$(var.SQLIse)\Library-UserStore.ps1" />
+            </Component>
+            <Component Id="Set_Options.ps1" Guid="*">
+                <File Id="Set_Options.ps1" KeyPath="yes" Source="$(var.SQLIse)\Set-Options.ps1" />
+            </Component>
+            <Component Id="Show_ConnectionManager.ps1" Guid="*">
+                <File Id="Show_ConnectionManager.ps1" KeyPath="yes" Source="$(var.SQLIse)\Show-ConnectionManager.ps1" />
+            </Component>
+            <Component Id="Show_DbObjectList.ps1" Guid="*">
+                <File Id="Show_DbObjectList.ps1" KeyPath="yes" Source="$(var.SQLIse)\Show-DbObjectList.ps1" />
+            </Component>
+            <Component Id="Show_TableBrowser.ps1" Guid="*">
+                <File Id="Show_TableBrowser.ps1" KeyPath="yes" Source="$(var.SQLIse)\Show-TableBrowser.ps1" />
+            </Component>
+            <Component Id="SQLIse.psm1" Guid="*">
+                <File Id="SQLIse.psm1" KeyPath="yes" Source="$(var.SQLIse)\SQLIse.psm1" />
+            </Component>
+            <Component Id="SQLPSX.PNG" Guid="*">
+                <File Id="SQLPSX.PNG" KeyPath="yes" Source="$(var.SQLIse)\SQLPSX.PNG" />
+            </Component>
+            <Component Id="Switch_CommentOrText.ps1" Guid="*">
+                <File Id="Switch_CommentOrText.ps1" KeyPath="yes" Source="$(var.SQLIse)\Switch-CommentOrText.ps1" />
+            </Component>
+            <Component Id="Switch_SelectedCommentOrText.ps1" Guid="*">
+                <File Id="Switch_SelectedCommentOrText.ps1" KeyPath="yes" Source="$(var.SQLIse)\Switch-SelectedCommentOrText.ps1" />
+            </Component>
+            <Component Id="TabExpansion.ps1" Guid="*">
+                <File Id="TabExpansion.ps1" KeyPath="yes" Source="$(var.SQLIse)\TabExpansion.ps1" />
+            </Component>
+        </DirectoryRef>
+    </Fragment>
+</Wix>

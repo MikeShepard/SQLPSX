@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?include $(sys.CURRENTDIR)\Config.wxi?>
+<!--
+      NEVER change the UPGRADE code. ALWAYS change the Id.
+      Version 2.2.3.1       Product Id was: E708DE54-4067-4727-A6CC-83D9D5A61B1F
+-->
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Product Id="E708DE54-4067-4727-A6CC-83D9D5A61B1F" Name="SQLPSX" Language="1033" Version="$(var.MajorVersion).$(var.MinorVersion).$(var.MicroVersion).$(var.BuildVersion)" Manufacturer="SQLPSX" UpgradeCode="F52E6F67-79FE-4115-81B1-B441ECD9ABCF">
+        <Package Description="SQLPSX Installer" InstallPrivileges="elevated" Comments="SQLPSX Installer" InstallerVersion="200" Compressed="yes" />
+        <Media Id="1" Cabinet="SQLPSXInstaller.cab" EmbedCab="yes" />
+        <Directory Id="TARGETDIR" Name="SourceDir">
+            <Directory Id="PersonalFolder" Name="PersonalFolder">
+                <Directory Name="WindowsPowerShell" Id="WindowsPowerShell">
+                    <Directory Name="Modules" Id="INSTALLDIR">
+                        <Directory Id="adoLib" Name="adoLib">
+                        </Directory>
+                        <Directory Id="Agent" Name="Agent">
+                        </Directory>
+                        <Directory Id="ISECreamBasic" Name="ICECreamBasic">
+                        </Directory>
+                        <Directory Id="OracleClient" Name="OracleClient">
+                        </Directory>
+                        <Directory Id="OracleIse" Name="OracleIse">
+                        </Directory>
+                        <Directory Id="Repl" Name="Repl">
+                        </Directory>
+                        <Directory Id="ShowMbrs" Name="ShowMbrs">
+                        </Directory>
+                        <Directory Id="SQLIse" Name="SQLIse">
+                        </Directory>
+                        <Directory Id="SQLMaint" Name="SQLMaint">
+                        </Directory>
+                        <Directory Id="SQLParser" Name="SQLParser">
+                        </Directory>
+                        <Directory Id="SQLPSX" Name="SQLPSX">
+                        </Directory>
+                        <Directory Id="SQLServer" Name="SQLServer">
+                        </Directory>
+                        <Directory Id="SSIS" Name="SSIS">
+                        </Directory>
+                        <Directory Id="WPK" Name="WPK">
+                        </Directory>
+                    </Directory>
+                </Directory>
+            </Directory>
+        </Directory>
+        <Property Id="ARPHELPLINK" Value="http://sqlpsx.codeplex.com/Thread/List.aspx" />
+        <Property Id="ARPURLINFOABOUT" Value="http://sqlpsx.codeplex.com" />
+        <Feature Id="Module" Title="SQLPSX" Level="1" ConfigurableDirectory='INSTALLDIR'>
+            <ComponentGroupRef Id="adoLib" />
+            <ComponentGroupRef Id="Agent" />
+            <ComponentGroupRef Id="ISECreamBasic" />
+            <ComponentGroupRef Id="OracleClient" />
+            <ComponentGroupRef Id="OracleIse" />
+            <ComponentGroupRef Id="Repl" />
+            <ComponentGroupRef Id="ShowMbrs" />
+            <ComponentGroupRef Id="SQLIse" />
+            <ComponentGroupRef Id="SQLMaint" />
+            <ComponentGroupRef Id="SQLParser" />
+            <ComponentGroupRef Id="SQLPSX" />
+            <ComponentGroupRef Id="SQLServer" />
+            <ComponentGroupRef Id="SSIS" />
+            <ComponentGroupRef Id="WPK" />
+        </Feature>
+        <UI />
+        <UIRef Id="WixUI_InstallDir" />
+        <Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR" />
+    </Product>
+</Wix>

@@ -19,19 +19,42 @@
 # ---------------------------------------------------------------------------
 
 $scriptRoot = Split-Path (Resolve-Path $myInvocation.MyCommand.Path)
-. $scriptRoot\LibrarySmo.ps1
-Set-Alias Test-SqlConn $scriptRoot\Test-SqlConn.ps1
+#. $scriptRoot\LibrarySmo.ps1
+#Set-Alias Test-SqlConn $scriptRoot\Test-SqlConn.ps1
 
 $maxThread = 2
 $ServerList = New-Object System.Collections.ArrayList
-$SQLPSXServer = 'Z002\SQLEXPRESS'
+$SQLPSXServer = 'Z002\SQL2K8'
 $SQLPSXDb = 'SQLPSX'
-$SQLPSXDir = "$scriptRoot\Data\"
+$SQLPSXDir = "C:\SQLPSX\Data\"
+if (!(Test-Path $SQLPSXDir)) {new-item $SQLPSXDir -ItemType "dir"}
+
+#######################
+function Invoke-Sqlcmd2
+{
+    param(
+    [string]$ServerInstance,
+    [string]$Database,
+    [string]$Query,
+    [Int32]$QueryTimeout=30
+    )
+
+    $conn=new-object System.Data.SqlClient.SQLConnection
+    $conn.ConnectionString="Server={0};Database={1};Integrated Security=True" -f $ServerInstance,$Database
+    $conn.Open()
+    $cmd=new-object system.Data.SqlClient.SqlCommand($Query,$conn)
+    $cmd.CommandTimeout=$QueryTimeout
+    $ds=New-Object system.Data.DataSet
+    $da=New-Object system.Data.SqlClient.SqlDataAdapter($cmd)
+    [void]$da.fill($ds)
+    $conn.Close()
+    $ds.Tables[0]
+} #Invoke-Sqlcmd2
 
 #######################
 function Get-SqlList
 {
- Get-SqlData $SQLPSXServer $SQLPSXDb  "SELECT Server FROM dbo.SqlServer WHERE IsEnabled = 'true'" | foreach {$_.Server} | Test-SqlConn |
+ Invoke-Sqlcmd2 $SQLPSXServer $SQLPSXDb  "SELECT Server FROM dbo.SqlServer WHERE IsEnabled = 'true'" | foreach {$_.Server} | 
  foreach { $ServerList.Add("$_") > $null }
 
 }# Get-SqlList
