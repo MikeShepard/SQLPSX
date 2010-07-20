@@ -7,7 +7,13 @@
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
     <Product Id="E708DE54-4067-4727-A6CC-83D9D5A61B1F" Name="SQLPSX" Language="1033" Version="$(var.MajorVersion).$(var.MinorVersion).$(var.MicroVersion).$(var.BuildVersion)" Manufacturer="SQLPSX" UpgradeCode="F52E6F67-79FE-4115-81B1-B441ECD9ABCF">
         <Package Description="SQLPSX Installer" InstallPrivileges="elevated" Comments="SQLPSX Installer" InstallerVersion="200" Compressed="yes" />
+        <Upgrade Id="F52E6F67-79FE-4115-81B1-B441ECD9ABCF">
+          <UpgradeVersion OnlyDetect="no" Property="PREVIOUSFOUND"
+            Minimum="1.0.0" IncludeMinimum="yes"
+            Maximum="2.2.3.1" IncludeMaximum="no" />
+        </Upgrade>
         <Media Id="1" Cabinet="SQLPSXInstaller.cab" EmbedCab="yes" />
+        <WixVariable Id="WixUILicenseRtf" Value="License.rtf" />
         <Directory Id="TARGETDIR" Name="SourceDir">
             <Directory Id="PersonalFolder" Name="PersonalFolder">
                 <Directory Name="WindowsPowerShell" Id="WindowsPowerShell">
