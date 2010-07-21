@@ -22,7 +22,7 @@
                         </Directory>
                         <Directory Id="Agent" Name="Agent">
                         </Directory>
-                        <Directory Id="ISECreamBasic" Name="ICECreamBasic">
+                        <Directory Id="ISECreamBasic" Name="ISECreamBasic">
                         </Directory>
                         <Directory Id="OracleClient" Name="OracleClient">
                         </Directory>
