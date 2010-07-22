@@ -84,240 +84,240 @@
     </Fragment>
     <Fragment>
         <DirectoryRef Id="WPK">
-            <Component Id="Add_ChildControl.ps1" Guid="*">
+            <Component Id="Add_ChildControl.ps1" Guid="*" Permanent="yes">
                 <File Id="Add_ChildControl.ps1" KeyPath="yes" Source="$(var.WPK)\Add-ChildControl.ps1" />
             </Component>
-            <Component Id="Add_CodeGenerationRule.ps1" Guid="*">
+            <Component Id="Add_CodeGenerationRule.ps1" Guid="*" Permanent="yes">
                 <File Id="Add_CodeGenerationRule.ps1" KeyPath="yes" Source="$(var.WPK)\Add-CodeGenerationRule.ps1" />
             </Component>
-            <Component Id="Add_EventHandler.ps1" Guid="*">
+            <Component Id="Add_EventHandler.ps1" Guid="*" Permanent="yes">
                 <File Id="Add_EventHandler.ps1" KeyPath="yes" Source="$(var.WPK)\Add-EventHandler.ps1" />
             </Component>
-            <Component Id="Add_GridColumn.ps1" Guid="*">
+            <Component Id="Add_GridColumn.ps1" Guid="*" Permanent="yes">
                 <File Id="Add_GridColumn.ps1" KeyPath="yes" Source="$(var.WPK)\Add-GridColumn.ps1" />
             </Component>
-            <Component Id="Add_GridRow.ps1" Guid="*">
+            <Component Id="Add_GridRow.ps1" Guid="*" Permanent="yes">
                 <File Id="Add_GridRow.ps1" KeyPath="yes" Source="$(var.WPK)\Add-GridRow.ps1" />
             </Component>
-            <Component Id="Close_Control.ps1" Guid="*">
+            <Component Id="Close_Control.ps1" Guid="*" Permanent="yes">
                 <File Id="Close_Control.ps1" KeyPath="yes" Source="$(var.WPK)\Close-Control.ps1" />
             </Component>
-            <Component Id="ConvertFrom_TypeToScriptCmdlet.ps1" Guid="*">
+            <Component Id="ConvertFrom_TypeToScriptCmdlet.ps1" Guid="*" Permanent="yes">
                 <File Id="ConvertFrom_TypeToScriptCmdlet.ps1" KeyPath="yes" Source="$(var.WPK)\ConvertFrom-TypeToScriptCmdlet.ps1" />
             </Component>
-            <Component Id="ConvertTo_DataTemplate.ps1" Guid="*">
+            <Component Id="ConvertTo_DataTemplate.ps1" Guid="*" Permanent="yes">
                 <File Id="ConvertTo_DataTemplate.ps1" KeyPath="yes" Source="$(var.WPK)\ConvertTo-DataTemplate.ps1" />
             </Component>
-            <Component Id="ConvertTo_GridLength.ps1" Guid="*">
+            <Component Id="ConvertTo_GridLength.ps1" Guid="*" Permanent="yes">
                 <File Id="ConvertTo_GridLength.ps1" KeyPath="yes" Source="$(var.WPK)\ConvertTo-GridLength.ps1" />
             </Component>
-            <Component Id="ConvertTo_ParameterMetaData.ps1" Guid="*">
+            <Component Id="ConvertTo_ParameterMetaData.ps1" Guid="*" Permanent="yes">
                 <File Id="ConvertTo_ParameterMetaData.ps1" KeyPath="yes" Source="$(var.WPK)\ConvertTo-ParameterMetaData.ps1" />
             </Component>
-            <Component Id="ConvertTo_Xaml.ps1" Guid="*">
+            <Component Id="ConvertTo_Xaml.ps1" Guid="*" Permanent="yes">
                 <File Id="ConvertTo_Xaml.ps1" KeyPath="yes" Source="$(var.WPK)\ConvertTo-Xaml.ps1" />
             </Component>
-            <Component Id="Copy_DependencyProperty.ps1" Guid="*">
+            <Component Id="Copy_DependencyProperty.ps1" Guid="*" Permanent="yes">
                 <File Id="Copy_DependencyProperty.ps1" KeyPath="yes" Source="$(var.WPK)\Copy-DependencyProperty.ps1" />
             </Component>
-            <Component Id="Enable_Multitouch.ps1" Guid="*">
+            <Component Id="Enable_Multitouch.ps1" Guid="*" Permanent="yes">
                 <File Id="Enable_Multitouch.ps1" KeyPath="yes" Source="$(var.WPK)\Enable-Multitouch.ps1" />
             </Component>
-            <Component Id="Export_Application.ps1" Guid="*">
+            <Component Id="Export_Application.ps1" Guid="*" Permanent="yes">
                 <File Id="Export_Application.ps1" KeyPath="yes" Source="$(var.WPK)\Export-Application.ps1" />
             </Component>
-            <Component Id="Get_ChildControl.ps1" Guid="*">
+            <Component Id="Get_ChildControl.ps1" Guid="*" Permanent="yes">
                 <File Id="Get_ChildControl.ps1" KeyPath="yes" Source="$(var.WPK)\Get-ChildControl.ps1" />
             </Component>
-            <Component Id="Get_CommandPlugin.ps1" Guid="*">
+            <Component Id="Get_CommandPlugin.ps1" Guid="*" Permanent="yes">
                 <File Id="Get_CommandPlugin.ps1" KeyPath="yes" Source="$(var.WPK)\Get-CommandPlugin.ps1" />
             </Component>
-            <Component Id="Get_CommonParentControl.ps1" Guid="*">
+            <Component Id="Get_CommonParentControl.ps1" Guid="*" Permanent="yes">
                 <File Id="Get_CommonParentControl.ps1" KeyPath="yes" Source="$(var.WPK)\Get-CommonParentControl.ps1" />
             </Component>
-            <Component Id="Get_DependencyProperty.ps1" Guid="*">
+            <Component Id="Get_DependencyProperty.ps1" Guid="*" Permanent="yes">
                 <File Id="Get_DependencyProperty.ps1" KeyPath="yes" Source="$(var.WPK)\Get-DependencyProperty.ps1" />
             </Component>
-            <Component Id="Get_HashtableAsObject.ps1" Guid="*">
+            <Component Id="Get_HashtableAsObject.ps1" Guid="*" Permanent="yes">
                 <File Id="Get_HashtableAsObject.ps1" KeyPath="yes" Source="$(var.WPK)\Get-HashtableAsObject.ps1" />
             </Component>
-            <Component Id="Get_PowerShellDataSource.ps1" Guid="*">
+            <Component Id="Get_PowerShellDataSource.ps1" Guid="*" Permanent="yes">
                 <File Id="Get_PowerShellDataSource.ps1" KeyPath="yes" Source="$(var.WPK)\Get-PowerShellDataSource.ps1" />
             </Component>
-            <Component Id="Get_ReferencedCommand.ps1" Guid="*">
+            <Component Id="Get_ReferencedCommand.ps1" Guid="*" Permanent="yes">
                 <File Id="Get_ReferencedCommand.ps1" KeyPath="yes" Source="$(var.WPK)\Get-ReferencedCommand.ps1" />
             </Component>
-            <Component Id="Get_Resource.ps1" Guid="*">
+            <Component Id="Get_Resource.ps1" Guid="*" Permanent="yes">
                 <File Id="Get_Resource.ps1" KeyPath="yes" Source="$(var.WPK)\Get-Resource.ps1" />
             </Component>
-            <Component Id="Get_UIElementPosition.ps1" Guid="*">
+            <Component Id="Get_UIElementPosition.ps1" Guid="*" Permanent="yes">
                 <File Id="Get_UIElementPosition.ps1" KeyPath="yes" Source="$(var.WPK)\Get-UIElementPosition.ps1" />
             </Component>
-            <Component Id="Hide_UIElement.ps1" Guid="*">
+            <Component Id="Hide_UIElement.ps1" Guid="*" Permanent="yes">
                 <File Id="Hide_UIElement.ps1" KeyPath="yes" Source="$(var.WPK)\Hide-UIElement.ps1" />
             </Component>
-            <Component Id="Join_PowerShellCommandOutput.ps1" Guid="*">
+            <Component Id="Join_PowerShellCommandOutput.ps1" Guid="*" Permanent="yes">
                 <File Id="Join_PowerShellCommandOutput.ps1" KeyPath="yes" Source="$(var.WPK)\Join-PowerShellCommandOutput.ps1" />
             </Component>
-            <Component Id="license.txt" Guid="*">
+            <Component Id="license.txt" Guid="*" Permanent="yes">
                 <File Id="license.txt" KeyPath="yes" Source="$(var.WPK)\license.txt" />
             </Component>
-            <Component Id="Move_Control.ps1" Guid="*">
+            <Component Id="Move_Control.ps1" Guid="*" Permanent="yes">
                 <File Id="Move_Control.ps1" KeyPath="yes" Source="$(var.WPK)\Move-Control.ps1" />
             </Component>
-            <Component Id="readme.txt" Guid="*">
+            <Component Id="readme.txt" Guid="*" Permanent="yes">
                 <File Id="readme.txt" KeyPath="yes" Source="$(var.WPK)\readme.txt" />
             </Component>
-            <Component Id="Register_PowerShellCommand.ps1" Guid="*">
+            <Component Id="Register_PowerShellCommand.ps1" Guid="*" Permanent="yes">
                 <File Id="Register_PowerShellCommand.ps1" KeyPath="yes" Source="$(var.WPK)\Register-PowerShellCommand.ps1" />
             </Component>
-            <Component Id="Remove_ChildControl.ps1" Guid="*">
+            <Component Id="Remove_ChildControl.ps1" Guid="*" Permanent="yes">
                 <File Id="Remove_ChildControl.ps1" KeyPath="yes" Source="$(var.WPK)\Remove-ChildControl.ps1" />
             </Component>
-            <Component Id="Set_DependencyProperty.ps1" Guid="*">
+            <Component Id="Set_DependencyProperty.ps1" Guid="*" Permanent="yes">
                 <File Id="Set_DependencyProperty.ps1" KeyPath="yes" Source="$(var.WPK)\Set-DependencyProperty.ps1" />
             </Component>
-            <Component Id="Set_Property.ps1" Guid="*">
+            <Component Id="Set_Property.ps1" Guid="*" Permanent="yes">
                 <File Id="Set_Property.ps1" KeyPath="yes" Source="$(var.WPK)\Set-Property.ps1" />
             </Component>
-            <Component Id="Set_Resource.ps1" Guid="*">
+            <Component Id="Set_Resource.ps1" Guid="*" Permanent="yes">
                 <File Id="Set_Resource.ps1" KeyPath="yes" Source="$(var.WPK)\Set-Resource.ps1" />
             </Component>
-            <Component Id="Show_UIElement.ps1" Guid="*">
+            <Component Id="Show_UIElement.ps1" Guid="*" Permanent="yes">
                 <File Id="Show_UIElement.ps1" KeyPath="yes" Source="$(var.WPK)\Show-UIElement.ps1" />
             </Component>
-            <Component Id="Show_Window.ps1" Guid="*">
+            <Component Id="Show_Window.ps1" Guid="*" Permanent="yes">
                 <File Id="Show_Window.ps1" KeyPath="yes" Source="$(var.WPK)\Show-Window.ps1" />
             </Component>
-            <Component Id="Start_Animation.ps1" Guid="*">
+            <Component Id="Start_Animation.ps1" Guid="*" Permanent="yes">
                 <File Id="Start_Animation.ps1" KeyPath="yes" Source="$(var.WPK)\Start-Animation.ps1" />
             </Component>
-            <Component Id="Start_PowerShellCommand.ps1" Guid="*">
+            <Component Id="Start_PowerShellCommand.ps1" Guid="*" Permanent="yes">
                 <File Id="Start_PowerShellCommand.ps1" KeyPath="yes" Source="$(var.WPK)\Start-PowerShellCommand.ps1" />
             </Component>
-            <Component Id="Start_WPFJob.ps1" Guid="*">
+            <Component Id="Start_WPFJob.ps1" Guid="*" Permanent="yes">
                 <File Id="Start_WPFJob.ps1" KeyPath="yes" Source="$(var.WPK)\Start-WPFJob.ps1" />
             </Component>
-            <Component Id="Stop_PowerShellCommand.ps1" Guid="*">
+            <Component Id="Stop_PowerShellCommand.ps1" Guid="*" Permanent="yes">
                 <File Id="Stop_PowerShellCommand.ps1" KeyPath="yes" Source="$(var.WPK)\Stop-PowerShellCommand.ps1" />
             </Component>
-            <Component Id="Test_Ancestor.ps1" Guid="*">
+            <Component Id="Test_Ancestor.ps1" Guid="*" Permanent="yes">
                 <File Id="Test_Ancestor.ps1" KeyPath="yes" Source="$(var.WPK)\Test-Ancestor.ps1" />
             </Component>
-            <Component Id="Test_Descendent.ps1" Guid="*">
+            <Component Id="Test_Descendent.ps1" Guid="*" Permanent="yes">
                 <File Id="Test_Descendent.ps1" KeyPath="yes" Source="$(var.WPK)\Test-Descendent.ps1" />
             </Component>
-            <Component Id="Unregister_PowerShellCommand.ps1" Guid="*">
+            <Component Id="Unregister_PowerShellCommand.ps1" Guid="*" Permanent="yes">
                 <File Id="Unregister_PowerShellCommand.ps1" KeyPath="yes" Source="$(var.WPK)\Unregister-PowerShellCommand.ps1" />
             </Component>
-            <Component Id="Update_WPFJob.ps1" Guid="*">
+            <Component Id="Update_WPFJob.ps1" Guid="*" Permanent="yes">
                 <File Id="Update_WPFJob.ps1" KeyPath="yes" Source="$(var.WPK)\Update-WPFJob.ps1" />
             </Component>
-            <Component Id="WPF.ps1xml" Guid="*">
+            <Component Id="WPF.ps1xml" Guid="*" Permanent="yes">
                 <File Id="WPF.ps1xml" KeyPath="yes" Source="$(var.WPK)\WPF.ps1xml" />
             </Component>
-            <Component Id="WPK.psd1" Guid="*">
+            <Component Id="WPK.psd1" Guid="*" Permanent="yes">
                 <File Id="WPK.psd1" KeyPath="yes" Source="$(var.WPK)\WPK.psd1" />
             </Component>
-            <Component Id="WPK.psm1" Guid="*">
+            <Component Id="WPK.psm1" Guid="*" Permanent="yes">
                 <File Id="WPK.psm1" KeyPath="yes" Source="$(var.WPK)\WPK.psm1" />
             </Component>
             <Directory Id="Examples" Name="Examples">
-                <Component Id="AddGridRowExample.ps1" Guid="*">
+                <Component Id="AddGridRowExample.ps1" Guid="*" Permanent="yes">
                     <File Id="AddGridRowExample.ps1" KeyPath="yes" Source="$(var.WPK)\Examples\AddGridRowExample.ps1" />
                 </Component>
-                <Component Id="AnimatedLinesFromCenter.ps1" Guid="*">
+                <Component Id="AnimatedLinesFromCenter.ps1" Guid="*" Permanent="yes">
                     <File Id="AnimatedLinesFromCenter.ps1" KeyPath="yes" Source="$(var.WPK)\Examples\AnimatedLinesFromCenter.ps1" />
                 </Component>
-                <Component Id="canvasfromblend.ps1" Guid="*">
+                <Component Id="canvasfromblend.ps1" Guid="*" Permanent="yes">
                     <File Id="canvasfromblend.ps1" KeyPath="yes" Source="$(var.WPK)\Examples\canvasfromblend.ps1" />
                 </Component>
-                <Component Id="CanvasFromDesign.ps1" Guid="*">
+                <Component Id="CanvasFromDesign.ps1" Guid="*" Permanent="yes">
                     <File Id="CanvasFromDesign.ps1" KeyPath="yes" Source="$(var.WPK)\Examples\CanvasFromDesign.ps1" />
                 </Component>
-                <Component Id="CmdletExample.ps1" Guid="*">
+                <Component Id="CmdletExample.ps1" Guid="*" Permanent="yes">
                     <File Id="CmdletExample.ps1" KeyPath="yes" Source="$(var.WPK)\Examples\CmdletExample.ps1" />
                 </Component>
-                <Component Id="DataTemplate.ps1" Guid="*">
+                <Component Id="DataTemplate.ps1" Guid="*" Permanent="yes">
                     <File Id="DataTemplate.ps1" KeyPath="yes" Source="$(var.WPK)\Examples\DataTemplate.ps1" />
                 </Component>
-                <Component Id="DigitalClock.ps1" Guid="*">
+                <Component Id="DigitalClock.ps1" Guid="*" Permanent="yes">
                     <File Id="DigitalClock.ps1" KeyPath="yes" Source="$(var.WPK)\Examples\DigitalClock.ps1" />
                 </Component>
-                <Component Id="EllipseAnimation.ps1" Guid="*">
+                <Component Id="EllipseAnimation.ps1" Guid="*" Permanent="yes">
                     <File Id="EllipseAnimation.ps1" KeyPath="yes" Source="$(var.WPK)\Examples\EllipseAnimation.ps1" />
                 </Component>
-                <Component Id="FlowDocument.ps1" Guid="*">
+                <Component Id="FlowDocument.ps1" Guid="*" Permanent="yes">
                     <File Id="FlowDocument.ps1" KeyPath="yes" Source="$(var.WPK)\Examples\FlowDocument.ps1" />
                 </Component>
-                <Component Id="flyin.ps1" Guid="*">
+                <Component Id="flyin.ps1" Guid="*" Permanent="yes">
                     <File Id="flyin.ps1" KeyPath="yes" Source="$(var.WPK)\Examples\flyin.ps1" />
                 </Component>
-                <Component Id="Gradient.ps1" Guid="*">
+                <Component Id="Gradient.ps1" Guid="*" Permanent="yes">
                     <File Id="Gradient.ps1" KeyPath="yes" Source="$(var.WPK)\Examples\Gradient.ps1" />
                 </Component>
-                <Component Id="ImportWinForms.ps1" Guid="*">
+                <Component Id="ImportWinForms.ps1" Guid="*" Permanent="yes">
                     <File Id="ImportWinForms.ps1" KeyPath="yes" Source="$(var.WPK)\Examples\ImportWinForms.ps1" />
                 </Component>
-                <Component Id="ListBoxSamples.ps1" Guid="*">
+                <Component Id="ListBoxSamples.ps1" Guid="*" Permanent="yes">
                     <File Id="ListBoxSamples.ps1" KeyPath="yes" Source="$(var.WPK)\Examples\ListBoxSamples.ps1" />
                 </Component>
-                <Component Id="ListView.ps1" Guid="*">
+                <Component Id="ListView.ps1" Guid="*" Permanent="yes">
                     <File Id="ListView.ps1" KeyPath="yes" Source="$(var.WPK)\Examples\ListView.ps1" />
                 </Component>
-                <Component Id="MixingArgumentFormats.ps1" Guid="*">
+                <Component Id="MixingArgumentFormats.ps1" Guid="*" Permanent="yes">
                     <File Id="MixingArgumentFormats.ps1" KeyPath="yes" Source="$(var.WPK)\Examples\MixingArgumentFormats.ps1" />
                 </Component>
-                <Component Id="MoveControlExamples.ps1" Guid="*">
+                <Component Id="MoveControlExamples.ps1" Guid="*" Permanent="yes">
                     <File Id="MoveControlExamples.ps1" KeyPath="yes" Source="$(var.WPK)\Examples\MoveControlExamples.ps1" />
                 </Component>
-                <Component Id="MutlitouchDraw.ps1" Guid="*">
+                <Component Id="MutlitouchDraw.ps1" Guid="*" Permanent="yes">
                     <File Id="MutlitouchDraw.ps1" KeyPath="yes" Source="$(var.WPK)\Examples\MutlitouchDraw.ps1" />
                 </Component>
-                <Component Id="MutlitouchImage.ps1" Guid="*">
+                <Component Id="MutlitouchImage.ps1" Guid="*" Permanent="yes">
                     <File Id="MutlitouchImage.ps1" KeyPath="yes" Source="$(var.WPK)\Examples\MutlitouchImage.ps1" />
                 </Component>
-                <Component Id="PowerShellDataSources.ps1" Guid="*">
+                <Component Id="PowerShellDataSources.ps1" Guid="*" Permanent="yes">
                     <File Id="PowerShellDataSources.ps1" KeyPath="yes" Source="$(var.WPK)\Examples\PowerShellDataSources.ps1" />
                 </Component>
-                <Component Id="RichTextBoxAndCommands.ps1" Guid="*">
+                <Component Id="RichTextBoxAndCommands.ps1" Guid="*" Permanent="yes">
                     <File Id="RichTextBoxAndCommands.ps1" KeyPath="yes" Source="$(var.WPK)\Examples\RichTextBoxAndCommands.ps1" />
                 </Component>
-                <Component Id="RunCommand.ps1" Guid="*">
+                <Component Id="RunCommand.ps1" Guid="*" Permanent="yes">
                     <File Id="RunCommand.ps1" KeyPath="yes" Source="$(var.WPK)\Examples\RunCommand.ps1" />
                 </Component>
-                <Component Id="Show_Module.ps1" Guid="*">
+                <Component Id="Show_Module.ps1" Guid="*" Permanent="yes">
                     <File Id="Show_Module.ps1" KeyPath="yes" Source="$(var.WPK)\Examples\Show-Module.ps1" />
                 </Component>
-                <Component Id="SimpleDialog.ps1" Guid="*">
+                <Component Id="SimpleDialog.ps1" Guid="*" Permanent="yes">
                     <File Id="SimpleDialog.ps1" KeyPath="yes" Source="$(var.WPK)\Examples\SimpleDialog.ps1" />
                 </Component>
-                <Component Id="SkewAnimation.ps1" Guid="*">
+                <Component Id="SkewAnimation.ps1" Guid="*" Permanent="yes">
                     <File Id="SkewAnimation.ps1" KeyPath="yes" Source="$(var.WPK)\Examples\SkewAnimation.ps1" />
                 </Component>
-                <Component Id="Stopwatch.ps1" Guid="*">
+                <Component Id="Stopwatch.ps1" Guid="*" Permanent="yes">
                     <File Id="Stopwatch.ps1" KeyPath="yes" Source="$(var.WPK)\Examples\Stopwatch.ps1" />
                 </Component>
             </Directory>
             <Directory Id="GeneratedControls" Name="GeneratedControls">
-                <Component Id="PresentationCore.ps1" Guid="*">
+                <Component Id="PresentationCore.ps1" Guid="*" Permanent="yes">
                     <File Id="PresentationCore.ps1" KeyPath="yes" Source="$(var.WPK)\GeneratedControls\PresentationCore.ps1" />
                 </Component>
-                <Component Id="PresentationFramework.ps1" Guid="*">
+                <Component Id="PresentationFramework.ps1" Guid="*" Permanent="yes">
                     <File Id="PresentationFramework.ps1" KeyPath="yes" Source="$(var.WPK)\GeneratedControls\PresentationFramework.ps1" />
                 </Component>
-                <Component Id="WindowsBase.ps1" Guid="*">
+                <Component Id="WindowsBase.ps1" Guid="*" Permanent="yes">
                     <File Id="WindowsBase.ps1" KeyPath="yes" Source="$(var.WPK)\GeneratedControls\WindowsBase.ps1" />
                 </Component>
-                <Component Id="WindowsFormsIntegration.ps1" Guid="*">
+                <Component Id="WindowsFormsIntegration.ps1" Guid="*" Permanent="yes">
                     <File Id="WindowsFormsIntegration.ps1" KeyPath="yes" Source="$(var.WPK)\GeneratedControls\WindowsFormsIntegration.ps1" />
                 </Component>
-                <Component Id="Winforms.ps1" Guid="*">
+                <Component Id="Winforms.ps1" Guid="*" Permanent="yes">
                     <File Id="Winforms.ps1" KeyPath="yes" Source="$(var.WPK)\GeneratedControls\Winforms.ps1" />
                 </Component>
             </Directory>
             <Directory Id="Rules" Name="Rules">
-                <Component Id="WPFCodeGenerationRules.ps1" Guid="*">
+                <Component Id="WPFCodeGenerationRules.ps1" Guid="*" Permanent="yes">
                     <File Id="WPFCodeGenerationRules.ps1" KeyPath="yes" Source="$(var.WPK)\Rules\WPFCodeGenerationRules.ps1" />
                 </Component>
             </Directory>

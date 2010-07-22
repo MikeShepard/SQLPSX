@@ -29,6 +29,8 @@ remove-item sed*
 
 #candle.exe sqlpsxAll.wxs adolib.wxs Agent.wxs ISECreamBasic.wxs OracleClient.wxs OracleIse.wxs Repl.wxs ShowMbrs.wxs SQLIse.wxs SQLMaint.wxs SQLParser.wxs en-US.wxs SQLPSX.wxs SQLServer.wxs Database.wxs Reports.wxs SSIS.wxs WPK.wxs Examples.wxs GeneratedControls.wxs Rules.wxs
 #Fix duplicate files in ISECreamBasic and OralceISE -- give unique prefix ICB and Ora
+#May need to generate new guid for Product Id
+[System.Guid]::NewGuid().toString()
 
 candle.exe sqlpsxAll.wxs adolib.wxs Agent.wxs ISECreamBasic.wxs OracleClient.wxs OracleIse.wxs Repl.wxs ShowMbrs.wxs SQLIse.wxs SQLMaint.wxs SQLParser.wxs SQLPSX.wxs SQLServer.wxs SSIS.wxs WPK.wxs
 

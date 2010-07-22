@@ -3,15 +3,19 @@
 <!--
       NEVER change the UPGRADE code. ALWAYS change the Id.
       Version 2.2.3.1       Product Id was: E708DE54-4067-4727-A6CC-83D9D5A61B1F
+      Version 2.2.3.2       Product Id was: 16F395EE-FA14-4BAE-A0E8-DC773BD422B3
 -->
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-    <Product Id="E708DE54-4067-4727-A6CC-83D9D5A61B1F" Name="SQLPSX" Language="1033" Version="$(var.MajorVersion).$(var.MinorVersion).$(var.MicroVersion).$(var.BuildVersion)" Manufacturer="SQLPSX" UpgradeCode="F52E6F67-79FE-4115-81B1-B441ECD9ABCF">
+    <Product Id="16F395EE-FA14-4BAE-A0E8-DC773BD422B3" Name="SQLPSX" Language="1033" Version="$(var.MajorVersion).$(var.MinorVersion).$(var.MicroVersion).$(var.BuildVersion)" Manufacturer="SQLPSX" UpgradeCode="F52E6F67-79FE-4115-81B1-B441ECD9ABCF">
         <Package Description="SQLPSX Installer" InstallPrivileges="elevated" Comments="SQLPSX Installer" InstallerVersion="200" Compressed="yes" />
         <Upgrade Id="F52E6F67-79FE-4115-81B1-B441ECD9ABCF">
           <UpgradeVersion OnlyDetect="no" Property="PREVIOUSFOUND"
             Minimum="1.0.0" IncludeMinimum="yes"
-            Maximum="2.2.3.1" IncludeMaximum="no" />
+            Maximum="$(var.MajorVersion).$(var.MinorVersion).$(var.MicroVersion).$(var.BuildVersion)" IncludeMaximum="no" />
         </Upgrade>
+        <InstallExecuteSequence>
+            <RemoveExistingProducts After="InstallInitialize"/>
+        </InstallExecuteSequence>
         <Media Id="1" Cabinet="SQLPSXInstaller.cab" EmbedCab="yes" />
         <WixVariable Id="WixUILicenseRtf" Value="License.rtf" />
         <Directory Id="TARGETDIR" Name="SourceDir">

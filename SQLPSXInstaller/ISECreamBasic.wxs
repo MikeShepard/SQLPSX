@@ -12,19 +12,19 @@
     </Fragment>
     <Fragment>
         <DirectoryRef Id="ISECreamBasic">
-            <Component Id="Add_IseMenu.ps1" Guid="*">
+            <Component Id="Add_IseMenu.ps1" Guid="*" Permanent="yes">
                 <File Id="Add_IseMenu.ps1" KeyPath="yes" Source="$(var.ISECreamBasic)\Add-IseMenu.ps1" />
             </Component>
-            <Component Id="ISECreamBasic.psm1" Guid="*">
+            <Component Id="ISECreamBasic.psm1" Guid="*" Permanent="yes">
                 <File Id="ISECreamBasic.psm1" KeyPath="yes" Source="$(var.ISECreamBasic)\ISECreamBasic.psm1" />
             </Component>
-            <Component Id="ICBlicense.txt" Guid="*">
+            <Component Id="ICBlicense.txt" Guid="*" Permanent="yes">
                 <File Id="ICBlicense.txt" KeyPath="yes" Source="$(var.ISECreamBasic)\license.txt" />
             </Component>
-            <Component Id="ICBreadme.txt" Guid="*">
+            <Component Id="ICBreadme.txt" Guid="*" Permanent="yes">
                 <File Id="ICBreadme.txt" KeyPath="yes" Source="$(var.ISECreamBasic)\readme.txt" />
             </Component>
-            <Component Id="Remove_IseMenu.ps1" Guid="*">
+            <Component Id="Remove_IseMenu.ps1" Guid="*" Permanent="yes">
                 <File Id="Remove_IseMenu.ps1" KeyPath="yes" Source="$(var.ISECreamBasic)\Remove-IseMenu.ps1" />
             </Component>
         </DirectoryRef>
