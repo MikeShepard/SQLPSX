@@ -13,6 +13,10 @@
       <Name>PBMDashBoard.rdl</Name>
       <FullPath>PBMDashBoard.rdl</FullPath>
     </ProjectItem>
+    <ProjectItem>
+      <Name>FailedPolicyReport.rdl</Name>
+      <FullPath>FailedPolicyReport.rdl</FullPath>
+    </ProjectItem>
   </Reports>
   <Configurations>
     <Configuration>

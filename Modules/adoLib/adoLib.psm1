@@ -57,7 +57,7 @@ param([Parameter(Position=0, Mandatory=$true)][string]$server,
 	$conn=new-object System.Data.SqlClient.SQLConnection
 	
 	if ($user -ne ''){
-		$conn.ConnectionString="Server=$server;$dbclause`User ID=$user;Password=$password"
+		$conn.ConnectionString="Server=$server;$dbclause`User ID=[$user];Password=$password"
 	} else {
 		$conn.ConnectionString="Server=$server;$dbclause`Integrated Security=True"
 	}
@@ -169,6 +169,96 @@ param([Parameter(Position=0, Mandatory=$true)][System.Data.Dataset]$ds,
 
 <#
 	.SYNOPSIS
+		Create a sql command object
+
+	.DESCRIPTION
+		This function uses the information contained in the parameters to create a sql command object.  In general, you will want to use the invoke- functions directly, 
+        but if you need to manipulate a command object in ways that those functions don't allow, you will need this.  Also, the invoke-bulkcopy function allows you to pass 
+        a command object instead of a set of records in order to "stream" the records into the destination in cases where there are a lot of records and you don't want to
+        allocate memory to hold the entire result set.
+
+	.PARAMETER  sql
+		The sql to be executed by the command object (although it is not executed by this function).
+
+	.PARAMETER  connection
+		An existing connection to perform the sql statement with.  
+
+	.PARAMETER  parameters
+		A hashtable of input parameters to be supplied with the query.  See example 2. 
+        
+	.PARAMETER  timeout
+		The commandtimeout value (in seconds).  The command will fail and be rolled back if it does not complete before the timeout occurs.
+
+	.PARAMETER  Server
+		The server to connect to.  If both Server and Connection are specified, Server is ignored.
+
+	.PARAMETER  Database
+		The initial database for the connection.  If both Database and Connection are specified, Database is ignored.
+
+	.PARAMETER  User
+		The sql user to use for the connection.  If both User and Connection are specified, User is ignored.
+
+	.PARAMETER  Password
+		The password for the sql user named by the User parameter.
+
+	.PARAMETER  Transaction
+		A transaction to execute the sql statement in.
+
+	.EXAMPLE
+		PS C:\> $cmd=new-sqlcommand "ALTER DATABASE AdventureWorks Modify Name = Northwind" -server MyServer
+        PS C:\> $cmd.ExecuteNonQuery()
+
+
+	.EXAMPLE
+		PS C:\> $cmd=new-sqlcommand -server MyServer -sql "Select * from MyTable"
+        PS C:\> invoke-sqlbulkcopy -records $cmd -server MyOtherServer -table CopyOfMyTable
+
+    .INPUTS
+        None.
+        You cannot pipe objects to new-sqlcommand
+
+	.OUTPUTS
+		System.Data.SqlClient.SqlCommand
+
+#>
+function new-sqlcommand{
+param([Parameter(Position=0, Mandatory=$true)][string]$sql,
+      [Parameter(Position=1, Mandatory=$false)][System.Data.SqlClient.SQLConnection]$connection,
+      [Parameter(Position=2, Mandatory=$false)][hashtable]$parameters=@{},
+      [Parameter(Position=3, Mandatory=$false)][int]$timeout=30,
+      [Parameter(Position=4, Mandatory=$false)][string]$server,
+      [Parameter(Position=5, Mandatory=$false)][string]$database,
+      [Parameter(Position=6, Mandatory=$false)][string]$user,
+      [Parameter(Position=7, Mandatory=$false)][string]$password,
+      [Parameter(Position=8, Mandatory=$false)][System.Data.SqlClient.SqlTransaction]$transaction=$null)
+   
+    $conn=get-connection -conn $conn -server $server -database $database 
+    $close=($conn.State -eq [System.Data.ConnectionState]'Closed')
+    if ($close) {
+        $conn.Open()
+    }	
+    $cmd=new-object system.Data.SqlClient.SqlCommand($sql,$conn)
+    $cmd.CommandTimeout=$timeout
+    foreach($p in $parameters.Keys){
+	$parm=$cmd.Parameters.AddWithValue("@$p",$parameters[$p])
+        if (is-null $parameters[$p]){
+           $parm.Value=[DBNull]::Value
+        }
+    }
+    put-outputparameters $cmd $outparameters
+
+    if ($transaction -is [System.Data.SqlClient.SqlTransaction]){
+	$cmd.Transaction = $transaction
+    }
+    return $cmd
+
+
+}
+
+
+
+<#
+	.SYNOPSIS
 		Execute a sql statement, ignoring the result set.  Returns the number of rows modified by the statement (or -1 if it was not a DML staement)
 
 	.DESCRIPTION
@@ -222,26 +312,23 @@ function invoke-sql{
 param([Parameter(Position=0, Mandatory=$true)][string]$sql,
       [Parameter(Position=1, Mandatory=$false)][System.Data.SqlClient.SQLConnection]$connection,
       [Parameter(Position=2, Mandatory=$false)][hashtable]$parameters=@{},
-      [Parameter(Position=3, Mandatory=$false)][int]$timeout=30,
-      [Parameter(Position=4, Mandatory=$false)][string]$server,
-      [Parameter(Position=5, Mandatory=$false)][string]$database,
-      [Parameter(Position=6, Mandatory=$false)][string]$user,
-      [Parameter(Position=7, Mandatory=$false)][string]$password,
-      [Parameter(Position=8, Mandatory=$false)][System.Data.SqlClient.SqlTransaction]$transaction=$nothing)
+      [Parameter(Position=3, Mandatory=$false)][hashtable]$outparameters=@{},
+      [Parameter(Position=4, Mandatory=$false)][int]$timeout=30,
+      [Parameter(Position=5, Mandatory=$false)][string]$server,
+      [Parameter(Position=6, Mandatory=$false)][string]$database,
+      [Parameter(Position=7, Mandatory=$false)][string]$user,
+      [Parameter(Position=8, Mandatory=$false)][string]$password,
+      [Parameter(Position=9, Mandatory=$false)][System.Data.SqlClient.SqlTransaction]$transaction=$null)
 	
-	$conn=get-connection -conn $connection -server $server -database $database -user $user -password $password 
-	
-	
-	$cmd=new-object system.Data.SqlClient.SqlCommand($sql,$connection)
-	$cmd.CommandTimeout=$timeout
-	foreach($p in $parameters.Keys){
-				[Void] $cmd.Parameters.AddWithValue("@$p",$parameters[$p])
-	}
-    if ($transaction -is [System.Data.SqlClient.SqlTransaction]){
-       write-verbose 'Setting transaction'
-       $cmd.Transaction = $transaction
-    }
-	return $cmd.ExecuteNonQuery()
+
+       $cmd=new-sqlcommand @PSBoundParameters
+
+       #if it was an ad hoc connection, close it
+       if ($server){
+          $connection.close()
+       }	
+
+       return $cmd.ExecuteNonQuery()
 	
 }
 <#
@@ -315,33 +402,24 @@ param( [Parameter(Position=0, Mandatory=$true)][string]$sql,
        [Parameter(Position=6, Mandatory=$false)][string]$database,
        [Parameter(Position=7, Mandatory=$false)][string]$user,
        [Parameter(Position=8, Mandatory=$false)][string]$password,
-       [Parameter(Position=9, Mandatory=$false)][System.Data.SqlClient.SqlTransaction]$transaction)
+       [Parameter(Position=9, Mandatory=$false)][System.Data.SqlClient.SqlTransaction]$transaction=$null)
 
-	$connection=get-connection -conn $connection -server $server -database $database -user $user -password $password 
-		
-	$cmd=new-object system.Data.SqlClient.SqlCommand($sql,$connection)
-	$cmd.CommandTimeout=$timeout
-	foreach($p in $parameters.Keys){
-		$cmd.Parameters.AddWithValue("@$p",$parameters[$p]).Direction=[System.Data.ParameterDirection]::Input
-	}
-    if ($transaction -is [System.Data.SqlClient.SqlTransaction]) {
-  	    write-verbose 'Setting transaction'
-     	$cmd.Transaction = $transaction
-    }
-	put-outputparameters $cmd $outparameters
-	$ds=New-Object system.Data.DataSet
-	$da=New-Object system.Data.SqlClient.SqlDataAdapter($cmd)
-	$da.fill($ds) | Out-Null
+    $cmd=new-sqlcommand @PSBoundParameters
+    $ds=New-Object system.Data.DataSet
+    $da=New-Object system.Data.SqlClient.SqlDataAdapter($cmd)
+    $da.fill($ds) | Out-Null
     
-	#if ad-hoc connection, close it
+    #if it was an ad hoc connection, close it
     if ($server){
-      $connection.close()
+       $connection.close()
     }	
     
-	get-outputparameters $cmd $outparameters
+    get-outputparameters $cmd $outparameters
 
-	return (get-commandresults $ds $outparameters)
+    return (get-commandresults $ds $outparameters)
 }
+
+
 <#
 	.SYNOPSIS
 		Execute a stored procedure, returning the results of the query.  
@@ -421,33 +499,144 @@ param([Parameter(Position=0, Mandatory=$true)][string]$storedProcName,
       [Parameter(Position=6, Mandatory=$false)][string]$database,
       [Parameter(Position=7, Mandatory=$false)][string]$user,
       [Parameter(Position=8, Mandatory=$false)][string]$password,
-      [Parameter(Position=9, Mandatory=$false)][System.Data.SqlClient.SqlTransaction]$transaction=$nothing) 
+      [Parameter(Position=9, Mandatory=$false)][System.Data.SqlClient.SqlTransaction]$transaction=$null) 
 
-	$connection=get-connection -conn $connection -server $server -database $database -user $user -password $password 
+    $cmd=new-sqlcommand @PSBoundParameters
+    $ds=New-Object system.Data.DataSet
+    $da=New-Object system.Data.SqlClient.SqlDataAdapter($cmd)
+    $da.fill($ds) | out-null
 
-	$cmd=new-object system.Data.SqlClient.SqlCommand($sql,$connection)
-	$cmd.CommandType=[System.Data.CommandType]'StoredProcedure'
-	$cmd.CommandTimeout=$timeout
-	$cmd.CommandText=$storedProcName
-	foreach($p in $parameters.Keys){
-		$cmd.Parameters.AddWithValue("@$p",$parameters[$p]).Direction=[System.Data.ParameterDirection]::Input
-	}
-  	if ($transaction -is [System.Data.SqlClient.SqlTransaction]) {
-   		$cmd.Transaction = $transaction
- 	}
+    get-outputparameters $cmd $outparameters
+
+    #if it was an ad hoc connection, close it
+    if ($server){
+       $cmd.connection.close()
+    }	
 	
-	put-outputparameters $cmd $outparameters
-	$ds=New-Object system.Data.DataSet
-	$da=New-Object system.Data.SqlClient.SqlDataAdapter($cmd)
-	$da.fill($ds) | out-null
-	
-	get-outputparameters $cmd $outparameters
-		
-	return (get-commandresults $ds $outparameters)
+    return (get-commandresults $ds $outparameters)
 }
 
 
+<#
+	.SYNOPSIS
+		Uses the .NET SQLBulkCopy class to quickly copy rows into a destination table.
+
+	.DESCRIPTION
+        
+		Also, the invoke-bulkcopy function allows you to pass a command object instead of a set of records in order to "stream" the records
+        into the destination in cases where there are a lot of records and you don't want to allocate memory to hold the entire result set.
+
+	.PARAMETER  records
+		Either a datatable (like one returned from invoke-query or invoke-storedprocedure) or
+        A sql command object (use new-sqlcommand)
+
+	.PARAMETER  Server
+		The destination server to connect to.  
+
+	.PARAMETER  Database
+		The initial database for the connection.  
+
+	.PARAMETER  User
+		The sql user to use for the connection.  If user is not passed, NT Authentication is used.
+
+	.PARAMETER  Password
+		The password for the sql user named by the User parameter.
+
+	.PARAMETER  Table
+		The destination table for the bulk copy operation.
+
+	.PARAMETER  Mapping
+		A dictionary of column mappings of the form DestColumn=SourceColumn
+
+	.PARAMETER  BatchSize
+		The batch size for the bulk copy operation.
+
+	.PARAMETER  Transaction
+		A transaction to execute the bulk copy operation in.
+
+	.PARAMETER  NotifyAfter
+		The number of rows to fire the notification event after transferring.  0 means don't notify.
+        Ex: 1000 means to fire the notify event after each 1000 rows are transferred.
+        
+    .PARAMETER  NotifyFunction
+        A scriptblock to be executed after each $notifyAfter records has been copied.  The second parameter ($param[1]) 
+        is a SqlRowsCopiedEventArgs object, which has a RowsCopied property.  The default value for this parameter echoes the
+        number of rows copied to the console
+        
+    .PARAMETER  Options
+        An object containing special options to modify the bulk copy operation.
+        See http://msdn.microsoft.com/en-us/library/system.data.sqlclient.sqlbulkcopyoptions.aspx for values.
+
+
+	.EXAMPLE
+		PS C:\> $cmd=new-sqlcommand -server MyServer -sql "Select * from MyTable"
+        PS C:\> invoke-sqlbulkcopy -records $cmd -server MyOtherServer -table CopyOfMyTable
+
+	.EXAMPLE
+		PS C:\> $rows=invoke-query -server MyServer -sql "Select * from MyTable"
+        PS C:\> invoke-sqlbulkcopy -records $rows -server MyOtherServer -table CopyOfMyTable
+
+    .INPUTS
+        None.
+        You cannot pipe objects to invoke-bulkcopy
+
+	.OUTPUTS
+		System.Data.SqlClient.SqlCommand
+
+#>
+function invoke-bulkcopy{
+  param([Parameter(Position=0, Mandatory=$true)]$records,
+        [Parameter(Position=1, Mandatory=$true)]$server,
+        [Parameter(Position=2, Mandatory=$false)]$database,
+        [Parameter(Position=3, Mandatory=$false)][string]$user,
+        [Parameter(Position=4, Mandatory=$false)][string]$password,
+        [Parameter(Position=5, Mandatory=$true)][string]$table,
+        [Parameter(Position=6, Mandatory=$false)]$mapping=@{},
+        [Parameter(Position=7, Mandatory=$false)]$batchsize=0,
+        [Parameter(Position=8, Mandatory=$false)][System.Data.SqlClient.SqlTransaction]$transaction=$null,
+        [Parameter(Position=9, Mandatory=$false)]$notifyAfter=0,
+        [Parameter(Position=10, Mandatory=$false)][scriptblock]$notifyFunction={Write-Host "$($args[1].RowsCopied) rows copied."},
+        [Parameter(Position=11, Mandatory=$false)][System.Data.SqlClient.SqlBulkCopyOptions]$options=[System.Data.SqlClient.SqlBulkCopyOptions]::Default)
+
+	#use existing "new-connection" function to create a connection string.        
+        $connection=new-connection -server $server -database $Database -User $user -password $password
+	$connectionString = $connection.ConnectionString
+	$connection.close()
+
+	#Use a transaction if one was specified
+	if ($transaction -is [System.Data.SqlClient.SqlTransaction]){
+		$bulkCopy=new-object "Data.SqlClient.SqlBulkCopy" $connectionString $options  $transaction
+	} else {
+		$bulkCopy = new-object "Data.SqlClient.SqlBulkCopy" $connectionString
+	}
+	$bulkCopy.BatchSize=$batchSize
+	$bulkCopy.DestinationTableName = $table
+	$bulkCopy.BulkCopyTimeout=10000000
+	if ($notifyAfter -gt 0){
+		$bulkCopy.NotifyAfter=$notifyafter
+		$bulkCopy.Add_SQlRowscopied($notifyFunction)
+	}
+
+	#Add column mappings if they were supplied
+	foreach ($key in $mapping.Keys){
+	    $bulkCopy.ColumnMappings.Add($mapping[$key],$key) | out-null
+	}
+	
+	write-debug "Bulk copy starting at $(get-date)"
+	if ($records -is [System.Data.SqlClient.SqlCommand]){
+		#if passed a command object (rather than a datatable), ask it for a datareader to stream the records
+		$bulkCopy.WriteToServer($records.ExecuteReader())
+	} else {
+		$bulkCopy.WriteToServer($records)
+	}
+	write-debug "Bulk copy finished at $(get-date)"
+}
+
+
+
 export-modulemember new-connection
+export-modulemember new-sqlcommand
 export-modulemember invoke-sql
 export-modulemember invoke-query
 export-modulemember invoke-storedprocedure
+export-modulemember invoke-bulkcopy
