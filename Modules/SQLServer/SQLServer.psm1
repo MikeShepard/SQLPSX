@@ -99,7 +99,8 @@ function Get-SqlServer
     param(
     [Parameter(Position=0, Mandatory=$true)] [string]$sqlserver,
     [Parameter(Position=1, Mandatory=$false)] [string]$username, 
-    [Parameter(Position=2, Mandatory=$false)] [string]$password
+    [Parameter(Position=2, Mandatory=$false)] [string]$password,
+    [Parameter(Position=3, Mandatory=$false)] [string]$StatementTimeout=0
     )
     #When $sqlserver passed in from the SMO Name property, brackets
     #are automatically inserted which then need to be removed
@@ -110,6 +111,8 @@ function Get-SqlServer
     $con = Get-SqlConnection $sqlserver $Username $Password
 
     $server = new-object ("Microsoft.SqlServer.Management.Smo.Server") $con
+    #Some operations might take longer than the default timeout of 600 seconnds (10 minutes). Set new default to unlimited
+    $server.ConnectionContext.StatementTimeout = $StatementTimeout
     $server.SetDefaultInitFields([Microsoft.SqlServer.Management.SMO.StoredProcedure], "IsSystemObject")
     $server.SetDefaultInitFields([Microsoft.SqlServer.Management.SMO.Table], "IsSystemObject")
     $server.SetDefaultInitFields([Microsoft.SqlServer.Management.SMO.View], "IsSystemObject")
@@ -1207,25 +1210,39 @@ Get-SqlTable
 #>
 function Get-SqlTable
 {
+    [CmdletBinding()]
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database,
-    [Parameter(Position=1, Mandatory=$false)] [String]$name="*"
+    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$Database,
+    [Parameter(Position=1, Mandatory=$false)] [String]$Name,
+    [Parameter(Position=2, Mandatory=$false)] [String]$Schema,
+    [Parameter(Position=3, Mandatory=$false)] [String]$Include,
+    [Parameter(Position=4, Mandatory=$false)] [String]$Exclude,
+    [Switch] $Force
     )
 
     process
     {
-        foreach ($table in $database.Tables)
+        if ($Name -and $Schema)
+        { $tables = $Database.Tables.Item($Name,$Schema) }
+        elseif ($Name)
+        { $tables = $Database.Tables.Item($Name) }
+        elseif ($Schema)
+        { $tables = $Database.Tables | where-object {$_.Schema -eq "$Schema"} }
+        else { $tables = $Database.Tables }
+
+        foreach ($table in $tables)
         {
-            if ($table.IsSystemObject -eq $false -and ($table.name -like "*$name*" -or $name.Contains($table.name)))
+            if (($Force.IsPresent -or (-not($Force.IsPresent) -and $table.IsSystemObject -eq $false)) `
+            -and  (-not($Include)  -or ($Include -and $table.name -like "$Include")) `
+            -and  (-not($Exclude) -or ($Exclude -and $table.name -notlike "$Exclude")))
             {
             #Return Table Object
             $table | add-Member -memberType noteProperty -name timestamp -value $(Get-SessionTimeStamp) -passthru |
             add-Member -memberType noteProperty -name XMLExtendedProperties -value $(ConvertTo-ExtendedPropertyXML $table.ExtendedProperties) -passthru |
-                    add-Member -memberType noteProperty -name Server -value $database.parent.Name -passthru |
-                    add-Member -memberType noteProperty -name dbname -value $database.Name -passthru
+                    add-Member -memberType noteProperty -name Server -value $Database.parent.Name -passthru |
+                    add-Member -memberType noteProperty -name dbname -value $Database.Name -passthru
             }
         }
-
     }
 
 } #Get-SqlTable
@@ -1258,25 +1275,39 @@ Get-SqlStoredProcedure
 #>
 function Get-SqlStoredProcedure
 {
+    [CmdletBinding()]
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database,
-    [Parameter(Position=1, Mandatory=$false)] [String]$name="*"
+    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$Database,
+    [Parameter(Position=1, Mandatory=$false)] [String]$Name,
+    [Parameter(Position=2, Mandatory=$false)] [String]$Schema,
+    [Parameter(Position=3, Mandatory=$false)] [String]$Include,
+    [Parameter(Position=4, Mandatory=$false)] [String]$Exclude,
+    [Switch] $Force
     )
 
     process
     {
-        foreach ($storedProcedure in $database.StoredProcedures)
+        if ($Name -and $Schema)
+        { $storedProcedures = $Database.StoredProcedures.Item($Name,$Schema) }
+        elseif ($Name)
+        { $storedProcedures = $Database.StoredProcedures.Item($Name) }
+        elseif ($Schema)
+        { $storedProcedures = $Database.StoredProcedures | where-object {$_.Schema -eq "$Schema"} }
+        else { $storedProcedures = $Database.StoredProcedures }
+
+        foreach ($storedProcedure in $storedProcedures)
         {
-            if ($storedProcedure.IsSystemObject -eq $false -and ($storedProcedure.name -like "*$name*" -or $name.Contains($storedProcedure.name)))
+            if (($Force.IsPresent -or (-not($Force.IsPresent) -and $storedProcedure.IsSystemObject -eq $false)) `
+            -and  (-not($Include)  -or ($Include -and $storedProcedure.name -like "$Include")) `
+            -and  (-not($Exclude) -or ($Exclude -and $storedProcedure.name -notlike "$Exclude")))
             {
             #Return StoredProcedure Object
             $storedProcedure | add-Member -memberType noteProperty -name timestamp -value $(Get-SessionTimeStamp) -passthru |
       add-Member -memberType noteProperty -name XMLExtendedProperties -value $(ConvertTo-ExtendedPropertyXML $storedProcedure.ExtendedProperties) -passthru |
-                    add-Member -memberType noteProperty -name Server -value $database.parent.Name -passthru |
-                    add-Member -memberType noteProperty -name dbname -value $database.Name -passthru
+                    add-Member -memberType noteProperty -name Server -value $Database.parent.Name -passthru |
+                    add-Member -memberType noteProperty -name dbname -value $Database.Name -passthru
             }
         }
-
     }
 
 } #Get-SqlStoredProcedure
@@ -1309,25 +1340,39 @@ Get-SqlView
 #>
 function Get-SqlView
 {
+    [CmdletBinding()]
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database,
-    [Parameter(Position=1, Mandatory=$false)] [String]$name="*"
+    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$Database,
+    [Parameter(Position=1, Mandatory=$false)] [String]$Name,
+    [Parameter(Position=2, Mandatory=$false)] [String]$Schema,
+    [Parameter(Position=3, Mandatory=$false)] [String]$Include,
+    [Parameter(Position=4, Mandatory=$false)] [String]$Exclude,
+    [Switch] $Force
     )
 
     process
     {
-        foreach ($view in $database.Views)
+        if ($Name -and $Schema)
+        { $views = $Database.Views.Item($Name,$Schema) }
+        elseif ($Name)
+        { $views = $Database.Views.Item($Name) }
+        elseif ($Schema)
+        { $views = $Database.Views | where-object {$_.Schema -eq "$Schema"} }
+        else { $views = $Database.Views }
+
+        foreach ($view in $views)
         {
-            if ($view.IsSystemObject -eq $false -and ($view.name -like "*$name*" -or $name.Contains($view.name)))
+            if (($Force.IsPresent -or (-not($Force.IsPresent) -and $view.IsSystemObject -eq $false)) `
+            -and  (-not($Include)  -or ($Include -and $view.name -like "$Include")) `
+            -and  (-not($Exclude) -or ($Exclude -and $view.name -notlike "$Exclude")))
             {
             #Return View Object
             $view | add-Member -memberType noteProperty -name timestamp -value $(Get-SessionTimeStamp) -passthru |
-            add-Member -memberType noteProperty -name XMLExtendedProperties -value $(ConvertTo-ExtendedPropertyXML $view.ExtendedProperties) -passthru |
-                    add-Member -memberType noteProperty -name Server -value $database.parent.Name -passthru |
-                    add-Member -memberType noteProperty -name dbname -value $database.Name -passthru
+              add-Member -memberType noteProperty -name XMLExtendedProperties -value $(ConvertTo-ExtendedPropertyXML $view.ExtendedProperties) -passthru |
+                    add-Member -memberType noteProperty -name Server -value $Database.parent.Name -passthru |
+                    add-Member -memberType noteProperty -name dbname -value $Database.Name -passthru
             }
         }
-
     }
 
 } #Get-SqlView
@@ -1360,25 +1405,37 @@ Get-SqlUserDefinedDataType
 #>
 function Get-SqlUserDefinedDataType
 {
+    [CmdletBinding()]
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database,
-    [Parameter(Position=1, Mandatory=$false)] [String]$name="*"
+    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$Database,
+    [Parameter(Position=1, Mandatory=$false)] [String]$Name,
+    [Parameter(Position=2, Mandatory=$false)] [String]$Schema,
+    [Parameter(Position=3, Mandatory=$false)] [String]$Include,
+    [Parameter(Position=4, Mandatory=$false)] [String]$Exclude
     )
 
     process
     {
-       foreach ($userDefinedDataType in $database.UserDefinedDataTypes)
-       {
-           if ($userDefinedDataType.name -like "*$name*" -or $name.Contains($userDefinedDataType.name))
-           { 
+        if ($Name -and $Schema)
+        { $userDefinedDataTypes = $Database.UserDefinedDataTypes.Item($Name,$Schema) }
+        elseif ($Name)
+        { $userDefinedDataTypes = $Database.UserDefinedDataTypes.Item($Name) }
+        elseif ($Schema)
+        { $userDefinedDataTypes = $Database.UserDefinedDataTypes | where-object {$_.Schema -eq "$Schema"} }
+        else { $userDefinedDataTypes = $Database.UserDefinedDataTypes }
+
+        foreach ($userDefinedDataType in $userDefinedDataTypes)
+        {
+            if ((-not($Include)  -or ($Include -and $userDefinedDataType.name -like "$Include")) `
+            -and  (-not($Exclude) -or ($Exclude -and $userDefinedDataType.name -notlike "$Exclude")))
+            {
             #Return UserDefinedDataType Object
             $userDefinedDataType | add-Member -memberType noteProperty -name timestamp -value $(Get-SessionTimeStamp) -passthru |
   add-Member -memberType noteProperty -name XMLExtendedProperties -value $(ConvertTo-ExtendedPropertyXML $userDefinedDataType.ExtendedProperties) -passthru |
-                                   add-Member -memberType noteProperty -name Server -value $database.parent.Name -passthru |
-                                   add-Member -memberType noteProperty -name dbname -value $database.Name -passthru
+                    add-Member -memberType noteProperty -name Server -value $Database.parent.Name -passthru |
+                    add-Member -memberType noteProperty -name dbname -value $Database.Name -passthru
             }
         }
-
     }
 
 } #Get-SqlUserDefinedDataType
@@ -1411,25 +1468,39 @@ Get-SqlUserDefinedFunction
 #>
 function Get-SqlUserDefinedFunction
 {
+    [CmdletBinding()]
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database,
-    [Parameter(Position=1, Mandatory=$false)] [String]$name="*"
+    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$Database,
+    [Parameter(Position=1, Mandatory=$false)] [String]$Name,
+    [Parameter(Position=2, Mandatory=$false)] [String]$Schema,
+    [Parameter(Position=3, Mandatory=$false)] [String]$Include,
+    [Parameter(Position=4, Mandatory=$false)] [String]$Exclude,
+    [Switch] $Force
     )
 
     process
     {
-        foreach ($userDefinedFunction in $database.UserDefinedFunctions)
+        if ($Name -and $Schema)
+        { $userDefinedFunctions = $Database.UserDefinedFunctions.Item($Name,$Schema) }
+        elseif ($Name)
+        { $userDefinedFunctions = $Database.UserDefinedFunctions.Item($Name) }
+        elseif ($Schema)
+        { $userDefinedFunctions = $Database.UserDefinedFunctions | where-object {$_.Schema -eq "$Schema"} }
+        else { $userDefinedFunctions = $Database.UserDefinedFunctions }
+
+        foreach ($userDefinedFunction in $userDefinedFunctions)
         {
-           if ($userDefinedFunction.IsSystemObject -eq $false -and ($userDefinedFunction.name -like "*$name*" -or $name.Contains($userDefinedFunction.name)))
+            if (($Force.IsPresent -or (-not($Force.IsPresent) -and $userDefinedFunction.IsSystemObject -eq $false)) `
+            -and  (-not($Include)  -or ($Include -and $userDefinedFunction.name -like "$Include")) `
+            -and  (-not($Exclude) -or ($Exclude -and $userDefinedFunction.name -notlike "$Exclude")))
             {
             #Return UserDefinedFunction Object
             $userDefinedFunction | add-Member -memberType noteProperty -name timestamp -value $(Get-SessionTimeStamp) -passthru |
   add-Member -memberType noteProperty -name XMLExtendedProperties -value $(ConvertTo-ExtendedPropertyXML $userDefinedFunction.ExtendedProperties) -passthru |
-                                   add-Member -memberType noteProperty -name Server -value $database.parent.Name -passthru |
-                                   add-Member -memberType noteProperty -name dbname -value $database.Name -passthru
+                    add-Member -memberType noteProperty -name Server -value $Database.parent.Name -passthru |
+                    add-Member -memberType noteProperty -name dbname -value $Database.Name -passthru
             }
         }
-
     }
 
 } #Get-SqlUserDefinedFunction
@@ -1462,25 +1533,38 @@ Get-SqlSynonym
 #>
 function Get-SqlSynonym
 {
+    [CmdletBinding()]
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database,
-    [Parameter(Position=1, Mandatory=$false)] [String]$name="*"
+    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$Database,
+    [Parameter(Position=1, Mandatory=$false)] [String]$Name,
+    [Parameter(Position=2, Mandatory=$false)] [String]$Schema,
+    [Parameter(Position=3, Mandatory=$false)] [String]$Include,
+    [Parameter(Position=4, Mandatory=$false)] [String]$Exclude,
+    [Switch] $Force
     )
 
     process
     {
-        foreach ($synonym in $database.Synonyms)
+        if ($Name -and $Schema)
+        { $synonyms = $Database.Synonyms.Item($Name,$Schema) }
+        elseif ($Name)
+        { $synonyms = $Database.Synonyms.Item($Name) }
+        elseif ($Schema)
+        { $synonyms = $Database.Synonyms | where-object {$_.Schema -eq "$Schema"} }
+        else { $synonyms = $Database.Synonyms }
+
+        foreach ($synonym in $synonyms)
         {
-            if ($synonym.name -like "*$name*" -or $name.Contains($synonym.name))
+            if ((-not($Include)  -or ($Include -and $synonym.name -like "$Include")) `
+            -and  (-not($Exclude) -or ($Exclude -and $synonym.name -notlike "$Exclude")))
             {
             #Return Synonym Object
             $synonym | add-Member -memberType noteProperty -name timestamp -value $(Get-SessionTimeStamp) -passthru |
-  add-Member -memberType noteProperty -name XMLExtendedProperties -value $(ConvertTo-ExtendedPropertyXML $synonym.ExtendedProperties) -passthru |
-                       add-Member -memberType noteProperty -name Server -value $database.parent.Name -passthru |
-                       add-Member -memberType noteProperty -name dbname -value $database.Name -passthru
+              add-Member -memberType noteProperty -name XMLExtendedProperties -value $(ConvertTo-ExtendedPropertyXML $synonym.ExtendedProperties) -passthru |
+                    add-Member -memberType noteProperty -name Server -value $Database.parent.Name -passthru |
+                    add-Member -memberType noteProperty -name dbname -value $Database.Name -passthru
             }
         }
-
     }
 
 } #Get-SqlSynonym
@@ -1517,14 +1601,20 @@ function Get-SqlTrigger
 {
     param(
     [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] $smo,
-    [Parameter(Position=1, Mandatory=$false)] [String]$name="*"
+    [Parameter(Position=1, Mandatory=$false)] [String]$Name,
+    [Parameter(Position=3, Mandatory=$false)] [String]$Include,
+    [Parameter(Position=4, Mandatory=$false)] [String]$Exclude,
+    [Switch] $Force
+
     )
 
     process
     {
         foreach ($trigger in $smo.Triggers)
         {
-            if ($trigger.name -like "*$name*" -or $name.Contains($trigger.name))
+            if (($Force.IsPresent -or (-not($Force.IsPresent) -and $trigger.IsSystemObject -eq $false)) `
+            -and  (-not($Include)  -or ($Include -and $trigger.name -like "$Include")) `
+            -and  (-not($Exclude) -or ($Exclude -and $trigger.name -notlike "$Exclude")))
             {
                 switch ($smo.GetType().Name)
                 {
@@ -2596,6 +2686,13 @@ function Invoke-SqlBackup
       { throw 'CopyOnly is supported in SQL Server 2005(9.0) or higher with SMO version 10.0 or higher.' }
     }
     
+    $percentHandler = [Microsoft.SqlServer.Management.Smo.PercentCompleteEventHandler] {Write-Progress -activity "Backing up Database..." `
+    -status "$($backup.Database)" -percentcomplete $($_.Percent); Write-Verbose "$($_.Percent) percent processed."}
+    $backup.add_PercentComplete($percentHandler)
+
+    $completeHandler = [Microsoft.SqlServer.Management.Common.ServerMessageEventHandler] {Write-Verbose "$($_.Error.Message)"}
+    $backup.add_Complete($completeHandler)
+
     try { $backup.SqlBackup($server) }
     catch {
             $ex = $_.Exception
@@ -2681,6 +2778,13 @@ function Invoke-SqlRestore
             [void]$restore.RelocateFiles.Add($relocateFile)
         }
     }
+
+    $percentHandler = [Microsoft.SqlServer.Management.Smo.PercentCompleteEventHandler] {Write-Progress -activity "Restoring Database..." `
+    -status "$($restore.Database)" -percentcomplete $($_.Percent); Write-Verbose "$($_.Percent) percent processed."}
+     $restore.add_PercentComplete($percentHandler)
+
+    $completeHandler = [Microsoft.SqlServer.Management.Common.ServerMessageEventHandler] {Write-Verbose "$($_.Error.Message)"}
+    $restore.add_Complete($completeHandler)
 
     try { $restore.SqlRestore($server) }
     catch {
@@ -3837,14 +3941,18 @@ function Get-SqlSchema
 {
     param(
     [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database,
-    [Parameter(Position=1, Mandatory=$false)] [string]$name="*"
+    [Parameter(Position=1, Mandatory=$false)] [String]$Name,
+    [Parameter(Position=3, Mandatory=$false)] [String]$Include,
+    [Parameter(Position=4, Mandatory=$false)] [String]$Exclude
     )
 
     process
     {
         foreach ($schema in $database.Schemas)
         {
-            if ($schema.name -like "*$name*" -or $name.Contains($schema.name))
+            if ((-not($Include)  -or ($Include -and $schema.name -like "$Include")) `
+            -and  (-not($Exclude) -or ($Exclude -and $schema.name -notlike "$Exclude")))
+
             {
                 #Return schema Object
                 $schema | add-Member -memberType noteProperty -name timestamp -value $(Get-SessionTimeStamp) -passthru |
