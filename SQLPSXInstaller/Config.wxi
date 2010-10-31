@@ -5,6 +5,9 @@
     <?define ISECreamBasic="ISECreamBasic" ?>
     <?define OracleClient="OracleClient" ?>
     <?define OracleIse="OracleIse" ?>
+    <?define PBM="PBM" ?>
+    <?define PBMDatabase="PBM\Database" ?>
+    <?define PBMReports="PBM\Reports" ?>
     <?define Repl="Repl" ?>
     <?define ShowMbrs="ShowMbrs" ?>
     <?define SQLIse="SQLIse" ?>
@@ -21,8 +24,8 @@
     <?define GeneratedControls="WPK\GeneratedControls" ?>
     <?define Rules="WPK\Rules" ?>
     <?define MajorVersion="2" ?>
-    <?define MinorVersion="2" ?>
-    <?define MicroVersion="3" ?>
-    <?define BuildVersion="2" ?>
+    <?define MinorVersion="3" ?>
+    <?define MicroVersion="0" ?>
+    <?define BuildVersion="0" ?>
 </Include>
 

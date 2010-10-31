@@ -3,11 +3,14 @@
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
     <Fragment>
         <ComponentGroup Id="OracleIse">
-            <ComponentRef Id="DefaultOptions.xml" />
-            <ComponentRef Id="Get_OraConnectionInfo.ps1" />
-            <ComponentRef Id="Options.xml" />
+            <ComponentRef Id="OraConvertFrom_Xml.ps1" />
+            <ComponentRef Id="OraConvertTo_StringData.ps1" />
+            <ComponentRef Id="Oradefaultopts.ps1" />
+            <ComponentRef Id="OraExpand_String.ps1" />
+            <ComponentRef Id="OraGet_ConnectionInfo.ps1" />
+            <ComponentRef Id="OraLibrary_UserStore.ps1" />
             <ComponentRef Id="OracleIse.psm1" />
-            <ComponentRef Id="Set_OraOptions.ps1" />
+            <ComponentRef Id="OraSet_Options.ps1" />
             <ComponentRef Id="OraSQLPSX.PNG" />
             <ComponentRef Id="OraSwitch_CommentOrText.ps1" />
             <ComponentRef Id="OraSwitch_SelectedCommentOrText.ps1" />
@@ -15,20 +18,29 @@
     </Fragment>
     <Fragment>
         <DirectoryRef Id="OracleIse">
-            <Component Id="DefaultOptions.xml" Guid="*">
-                <File Id="DefaultOptions.xml" KeyPath="yes" Source="$(var.OracleIse)\DefaultOptions.xml" />
+            <Component Id="OraConvertFrom_Xml.ps1" Guid="*">
+                <File Id="OraConvertFrom_Xml.ps1" KeyPath="yes" Source="$(var.OracleIse)\ConvertFrom-Xml.ps1" />
             </Component>
-            <Component Id="Get_OraConnectionInfo.ps1" Guid="*">
-                <File Id="Get_OraConnectionInfo.ps1" KeyPath="yes" Source="$(var.OracleIse)\Get-ConnectionInfo.ps1" />
+            <Component Id="OraConvertTo_StringData.ps1" Guid="*">
+                <File Id="OraConvertTo_StringData.ps1" KeyPath="yes" Source="$(var.OracleIse)\ConvertTo-StringData.ps1" />
             </Component>
-            <Component Id="Options.xml" Guid="*">
-                <File Id="Options.xml" KeyPath="yes" Source="$(var.OracleIse)\Options.xml" />
+            <Component Id="Oradefaultopts.ps1" Guid="*">
+                <File Id="Oradefaultopts.ps1" KeyPath="yes" Source="$(var.OracleIse)\defaultopts.ps1" />
+            </Component>
+            <Component Id="OraExpand_String.ps1" Guid="*">
+                <File Id="OraExpand_String.ps1" KeyPath="yes" Source="$(var.OracleIse)\Expand-String.ps1" />
+            </Component>
+            <Component Id="OraGet_ConnectionInfo.ps1" Guid="*">
+                <File Id="OraGet_ConnectionInfo.ps1" KeyPath="yes" Source="$(var.OracleIse)\Get-ConnectionInfo.ps1" />
+            </Component>
+            <Component Id="OraLibrary_UserStore.ps1" Guid="*">
+                <File Id="OraLibrary_UserStore.ps1" KeyPath="yes" Source="$(var.OracleIse)\Library-UserStore.ps1" />
             </Component>
             <Component Id="OracleIse.psm1" Guid="*">
                 <File Id="OracleIse.psm1" KeyPath="yes" Source="$(var.OracleIse)\OracleIse.psm1" />
             </Component>
-            <Component Id="Set_OraOptions.ps1" Guid="*">
-                <File Id="Set_OraOptions.ps1" KeyPath="yes" Source="$(var.OracleIse)\Set-Options.ps1" />
+            <Component Id="OraSet_Options.ps1" Guid="*">
+                <File Id="OraSet_Options.ps1" KeyPath="yes" Source="$(var.OracleIse)\Set-Options.ps1" />
             </Component>
             <Component Id="OraSQLPSX.PNG" Guid="*">
                 <File Id="OraSQLPSX.PNG" KeyPath="yes" Source="$(var.OracleIse)\SQLPSX.PNG" />
