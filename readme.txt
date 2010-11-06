@@ -2,15 +2,17 @@ Getting Started with SQLPSX
 ** NOTE: You must have SMO installed to run the SQLPSX, SMO is installed with SQL Server Management Studio ***
 ** Powershell 2.0 is required **
 Installer installation
-1. Unzip SQLPSX_V2_Install.zip
-2. Run 32 or 64 bit installer
+* Run SQLPSX.msi installer
 
 Manual installation
-1. Copy all Modules to $env:psmodulepath directory and Script files to any directory. 
-2. Run import-module
-    2a. Import the master module sqlpsx
+1. Unblock zip file
+2. Copy all Modules to $env:psmodulepath directory and Script files to any directory. 
+
+Using Modules
+1. Run import-module
+    1a. Import the master module sqlpsx (modify sqlpsx.psm1 as needed)
         import-module sqlpsx
-    2b. Or import individual modules
+    1b. Or import individual modules
         import-module SQLServer
         import-module Agent
         import-module Repl
@@ -21,7 +23,10 @@ Manual installation
         import-module sqlmaint
         import-module sqlise
         import-module oracleise
-3. Add import-module commands to your Profile if desired
+    1c. PBM module should be used in the sqlps mini-shell. Because import-module isn't supported in 
+        Microsoft's sqlps shell, source the functions:
+        . ./pbm.psm1
+2. Add import-module commands to your Profile if desired
 
 Optional Database and Reporting Services Components
 1. Create a database, for example SQLPSX and run the SQLPSX.AllObject.sql script to create the all database objects
@@ -33,6 +38,33 @@ Optional Database and Reporting Services Components
 7. Run Write-SmoToCsvFile.ps1 to import the csv file into the database
 
 What's New
+    Version 2.3
+        Added MSI-based installer
+        Added PBM Module
+            Includes tables, functions, report and sample policies. Works againts SQL 2000, 2005 or 2008 or 2008 R2.
+        Modified adolib module
+            Fixed minor issues
+            Added invoke-bulkcopy to which uses SqlBulkCopy class in and allows column mapping
+            Added new-sqlcmd which is used to create SqlCommand objects for use in other functions and invoke-bulkcopy
+        Modified OracleIse module
+            Moved saved preference to User Store instead of module directory
+            Modified prompt to show both Oracle and SQL Server connections
+            Added auto, table, list, and isetab output options
+            Added PoshMode which allows embedding PowerShell variables in queries
+            Moved output option to separate dialog box
+        Modified SQLIse module
+            Moved saved preference to User Store instead of module directory
+            Modified prompt to show both Oracle and SQL Server connections
+            Added auto, table, list, and isetab output options
+            Moved output option to separate dialog box
+            Added print and raiserror handling
+            Added multi-query handling
+        Modified SqlServer module
+            Fixed Write-SmoCsvToDb.ps1, Write-SmoToCsvFile.ps1 and Run-SmoToCsvFile.ps1
+            Changed statement timeout from the default of 10 minutes to unlimited. This was needed for backup and other long
+                operations. Timeout can be also be specified by user
+            Fixed issues/added functionality in specifying database objects
+            Added progress indicator, precent complete and success messages to backup and restore functions
     Version 2.2.3
         Fixed issues with PoshMode
     Version 2.2.2
@@ -402,7 +434,16 @@ Modules
     LibraryShowmbrs.ps1 functions
         Get-ShowMbrs
             Recursivley enumerates local Windows and AD groups similar to the NT Resource utility showmbrs.exe
-
+    PBM Module functions:
+        Get-PolicyStore
+            Gets a Policy Server i.e. server where policies are stored
+        Write-PolicyEvalError
+            Write the errors messages from a Policy evaluation to the policy evaluation database
+        Write-PolicyEval
+            Writes the results of a policy evaluation to the policy evaluation sdatabase
+        Import-PolicyEvaluation
+            Evaluates a set of policies based on a policy category and CMS groupusing invoke-policyevaluation cmdlet. The results and error messages
+            if any are written to policy evaluation database. Optionally writes a event log entry (useful for integrating with SCOM).
 Scripts
     Get-InvalidLogins.ps1
         Lists invalid AD/NT logins/groups which have been granted access to the
