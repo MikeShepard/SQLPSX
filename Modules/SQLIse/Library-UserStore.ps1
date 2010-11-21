@@ -56,6 +56,7 @@ function Write-UserStore
         }
         else
         {
+            $object | where {$_.Password} | foreach {$_.Password = Protect-String $_.Password}
             $xml = $object | ConvertTo-Xml -noTypeInformation
             $xml.Save($file)
         }
@@ -98,6 +99,7 @@ function Read-UserStore
             $xml = New-Object System.Xml.XmlDocument
             $xml.Load($xmlReader)
             $object =  ConvertFrom-Xml -xml $xml
+            $object | where {$_.Password} | foreach {$_.Password = UnProtect-String $_.Password}
             Write-Output $object
         }
     }

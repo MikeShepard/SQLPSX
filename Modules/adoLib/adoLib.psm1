@@ -12,6 +12,37 @@
 ### </Script>
 # ---------------------------------------------------------------------------
 
+
+<#
+	.SYNOPSIS
+		Tests to see if a value is a SQL NULL or not
+
+	.DESCRIPTION
+		Returns $true if the value is a SQL NULL.
+
+	.PARAMETER  value
+		The value to test
+
+	
+
+	.EXAMPLE
+		PS C:\> is-null $row.columnname
+
+	
+    .INPUTS
+        None.
+        You cannot pipe objects to New-connection
+
+	.OUTPUTS
+		Boolean
+
+#>
+function is-null{
+  param([Parameter(Position=0, Mandatory=$true)]$value)
+  return  [System.DBNull]::Value.Equals($value)
+}
+
+
 <#
 	.SYNOPSIS
 		Create a SQLConnection object with the given parameters
@@ -57,7 +88,7 @@ param([Parameter(Position=0, Mandatory=$true)][string]$server,
 	$conn=new-object System.Data.SqlClient.SQLConnection
 	
 	if ($user -ne ''){
-		$conn.ConnectionString="Server=$server;$dbclause`User ID=[$user];Password=$password"
+		$conn.ConnectionString="Server=$server;$dbclause`User ID=$user;Password=$password;Pooling=false"
 	} else {
 		$conn.ConnectionString="Server=$server;$dbclause`Integrated Security=True"
 	}
@@ -223,16 +254,17 @@ param([Parameter(Position=0, Mandatory=$true)][System.Data.Dataset]$ds,
 #>
 function new-sqlcommand{
 param([Parameter(Position=0, Mandatory=$true)][string]$sql,
-      [Parameter(Position=1, Mandatory=$false)][System.Data.SqlClient.SQLConnection]$connection,
+      [Parameter(ParameterSetName="SuppliedConnection",Position=1, Mandatory=$false)][System.Data.SqlClient.SQLConnection]$connection,
       [Parameter(Position=2, Mandatory=$false)][hashtable]$parameters=@{},
       [Parameter(Position=3, Mandatory=$false)][int]$timeout=30,
-      [Parameter(Position=4, Mandatory=$false)][string]$server,
-      [Parameter(Position=5, Mandatory=$false)][string]$database,
-      [Parameter(Position=6, Mandatory=$false)][string]$user,
+      [Parameter(ParameterSetName="AdHocConnection",Position=4, Mandatory=$false)][string]$server,
+      [Parameter(ParameterSetName="AdHocConnection",Position=5, Mandatory=$false)][string]$database,
+      [Parameter(ParameterSetName="AdHocConnection",Position=6, Mandatory=$false)][string]$user,
       [Parameter(Position=7, Mandatory=$false)][string]$password,
-      [Parameter(Position=8, Mandatory=$false)][System.Data.SqlClient.SqlTransaction]$transaction=$null)
+      [Parameter(Position=8, Mandatory=$false)][System.Data.SqlClient.SqlTransaction]$transaction=$null,
+	  [Parameter(Position=9, Mandatory=$false)][hashtable]$outparameters=@{})
    
-    $conn=get-connection -conn $conn -server $server -database $database 
+    $conn=get-connection -conn $conn -server $server -database $database -user $user -password $password
     $close=($conn.State -eq [System.Data.ConnectionState]'Closed')
     if ($close) {
         $conn.Open()
@@ -310,14 +342,14 @@ param([Parameter(Position=0, Mandatory=$true)][string]$sql,
 #>
 function invoke-sql{
 param([Parameter(Position=0, Mandatory=$true)][string]$sql,
-      [Parameter(Position=1, Mandatory=$false)][System.Data.SqlClient.SQLConnection]$connection,
+      [Parameter(ParameterSetName="SuppliedConnection",Position=1, Mandatory=$false)][System.Data.SqlClient.SQLConnection]$connection,
       [Parameter(Position=2, Mandatory=$false)][hashtable]$parameters=@{},
       [Parameter(Position=3, Mandatory=$false)][hashtable]$outparameters=@{},
       [Parameter(Position=4, Mandatory=$false)][int]$timeout=30,
-      [Parameter(Position=5, Mandatory=$false)][string]$server,
-      [Parameter(Position=6, Mandatory=$false)][string]$database,
-      [Parameter(Position=7, Mandatory=$false)][string]$user,
-      [Parameter(Position=8, Mandatory=$false)][string]$password,
+      [Parameter(ParameterSetName="AdHocConnection",Position=5, Mandatory=$false)][string]$server,
+      [Parameter(ParameterSetName="AdHocConnection",Position=6, Mandatory=$false)][string]$database,
+      [Parameter(ParameterSetName="AdHocConnection",Position=7, Mandatory=$false)][string]$user,
+      [Parameter(ParameterSetName="AdHocConnection",Position=8, Mandatory=$false)][string]$password,
       [Parameter(Position=9, Mandatory=$false)][System.Data.SqlClient.SqlTransaction]$transaction=$null)
 	
 
@@ -325,7 +357,7 @@ param([Parameter(Position=0, Mandatory=$true)][string]$sql,
 
        #if it was an ad hoc connection, close it
        if ($server){
-          $connection.close()
+          $cmd.connection.close()
        }	
 
        return $cmd.ExecuteNonQuery()
@@ -394,14 +426,14 @@ param([Parameter(Position=0, Mandatory=$true)][string]$sql,
 #>
 function invoke-query{
 param( [Parameter(Position=0, Mandatory=$true)][string]$sql,
-       [Parameter(Position=1, Mandatory=$false)][System.Data.SqlClient.SqlConnection]$connection,
+       [Parameter(ParameterSetName="SuppliedConnection", Position=1, Mandatory=$false)][System.Data.SqlClient.SqlConnection]$connection,
        [Parameter(Position=2, Mandatory=$false)][hashtable]$parameters=@{},
        [Parameter(Position=3, Mandatory=$false)][hashtable]$outparameters=@{},
        [Parameter(Position=4, Mandatory=$false)][int]$timeout=30,
-       [Parameter(Position=5, Mandatory=$false)][string]$server,
-       [Parameter(Position=6, Mandatory=$false)][string]$database,
-       [Parameter(Position=7, Mandatory=$false)][string]$user,
-       [Parameter(Position=8, Mandatory=$false)][string]$password,
+       [Parameter(ParameterSetName="AdHocConnection",Position=5, Mandatory=$false)][string]$server,
+       [Parameter(ParameterSetName="AdHocConnection",Position=6, Mandatory=$false)][string]$database,
+       [Parameter(ParameterSetName="AdHocConnection",Position=7, Mandatory=$false)][string]$user,
+       [Parameter(ParameterSetName="AdHocConnection",Position=8, Mandatory=$false)][string]$password,
        [Parameter(Position=9, Mandatory=$false)][System.Data.SqlClient.SqlTransaction]$transaction=$null)
 
     $cmd=new-sqlcommand @PSBoundParameters
@@ -411,7 +443,7 @@ param( [Parameter(Position=0, Mandatory=$true)][string]$sql,
     
     #if it was an ad hoc connection, close it
     if ($server){
-       $connection.close()
+       $cmd.connection.close()
     }	
     
     get-outputparameters $cmd $outparameters
@@ -491,17 +523,19 @@ param( [Parameter(Position=0, Mandatory=$true)][string]$sql,
 #>
 function invoke-storedprocedure{
 param([Parameter(Position=0, Mandatory=$true)][string]$storedProcName,
-      [Parameter(Position=1, Mandatory=$false)][System.Data.SqlClient.SqlConnection]$connection,
+      [Parameter(ParameterSetName="SuppliedConnection",Position=1, Mandatory=$false)][System.Data.SqlClient.SqlConnection]$connection,
       [Parameter(Position=2, Mandatory=$false)][hashtable] $parameters=@{},
       [Parameter(Position=3, Mandatory=$false)][hashtable]$outparameters=@{},
       [Parameter(Position=4, Mandatory=$false)][int]$timeout=30,
-      [Parameter(Position=5, Mandatory=$false)][string]$server,
-      [Parameter(Position=6, Mandatory=$false)][string]$database,
-      [Parameter(Position=7, Mandatory=$false)][string]$user,
-      [Parameter(Position=8, Mandatory=$false)][string]$password,
+      [Parameter(ParameterSetName="AdHocConnection",Position=5, Mandatory=$false)][string]$server,
+      [Parameter(ParameterSetName="AdHocConnection",Position=6, Mandatory=$false)][string]$database,
+      [Parameter(ParameterSetName="AdHocConnection",Position=7, Mandatory=$false)][string]$user,
+      [Parameter(ParameterSetName="AdHocConnection",Position=8, Mandatory=$false)][string]$password,
       [Parameter(Position=9, Mandatory=$false)][System.Data.SqlClient.SqlTransaction]$transaction=$null) 
-
+	$PSBoundParameters.Add('sql',$PSBoundParameters.StoredProcName) | Out-Null 
+	$PSBoundParameters.Remove('storedProcName') | out-null
     $cmd=new-sqlcommand @PSBoundParameters
+	$cmd.CommandType=[System.Data.CommandType]::StoredProcedure  
     $ds=New-Object system.Data.DataSet
     $da=New-Object system.Data.SqlClient.SqlDataAdapter($cmd)
     $da.fill($ds) | out-null
