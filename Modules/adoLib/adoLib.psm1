@@ -162,6 +162,30 @@ param([string]$typename)
 	
 }
 
+function copy-hashtable{
+param([hashtable]$hash,
+[String[]]$include,
+[String[]]$exclude)
+
+	if($include){
+	   $newhash=@{}
+	   foreach ($key in $include){
+	    if ($hash.ContainsKey($key)){
+	   		$newhash.Add($key,$hash[$key]) | Out-Null 
+		}
+	   }
+	} else {
+	   $newhash=$hash.Clone()
+	   if ($exclude){
+		   foreach ($key in $exclude){
+		        if ($newhash.ContainsKey($key)) {
+		   			$newhash.Remove($key) | Out-Null 
+				}
+		   }
+	   }
+	}
+	return $newhash
+}
 
 <#
 Helper function figure out what kind of returned object to build from the results of a sql call (ds). 
@@ -253,7 +277,7 @@ param([Parameter(Position=0, Mandatory=$true)][System.Data.Dataset]$ds,
 
 #>
 function new-sqlcommand{
-param([Parameter(Position=0, Mandatory=$true)][string]$sql,
+param([Parameter(Position=0, Mandatory=$true)][Alias('storedProcName')][string]$sql,
       [Parameter(ParameterSetName="SuppliedConnection",Position=1, Mandatory=$false)][System.Data.SqlClient.SQLConnection]$connection,
       [Parameter(Position=2, Mandatory=$false)][hashtable]$parameters=@{},
       [Parameter(Position=3, Mandatory=$false)][int]$timeout=30,
@@ -434,9 +458,12 @@ param( [Parameter(Position=0, Mandatory=$true)][string]$sql,
        [Parameter(ParameterSetName="AdHocConnection",Position=6, Mandatory=$false)][string]$database,
        [Parameter(ParameterSetName="AdHocConnection",Position=7, Mandatory=$false)][string]$user,
        [Parameter(ParameterSetName="AdHocConnection",Position=8, Mandatory=$false)][string]$password,
-       [Parameter(Position=9, Mandatory=$false)][System.Data.SqlClient.SqlTransaction]$transaction=$null)
-
-    $cmd=new-sqlcommand @PSBoundParameters
+       [Parameter(Position=9, Mandatory=$false)][System.Data.SqlClient.SqlTransaction]$transaction=$null,
+       [Parameter(Position=10, Mandatory=$false)] [ValidateSet("DataSet", "DataTable", "DataRow", "Dynamic")] [string]$AsResult="Dynamic"
+       )
+    
+	$connectionparameters=copy-hashtable $PSBoundParameters -exclude AsResult
+    $cmd=new-sqlcommand @connectionparameters
     $ds=New-Object system.Data.DataSet
     $da=New-Object system.Data.SqlClient.SqlDataAdapter($cmd)
     $da.fill($ds) | Out-Null
@@ -444,12 +471,18 @@ param( [Parameter(Position=0, Mandatory=$true)][string]$sql,
     #if it was an ad hoc connection, close it
     if ($server){
        $cmd.connection.close()
-    }	
-    
+    }
     get-outputparameters $cmd $outparameters
-
-    return (get-commandresults $ds $outparameters)
+    switch ($AsResult)
+    {
+        'DataSet'   { $result = $ds }
+        'DataTable' { $result = $ds.Tables }
+        'DataRow'   { $result = $ds.Tables[0] }
+        'Dynamic'   { $result = get-commandresults $ds $outparameters } 
+    }
+    return $result
 }
+
 
 
 <#
@@ -532,9 +565,8 @@ param([Parameter(Position=0, Mandatory=$true)][string]$storedProcName,
       [Parameter(ParameterSetName="AdHocConnection",Position=7, Mandatory=$false)][string]$user,
       [Parameter(ParameterSetName="AdHocConnection",Position=8, Mandatory=$false)][string]$password,
       [Parameter(Position=9, Mandatory=$false)][System.Data.SqlClient.SqlTransaction]$transaction=$null) 
-	$PSBoundParameters.Add('sql',$PSBoundParameters.StoredProcName) | Out-Null 
-	$PSBoundParameters.Remove('storedProcName') | out-null
-    $cmd=new-sqlcommand @PSBoundParameters
+
+	$cmd=new-sqlcommand @PSBoundParameters
 	$cmd.CommandType=[System.Data.CommandType]::StoredProcedure  
     $ds=New-Object system.Data.DataSet
     $da=New-Object system.Data.SqlClient.SqlDataAdapter($cmd)
