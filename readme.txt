@@ -38,6 +38,15 @@ Optional Database and Reporting Services Components
 7. Run Write-SmoToCsvFile.ps1 to import the csv file into the database
 
 What's New
+    Version 2.3.1
+        Added PerfCounters Module
+        Added SQLProfiler Module
+        Modified SQLIse Module
+            Fixed issues with output formatting of multi-queries
+            Added SQL password encryption
+        Modified adolib Module
+            Fixed issues with SQL authentication on some functions
+            Added enhanced output types
     Version 2.3
         Added MSI-based installer
         Added PBM Module
