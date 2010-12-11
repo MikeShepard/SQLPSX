@@ -12,6 +12,7 @@
             <ComponentRef Id="Get_TableAlias.ps1" />
             <ComponentRef Id="Get_TabObjectList.ps1" />
             <ComponentRef Id="Invoke_Coalesce.ps1" />
+            <ComponentRef Id="Library_StringCrypto.ps1" />
             <ComponentRef Id="Library_UserStore.ps1" />
             <ComponentRef Id="Set_Options.ps1" />
             <ComponentRef Id="Show_ConnectionManager.ps1" />
@@ -52,6 +53,9 @@
             </Component>
             <Component Id="Invoke_Coalesce.ps1" Guid="*">
                 <File Id="Invoke_Coalesce.ps1" KeyPath="yes" Source="$(var.SQLIse)\Invoke-Coalesce.ps1" />
+            </Component>
+            <Component Id="Library_StringCrypto.ps1" Guid="*">
+                <File Id="Library_StringCrypto.ps1" KeyPath="yes" Source="$(var.SQLIse)\Library-StringCrypto.ps1" />
             </Component>
             <Component Id="Library_UserStore.ps1" Guid="*">
                 <File Id="Library_UserStore.ps1" KeyPath="yes" Source="$(var.SQLIse)\Library-UserStore.ps1" />
