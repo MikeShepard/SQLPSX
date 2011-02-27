@@ -2732,16 +2732,20 @@ Invoke-SqlRestore
 function Invoke-SqlRestore
 {
     param(
+    [CmdletBinding(DefaultParametersetName="Restore")]
     [Parameter(Position=0, Mandatory=$true)] $sqlserver,
-    [Parameter(Position=1, Mandatory=$true)] [string]$dbname,
+    [Parameter(ParameterSetName="Restore", Position=1, Mandatory=$true)] [string]$dbname,
     [Parameter(Position=2, Mandatory=$true)] [string]$filepath,
-    [Parameter(Position=3, Mandatory=$false)] [Microsoft.SqlServer.Management.Smo.RestoreActionType]$action='Database',
-    [Parameter(Position=4, Mandatory=$false)] [string]$stopat,
-    [Parameter(Position=5, Mandatory=$false)] [hashtable]$relocatefiles,
-    [Parameter(Position=6, Mandatory=$false)] [switch]$force,
-    [Parameter(Position=7, Mandatory=$false)] [switch]$norecovery,
-    [Parameter(Position=8, Mandatory=$false)] [switch]$keepreplication
+    [Parameter(ParameterSetName="Restore", Position=3, Mandatory=$false)] [Microsoft.SqlServer.Management.Smo.RestoreActionType]$action='Database',
+    [Parameter(ParameterSetName="Restore", Position=4, Mandatory=$false)] [string]$stopat,
+    [Parameter(ParameterSetName="Restore", Position=5, Mandatory=$false)] [hashtable]$relocatefiles,
+    [Parameter(ParameterSetName="Restore", Position=6, Mandatory=$false)] [switch]$force,
+    [Parameter(ParameterSetName="Restore", Position=7, Mandatory=$false)] [switch]$norecovery,
+    [Parameter(ParameterSetName="Restore", Position=8, Mandatory=$false)] [switch]$keepreplication,
+    [Parameter(ParameterSetName="FileList", Position=9, Mandatory=$false)] [switch]$FileListOnly
     )
+
+
 
     $ErrorActionPreference = "Stop"
 
@@ -2758,10 +2762,14 @@ function Invoke-SqlRestore
 
     $restore = new-object ("Microsoft.SqlServer.Management.Smo.Restore")
     $restoreDevice = new-object ("Microsoft.SqlServer.Management.Smo.BackupDeviceItem") $filepath, 'File'
-
+    $restore.Devices.Add($restoreDevice)
+    if ($FileListOnly)
+    { 
+        $restore.ReadFileList($server)
+        break
+    }
     $restore.Action = $action
     $restore.Database = $dbname
-    $restore.Devices.Add($restoreDevice) 
     $restore.ReplaceDatabase = $($force.IsPresent)
     $restore.NoRecovery = $($norecovery.IsPresent)
     $restore.KeepReplication = $($keepreplication.IsPresent)

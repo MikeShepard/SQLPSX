@@ -114,7 +114,7 @@ function Import-PolicyEvaluation
                             if ($Script:WriteEventLog -and $_.Result -eq $false)
                             {
                                 $message= "{0} on {1} {2} failed." -f $Policy.PolicyName,$TargetServer,$_.TargetQueryExpression
-                                $log.WriteEntry($Message,$Script:EntryType,$Script:EventId)
+                                $eventlog.WriteEntry($Message,$Script:EntryType,$Script:EventId)
                             }
                 }
             }
