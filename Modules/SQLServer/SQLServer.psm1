@@ -2766,7 +2766,7 @@ function Invoke-SqlRestore
     if ($FileListOnly)
     { 
         $restore.ReadFileList($server)
-        break
+        return
     }
     $restore.Action = $action
     $restore.Database = $dbname
