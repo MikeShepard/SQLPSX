@@ -1,8 +1,9 @@
-$env:SQLPSX = "C:\Users\u00\Projects\SQLPSX_2.3.1\Modules"
+$env:SQLPSX = "C:\Users\u00\Projects\SQLPSX_2.3.2\Modules"
 
 heat dir "$($env:SQLPSX)\adoLib" -nologo -sfrag -suid -ag -srd -dir adoLib -out adoLib.wxs -cg adoLib -dr adoLib -var var.adoLib
 heat dir "$($env:SQLPSX)\Agent" -nologo -sfrag -suid -ag -srd -dir Agent -out Agent.wxs -cg Agent -dr Agent -var var.Agent
 heat dir "$($env:SQLPSX)\ISECreamBasic" -nologo -sfrag -suid -ag -srd -dir ISECreamBasic -out ISECreamBasic.wxs -cg ISECreamBasic -dr ISECreamBasic -var var.ISECreamBasic
+heat dir "$($env:SQLPSX)\mySQLLib" -nologo -sfrag -suid -ag -srd -dir mySQLLib -out mySQLLib.wxs -cg mySQLLib -dr mySQLLib -var var.mySQLLib
 heat dir "$($env:SQLPSX)\OracleClient" -nologo -sfrag -suid -ag -srd -dir OracleClient -out OracleClient.wxs -cg OracleClient -dr OracleClient -var var.OracleClient
 heat dir "$($env:SQLPSX)\OracleIse" -nologo -sfrag -suid -ag -srd -dir OracleIse -out OracleIse.wxs -cg OracleIse -dr OracleIse -var var.OracleIse
 heat dir "$($env:SQLPSX)\PBM" -nologo -sfrag -suid -ag -srd -dir PBM -out PBM.wxs -cg PBM -dr PBM -var var.PBM
@@ -28,6 +29,6 @@ remove-item sed*
 #May need to generate new guid for Product Id
 ([System.Guid]::NewGuid().toString()).ToUpper()
 
-candle.exe sqlpsxAll.wxs adolib.wxs Agent.wxs ISECreamBasic.wxs OracleClient.wxs OracleIse.wxs PBM.wxs PerfCounters.wxs Repl.wxs ShowMbrs.wxs SQLIse.wxs SQLMaint.wxs SQLParser.wxs SQLProfiler.wxs SQLPSX.wxs SQLServer.wxs SSIS.wxs WPK.wxs
+candle.exe sqlpsxAll.wxs adolib.wxs Agent.wxs mySQLLib.wxs ISECreamBasic.wxs OracleClient.wxs OracleIse.wxs PBM.wxs PerfCounters.wxs Repl.wxs ShowMbrs.wxs SQLIse.wxs SQLMaint.wxs SQLParser.wxs SQLProfiler.wxs SQLPSX.wxs SQLServer.wxs SSIS.wxs WPK.wxs
 
-light.exe -ext WixUIExtension -out SQLPSX.msi sqlpsxAll.wixobj adolib.wixobj Agent.wixobj ISECreamBasic.wixobj OracleClient.wixobj OracleIse.wixobj PBM.wixobj PerfCounters.wixobj Repl.wixobj ShowMbrs.wixobj SQLIse.wixobj SQLMaint.wixobj SQLParser.wixobj SQLProfiler.wixobj SQLPSX.wixobj SQLServer.wixobj SSIS.wixobj WPK.wixobj -b "$($env:SQLPSX)"
+light.exe -ext WixUIExtension -out SQLPSX.msi sqlpsxAll.wixobj adolib.wixobj Agent.wixobj mySQLLib.wixobj ISECreamBasic.wixobj OracleClient.wixobj OracleIse.wixobj PBM.wixobj PerfCounters.wixobj Repl.wixobj ShowMbrs.wixobj SQLIse.wixobj SQLMaint.wixobj SQLParser.wixobj SQLProfiler.wixobj SQLPSX.wixobj SQLServer.wixobj SSIS.wixobj WPK.wixobj -b "$($env:SQLPSX)"

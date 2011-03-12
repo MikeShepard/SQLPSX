@@ -6,9 +6,10 @@
       Version 2.2.3.2       Product Id was: 16F395EE-FA14-4BAE-A0E8-DC773BD422B3
       Version 2.3.0.0       Product Id was: 66A59D8B-0A17-4063-A1B1-DBBE66C6D094
       Version 2.3.1.0       Product Id was: 88860FA9-A4FF-4A62-BA19-8F01842D0684
+      Version 2.3.2.0       Product Id was: F64E4208-905E-4C25-A044-5962159B0682
 -->
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-    <Product Id="88860FA9-A4FF-4A62-BA19-8F01842D0684" Name="SQLPSX" Language="1033" Version="$(var.MajorVersion).$(var.MinorVersion).$(var.MicroVersion).$(var.BuildVersion)" Manufacturer="SQLPSX" UpgradeCode="F52E6F67-79FE-4115-81B1-B441ECD9ABCF">
+    <Product Id="F64E4208-905E-4C25-A044-5962159B0682" Name="SQLPSX" Language="1033" Version="$(var.MajorVersion).$(var.MinorVersion).$(var.MicroVersion).$(var.BuildVersion)" Manufacturer="SQLPSX" UpgradeCode="F52E6F67-79FE-4115-81B1-B441ECD9ABCF">
         <Package Description="SQLPSX Installer" InstallPrivileges="elevated" Comments="SQLPSX Installer" InstallerVersion="200" Compressed="yes" />
         <Upgrade Id="F52E6F67-79FE-4115-81B1-B441ECD9ABCF">
           <UpgradeVersion OnlyDetect="no" Property="PREVIOUSFOUND"
@@ -29,6 +30,8 @@
                         <Directory Id="Agent" Name="Agent">
                         </Directory>
                         <Directory Id="ISECreamBasic" Name="ISECreamBasic">
+                        </Directory>
+                        <Directory Id="mySQLLib" Name="mySQLLib">
                         </Directory>
                         <Directory Id="OracleClient" Name="OracleClient">
                         </Directory>
@@ -68,6 +71,7 @@
             <ComponentGroupRef Id="adoLib" />
             <ComponentGroupRef Id="Agent" />
             <ComponentGroupRef Id="ISECreamBasic" />
+            <ComponentGroupRef Id="mySQLLib" />
             <ComponentGroupRef Id="OracleClient" />
             <ComponentGroupRef Id="OracleIse" />
             <ComponentGroupRef Id="PBM" />

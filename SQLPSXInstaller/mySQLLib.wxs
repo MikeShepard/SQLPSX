@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?include $(sys.CURRENTDIR)\Config.wxi?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Fragment>
+        <ComponentGroup Id="mySQLLib">
+            <ComponentRef Id="mySQLLib.psm1" />
+        </ComponentGroup>
+    </Fragment>
+    <Fragment>
+        <DirectoryRef Id="mySQLLib">
+            <Component Id="mySQLLib.psm1" Guid="*">
+                <File Id="mySQLLib.psm1" KeyPath="yes" Source="$(var.mySQLLib)\mySQLLib.psm1" />
+            </Component>
+        </DirectoryRef>
+    </Fragment>
+</Wix>

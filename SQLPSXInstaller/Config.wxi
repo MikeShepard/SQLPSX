@@ -3,6 +3,7 @@
     <?define adoLib="adoLib" ?>
     <?define Agent="Agent" ?>
     <?define ISECreamBasic="ISECreamBasic" ?>
+    <?define mySQLLib="mySQLLib" ?>
     <?define OracleClient="OracleClient" ?>
     <?define OracleIse="OracleIse" ?>
     <?define PBM="PBM" ?>
@@ -19,7 +20,7 @@
     <?define WPK="WPK" ?>
     <?define MajorVersion="2" ?>
     <?define MinorVersion="3" ?>
-    <?define MicroVersion="1" ?>
+    <?define MicroVersion="2" ?>
     <?define BuildVersion="0" ?>
 </Include>
 

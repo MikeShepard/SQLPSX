@@ -6,6 +6,7 @@
             <ComponentRef Id="get_commandresults.ps1" />
             <ComponentRef Id="invoke_query.ps1" />
             <ComponentRef Id="new_connection.ps1" />
+            <ComponentRef Id="OracleBulkcopy.ps1" />
             <ComponentRef Id="OracleClient.psm1" />
         </ComponentGroup>
     </Fragment>
@@ -19,6 +20,9 @@
             </Component>
             <Component Id="new_connection.ps1" Guid="*">
                 <File Id="new_connection.ps1" KeyPath="yes" Source="$(var.OracleClient)\new-connection.ps1" />
+            </Component>
+            <Component Id="OracleBulkcopy.ps1" Guid="*">
+                <File Id="OracleBulkcopy.ps1" KeyPath="yes" Source="$(var.OracleClient)\OracleBulkcopy.ps1" />
             </Component>
             <Component Id="OracleClient.psm1" Guid="*">
                 <File Id="OracleClient.psm1" KeyPath="yes" Source="$(var.OracleClient)\OracleClient.psm1" />
