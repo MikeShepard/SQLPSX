@@ -38,6 +38,16 @@ Optional Database and Reporting Services Components
 7. Run Write-SmoToCsvFile.ps1 to import the csv file into the database
 
 What's New
+    Version 2.3.2
+        Added MySQLLib Module
+        Modified adolib Module
+            Changed SQLBulkCopy to use System.Data.Common classes rather than SQLClient-specific classes for platform interoperability 
+            Fixed issue in new-sqlcommand
+        Modified OracleClient Module
+            Added OracleBulkCopy
+        Modified SQLServer Module
+            Added FileListOnly to Invoke-SqlRestore function
+            Fixed issue in PBM module when writing to Windows Event log
     Version 2.3.1
         Added PerfCounters Module
         Added SQLProfiler Module
@@ -185,6 +195,8 @@ Modules
             Execute a sql statement, returning the results of the query
         Invoke-StoredProcedure
             Execute a stored procedure, returning the results of the query
+        Invoke-Bulkcopy
+        New-SQLCommand
     SqlParser Module cmdlets
         Test-SqlScript
             Determines whether a SQL script is valid.
@@ -453,6 +465,18 @@ Modules
         Import-PolicyEvaluation
             Evaluates a set of policies based on a policy category and CMS groupusing invoke-policyevaluation cmdlet. The results and error messages
             if any are written to policy evaluation database. Optionally writes a event log entry (useful for integrating with SCOM).
+    OracleClient Module functions:
+        ConvertTo-oracleDataSource
+        invoke-oracle_query
+        Invoke-OracleBulkcopy
+        New-Oracle_connection
+   MySQLLib Module functions:
+        Invoke-MySql
+        Invoke-MySQLQuery
+        Invoke-MySQLStoredProcedure
+        New-MySQLCommand
+        New-MySQLConnection
+        
 Scripts
     Get-InvalidLogins.ps1
         Lists invalid AD/NT logins/groups which have been granted access to the

@@ -19,9 +19,10 @@
 . $psScriptRoot\new-connection.ps1
 . $psScriptRoot\invoke-query.ps1
 . $psScriptRoot\get-commandresults.ps1
+. $psScriptRoot\OracleBulkcopy.ps1
 
 
 export-modulemember  new-oracle_connection
 # export-modulemember -function invoke-sql
-export-modulemember -function invoke-oracle_query,ConvertTo-oracleDataSource
+export-modulemember -function invoke-oracle_query, ConvertTo-oracleDataSource, Invoke-OracleBulkcopy
 # export-modulemember -function invoke-storedprocedure

@@ -1,13 +1,14 @@
+[void][System.Reflection.Assembly]::LoadWithPartialName("MySql.Data")
 # ---------------------------------------------------------------------------
 ### <Script>
 ### <Author>
 ### Mike Shepard
 ### </Author>
 ### <Description>
-### Defines functions for executing Ado.net queries
+### Defines functions for executing Ado.net queries with mySQL
 ### </Description>
 ### <Usage>
-### import-module adolib
+### import-module mySQLLib
 ###  </Usage>
 ### </Script>
 # ---------------------------------------------------------------------------
@@ -76,21 +77,22 @@ function Is-NULL{
 		System.Data.SqlClient.SQLConnection
 
 #>
-function New-Connection{
+function New-MySQLConnection{
 param([Parameter(Position=0, Mandatory=$true)][string]$server, 
       [Parameter(Position=1, Mandatory=$false)][string]$database='',
       [string]$user='',
-      [string]$password='')
+      [string]$password='',
+      [int]$port=3306)
 
 	if($database -ne ''){
 	  $dbclause="Database=$database;"
 	}
-	$conn=new-object System.Data.SqlClient.SQLConnection
+	$conn=new-object MySql.Data.MySqlClient.MySqlConnection
 	
 	if ($user -ne ''){
-		$conn.ConnectionString="Server=$server;$dbclause`User ID=$user;Password=$password;Pooling=false"
+		$conn.ConnectionString="Server=$Server;Port=$port;Database=$DataBase;Uid=$User;Pwd=$Password;allow zero datetime=yes"
 	} else {
-		$conn.ConnectionString="Server=$server;$dbclause`Integrated Security=True"
+		$conn.ConnectionString="Server=$server;Port=$port;$dbclause`Integrated Security=True"
 	}
 	$conn.Open()
     write-debug $conn.ConnectionString
@@ -98,7 +100,7 @@ param([Parameter(Position=0, Mandatory=$true)][string]$server,
 }
 
 function Get-Connection{
-param([System.Data.SqlClient.SQLConnection]$conn,
+param([MySql.Data.MySqlClient.MySqlConnection]$conn,
       [string]$server, 
       [string]$database,
       [string]$user,
@@ -114,7 +116,7 @@ param([System.Data.SqlClient.SQLConnection]$conn,
 }
 
 function Put-OutputParameters{
-param([Parameter(Position=0, Mandatory=$true)][System.Data.SqlClient.SQLCommand]$cmd, 
+param([Parameter(Position=0, Mandatory=$true)][MySql.Data.MySqlClient.MySqlCommand]$cmd, 
       [Parameter(Position=1, Mandatory=$false)][hashtable]$outparams)
     if ($outparams){
     	foreach($outp in $outparams.Keys){
@@ -129,7 +131,7 @@ param([Parameter(Position=0, Mandatory=$true)][System.Data.SqlClient.SQLCommand]
 }
 
 function Get-Outputparameters{
-param([Parameter(Position=0, Mandatory=$true)][System.Data.SqlClient.SQLCommand]$cmd,
+param([Parameter(Position=0, Mandatory=$true)][MySql.Data.MySqlClient.MySqlCommand]$cmd,
       [Parameter(Position=1, Mandatory=$true)][hashtable]$outparams)
 	foreach($p in $cmd.Parameters){
 		if ($p.Direction -eq [System.Data.ParameterDirection]::Output){
@@ -137,7 +139,7 @@ param([Parameter(Position=0, Mandatory=$true)][System.Data.SqlClient.SQLCommand]
 		}
 	}
 }
-
+#>
 
 
 function Get-ParamType{
@@ -200,8 +202,9 @@ Options are:
 
 #>
 function Get-CommandResults{
-param([Parameter(Position=0, Mandatory=$true)][System.Data.Dataset]$ds, 
-      [Parameter(Position=1, Mandatory=$true)][HashTable]$outparams)   
+param([Parameter(Position=0, Mandatory=$true)][System.Data.Dataset]$ds
+    ,       [Parameter(Position=1, Mandatory=$true)][HashTable]$outparams
+    )   
 
 	if ($ds.tables.count -eq 1){
 		$retval= $ds.Tables[0]
@@ -211,6 +214,7 @@ param([Parameter(Position=0, Mandatory=$true)][System.Data.Dataset]$ds,
 	} else {
 		[system.Data.DataSet]$retval= $ds 
 	}
+	
 	if ($outparams.Count -gt 0){
 		if ($retval){
 			return @{Results=$retval; OutputParameters=$outparams}
@@ -220,6 +224,7 @@ param([Parameter(Position=0, Mandatory=$true)][System.Data.Dataset]$ds,
 	} else {
 		return $retval
 	}
+
 }
 
 <#
@@ -276,24 +281,25 @@ param([Parameter(Position=0, Mandatory=$true)][System.Data.Dataset]$ds,
 		System.Data.SqlClient.SqlCommand
 
 #>
-function New-SQLCommand{
+function New-MySQLCommand{
 param([Parameter(Position=0, Mandatory=$true)][Alias('storedProcName')][string]$sql,
-      [Parameter(ParameterSetName="SuppliedConnection",Position=1, Mandatory=$false)][System.Data.SqlClient.SQLConnection]$connection,
+      [Parameter(ParameterSetName="SuppliedConnection",Position=1, Mandatory=$false)][ MySql.Data.MySqlClient.MySQLConnection]$connection,
       [Parameter(Position=2, Mandatory=$false)][hashtable]$parameters=@{},
       [Parameter(Position=3, Mandatory=$false)][int]$timeout=30,
       [Parameter(ParameterSetName="AdHocConnection",Position=4, Mandatory=$false)][string]$server,
       [Parameter(ParameterSetName="AdHocConnection",Position=5, Mandatory=$false)][string]$database,
       [Parameter(ParameterSetName="AdHocConnection",Position=6, Mandatory=$false)][string]$user,
       [Parameter(Position=7, Mandatory=$false)][string]$password,
-      [Parameter(Position=8, Mandatory=$false)][System.Data.SqlClient.SqlTransaction]$transaction=$null,
-	  [Parameter(Position=9, Mandatory=$false)][hashtable]$outparameters=@{})
+      [Parameter(Position=8, Mandatory=$false)][MySql.Data.MySqlClient.MySqlTransaction]$transaction=$null
+	  ,[Parameter(Position=9, Mandatory=$false)][hashtable]$outparameters=@{}
+     )
    
     $dbconn=Get-Connection -conn $connection -server $server -database $database -user $user -password $password
     $close=($dbconn.State -eq [System.Data.ConnectionState]'Closed')
     if ($close) {
         $dbconn.Open()
     }	
-    $cmd=new-object system.Data.SqlClient.SqlCommand($sql,$dbconn)
+    $cmd=new-object  MySql.Data.MySqlClient.MySqlCommand($sql,$dbconn)
     $cmd.CommandTimeout=$timeout
     foreach($p in $parameters.Keys){
 	    $parm=$cmd.Parameters.AddWithValue("@$p",$parameters[$p])
@@ -303,8 +309,8 @@ param([Parameter(Position=0, Mandatory=$true)][Alias('storedProcName')][string]$
     }
     put-outputparameters $cmd $outparameters
 
-    if ($transaction -is [System.Data.SqlClient.SqlTransaction]){
-	$cmd.Transaction = $transaction
+    if ($transaction -is [MySql.Data.MySqlClient.MySqlTransaction]){
+	   $cmd.Transaction = $transaction
     }
     return $cmd
 
@@ -364,9 +370,9 @@ param([Parameter(Position=0, Mandatory=$true)][Alias('storedProcName')][string]$
 		Integer
 
 #>
-function Invoke-Sql{
+function Invoke-MySql{
 param([Parameter(Position=0, Mandatory=$true)][string]$sql,
-      [Parameter(ParameterSetName="SuppliedConnection",Position=1, Mandatory=$false)][System.Data.SqlClient.SQLConnection]$connection,
+      [Parameter(ParameterSetName="SuppliedConnection",Position=1, Mandatory=$false)][MySql.Data.MySqlClient.MySqlConnection]$connection,
       [Parameter(Position=2, Mandatory=$false)][hashtable]$parameters=@{},
       [Parameter(Position=3, Mandatory=$false)][hashtable]$outparameters=@{},
       [Parameter(Position=4, Mandatory=$false)][int]$timeout=30,
@@ -377,7 +383,7 @@ param([Parameter(Position=0, Mandatory=$true)][string]$sql,
       [Parameter(Position=9, Mandatory=$false)][System.Data.SqlClient.SqlTransaction]$transaction=$null)
 	
 
-       $cmd=new-sqlcommand @PSBoundParameters
+       $cmd=new-mysqlcommand @PSBoundParameters
 
        #if it was an ad hoc connection, close it
        if ($server){
@@ -448,9 +454,9 @@ param([Parameter(Position=0, Mandatory=$true)][string]$sql,
         2.  A dataset (for multi-result set queries)
         3.  An object that contains a dictionary of ouptut parameters and their values and either 1 or 2 (for queries that contain output parameters)
 #>
-function Invoke-Query{
+function Invoke-MySQLQuery{
 param( [Parameter(Position=0, Mandatory=$true)][string]$sql,
-       [Parameter(ParameterSetName="SuppliedConnection", Position=1, Mandatory=$false)][System.Data.SqlClient.SqlConnection]$connection,
+       [Parameter(ParameterSetName="SuppliedConnection", Position=1, Mandatory=$false)][MySql.Data.MySqlClient.MySqlConnection]$connection,
        [Parameter(Position=2, Mandatory=$false)][hashtable]$parameters=@{},
        [Parameter(Position=3, Mandatory=$false)][hashtable]$outparameters=@{},
        [Parameter(Position=4, Mandatory=$false)][int]$timeout=30,
@@ -463,9 +469,9 @@ param( [Parameter(Position=0, Mandatory=$true)][string]$sql,
        )
     
 	$connectionparameters=copy-hashtable $PSBoundParameters -exclude AsResult
-    $cmd=new-sqlcommand @connectionparameters
+    $cmd=new-mysqlcommand @connectionparameters
     $ds=New-Object system.Data.DataSet
-    $da=New-Object system.Data.SqlClient.SqlDataAdapter($cmd)
+    $da=New-Object MySql.Data.MySqlClient.MySqlDataAdapter($cmd)
     $da.fill($ds) | Out-Null
     
     #if it was an ad hoc connection, close it
@@ -478,7 +484,7 @@ param( [Parameter(Position=0, Mandatory=$true)][string]$sql,
         'DataSet'   { $result = $ds }
         'DataTable' { $result = $ds.Tables }
         'DataRow'   { $result = $ds.Tables[0] }
-        'Dynamic'   { $result = get-commandresults $ds $outparameters } 
+        'Dynamic'   { $result = get-commandresults $ds $outparameters  } 
     }
     return $result
 }
@@ -554,9 +560,9 @@ param( [Parameter(Position=0, Mandatory=$true)][string]$sql,
         2.  A dataset (for multi-result set queries)
         3.  An object that contains a hashtables of ouptut parameters and their values and either 1 or 2 (for queries that contain output parameters)
 #>
-function Invoke-StoredProcedure{
+function Invoke-MySQLStoredProcedure{
 param([Parameter(Position=0, Mandatory=$true)][string]$storedProcName,
-      [Parameter(ParameterSetName="SuppliedConnection",Position=1, Mandatory=$false)][System.Data.SqlClient.SqlConnection]$connection,
+      [Parameter(ParameterSetName="SuppliedConnection",Position=1, Mandatory=$false)][MySql.Data.MySqlClient.MySqlConnection]$connection,
       [Parameter(Position=2, Mandatory=$false)][hashtable] $parameters=@{},
       [Parameter(Position=3, Mandatory=$false)][hashtable]$outparameters=@{},
       [Parameter(Position=4, Mandatory=$false)][int]$timeout=30,
@@ -566,10 +572,10 @@ param([Parameter(Position=0, Mandatory=$true)][string]$storedProcName,
       [Parameter(ParameterSetName="AdHocConnection",Position=8, Mandatory=$false)][string]$password,
       [Parameter(Position=9, Mandatory=$false)][System.Data.SqlClient.SqlTransaction]$transaction=$null) 
 
-	$cmd=new-sqlcommand @PSBoundParameters
+	$cmd=new-MySqlCommand @PSBoundParameters
 	$cmd.CommandType=[System.Data.CommandType]::StoredProcedure  
     $ds=New-Object system.Data.DataSet
-    $da=New-Object system.Data.SqlClient.SqlDataAdapter($cmd)
+    $da=New-Object MySql.Data.MySqlClient.MySqlDataAdapter($cmd)
     $da.fill($ds) | out-null
 
     get-outputparameters $cmd $outparameters
@@ -579,135 +585,14 @@ param([Parameter(Position=0, Mandatory=$true)][string]$storedProcName,
        $cmd.connection.close()
     }	
 	
-    return (get-commandresults $ds $outparameters)
-}
-
-
-<#
-	.SYNOPSIS
-		Uses the .NET SQLBulkCopy class to quickly copy rows into a destination table.
-
-	.DESCRIPTION
-        
-		Also, the invoke-bulkcopy function allows you to pass a command object instead of a set of records in order to "stream" the records
-        into the destination in cases where there are a lot of records and you don't want to allocate memory to hold the entire result set.
-
-	.PARAMETER  records
-		Either a datatable (like one returned from invoke-query or invoke-storedprocedure) or
-        A command object (e.g. new-sqlcommand), or a datareader object.  Note that the command object or datareader object 
-        can come from any class that inherits from System.Data.Common.DbCommand or System.Data.Common.DataReader, so this will work
-        with most ADO.NET client libraries (not just SQL Server).
-
-	.PARAMETER  Server
-		The destination server to connect to.  
-
-	.PARAMETER  Database
-		The initial database for the connection.  
-
-	.PARAMETER  User
-		The sql user to use for the connection.  If user is not passed, NT Authentication is used.
-
-	.PARAMETER  Password
-		The password for the sql user named by the User parameter.
-
-	.PARAMETER  Table
-		The destination table for the bulk copy operation.
-
-	.PARAMETER  Mapping
-		A dictionary of column mappings of the form DestColumn=SourceColumn
-
-	.PARAMETER  BatchSize
-		The batch size for the bulk copy operation.
-
-	.PARAMETER  Transaction
-		A transaction to execute the bulk copy operation in.
-
-	.PARAMETER  NotifyAfter
-		The number of rows to fire the notification event after transferring.  0 means don't notify.
-        Ex: 1000 means to fire the notify event after each 1000 rows are transferred.
-        
-    .PARAMETER  NotifyFunction
-        A scriptblock to be executed after each $notifyAfter records has been copied.  The second parameter ($param[1]) 
-        is a SqlRowsCopiedEventArgs object, which has a RowsCopied property.  The default value for this parameter echoes the
-        number of rows copied to the console
-        
-    .PARAMETER  Options
-        An object containing special options to modify the bulk copy operation.
-        See http://msdn.microsoft.com/en-us/library/system.data.sqlclient.sqlbulkcopyoptions.aspx for values.
-
-
-	.EXAMPLE
-		PS C:\> $cmd=new-sqlcommand -server MyServer -sql "Select * from MyTable"
-        PS C:\> invoke-sqlbulkcopy -records $cmd -server MyOtherServer -table CopyOfMyTable
-
-	.EXAMPLE
-		PS C:\> $rows=invoke-query -server MyServer -sql "Select * from MyTable"
-        PS C:\> invoke-sqlbulkcopy -records $rows -server MyOtherServer -table CopyOfMyTable
-
-    .INPUTS
-        None.
-        You cannot pipe objects to invoke-bulkcopy
-
-	.OUTPUTS
-		System.Data.SqlClient.SqlCommand
-
-#>
-function Invoke-Bulkcopy{
-  param([Parameter(Position=0, Mandatory=$true)]$records,
-        [Parameter(Position=1, Mandatory=$true)]$server,
-        [Parameter(Position=2, Mandatory=$false)]$database,
-        [Parameter(Position=3, Mandatory=$false)][string]$user,
-        [Parameter(Position=4, Mandatory=$false)][string]$password,
-        [Parameter(Position=5, Mandatory=$true)][string]$table,
-        [Parameter(Position=6, Mandatory=$false)]$mapping=@{},
-        [Parameter(Position=7, Mandatory=$false)]$batchsize=0,
-        [Parameter(Position=8, Mandatory=$false)][System.Data.SqlClient.SqlTransaction]$transaction=$null,
-        [Parameter(Position=9, Mandatory=$false)]$notifyAfter=0,
-        [Parameter(Position=10, Mandatory=$false)][scriptblock]$notifyFunction={Write-Host "$($args[1].RowsCopied) rows copied."},
-        [Parameter(Position=11, Mandatory=$false)][System.Data.SqlClient.SqlBulkCopyOptions]$options=[System.Data.SqlClient.SqlBulkCopyOptions]::Default)
-
-	#use existing "New-Connection" function to create a connection string.        
-    $connection=New-Connection -server $server -database $Database -User $user -password $password
-	$connectionString = $connection.ConnectionString
-	$connection.close()
-
-	#Use a transaction if one was specified
-	if ($transaction -is [System.Data.SqlClient.SqlTransaction]){
-		$bulkCopy=new-object "Data.SqlClient.SqlBulkCopy" $connectionString $options  $transaction
-	} else {
-		$bulkCopy = new-object "Data.SqlClient.SqlBulkCopy" $connectionString
-	}
-	$bulkCopy.BatchSize=$batchSize
-	$bulkCopy.DestinationTableName = $table
-	$bulkCopy.BulkCopyTimeout=10000000
-	if ($notifyAfter -gt 0){
-		$bulkCopy.NotifyAfter=$notifyafter
-		$bulkCopy.Add_SQlRowscopied($notifyFunction)
-	}
-
-	#Add column mappings if they were supplied
-	foreach ($key in $mapping.Keys){
-	    $bulkCopy.ColumnMappings.Add($mapping[$key],$key) | out-null
-	}
-	
-	write-debug "Bulk copy starting at $(get-date)"
-	if ($records -is [System.Data.Common.DBCommand]){
-		#if passed a command object (rather than a datatable), ask it for a datareader to stream the records
-		$bulkCopy.WriteToServer($records.ExecuteReader())
-    } elsif ($records -is [System.Data.Common.DbDataReader]){
-		#if passed a Datareader object use it to stream the records
-		$bulkCopy.WriteToServer($records)
-	} else {
-		$bulkCopy.WriteToServer($records)
-	}
-	write-debug "Bulk copy finished at $(get-date)"
+    return (get-commandresults $ds $outparameters )
 }
 
 
 
-export-modulemember New-Connection
-export-modulemember new-sqlcommand
-export-modulemember invoke-sql
-export-modulemember invoke-query
-export-modulemember invoke-storedprocedure
-export-modulemember invoke-bulkcopy
+
+export-modulemember New-MySQLConnection
+export-modulemember new-MySqlCommand
+export-modulemember invoke-MySql
+export-modulemember invoke-MySqlquery
+export-modulemember invoke-MySqlStoredProcedure
