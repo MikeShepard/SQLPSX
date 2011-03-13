@@ -1,4 +1,5 @@
-$env:SQLPSX = "C:\Users\u00\Projects\SQLPSX_2.3.2\Modules"
+$env:SQLPSX = "C:\Users\u00\Projects\SQLPSX_2.3.2.1\Modules"
+cd $env:SQLPSX
 
 heat dir "$($env:SQLPSX)\adoLib" -nologo -sfrag -suid -ag -srd -dir adoLib -out adoLib.wxs -cg adoLib -dr adoLib -var var.adoLib
 heat dir "$($env:SQLPSX)\Agent" -nologo -sfrag -suid -ag -srd -dir Agent -out Agent.wxs -cg Agent -dr Agent -var var.Agent

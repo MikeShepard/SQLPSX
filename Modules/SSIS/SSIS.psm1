@@ -11,10 +11,16 @@
 ### </Usage>
 ### </Script>
 # ---------------------------------------------------------------------------
-#add-type -AssemblyName "Microsoft.SqlServer.ManagedDTS, Version=9.0.242.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91"
-#add-type -Path "C:\Program Files\Microsoft SQL Server\90\SDK\Assemblies\Microsoft.SQLServer.ManagedDTS.dll"
-add-type -AssemblyName "Microsoft.SqlServer.ManagedDTS, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91"
-#add-type -Path "C:\Program Files\Microsoft SQL Server\100\SDK\Assemblies\Microsoft.SQLServer.ManagedDTS.dll"
+if ( $Args[0] -eq 2005 )
+{
+    add-type -AssemblyName "Microsoft.SqlServer.ManagedDTS, Version=9.0.242.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91" 
+    #add-type -Path "C:\Program Files\Microsoft SQL Server\90\SDK\Assemblies\Microsoft.SQLServer.ManagedDTS.dll"
+}
+else
+{
+    add-type -AssemblyName "Microsoft.SqlServer.ManagedDTS, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91"
+    #add-type -Path "C:\Program Files\Microsoft SQL Server\100\SDK\Assemblies\Microsoft.SQLServer.ManagedDTS.dll"
+}
 
 #######################
 <#
@@ -73,7 +79,10 @@ function Copy-ISItemSQLToSQL
     [Parameter(Position=6, Mandatory=$false)] [ValidateNOTNullOrEmpty()] [string]$include="*",
     [Parameter(Position=7, Mandatory=$false)] [string]$exclude=$null,
     [Parameter(Position=8, Mandatory=$false)] [switch]$force,
-    [Parameter(Position=9, Mandatory=$false)] [hashtable]$connectionInfo
+    [Parameter(Position=9, Mandatory=$false)] [hashtable]$connectionInfo,
+#Valid values are: DontSaveSensitive, EncryptSensitiveWithUserKey, EncryptSensitiveWithPassword, EncryptAllWithPassword, EncryptAllWithUserKey, ServerStorage
+    [Parameter(Position=10, Mandatory=$false)]
+    [ValidateScript({[Enum]::GetNames([Microsoft.SqlServer.Dts.Runtime.DTSProtectionLevel]) -ccontains $_ })] [string]$protectionLevel
     )
 
     #If destinationServer contains instance i.e. server\instance, convert to just servername:
@@ -95,6 +104,8 @@ Write-Verbose "Copy-ISItemSQLToSQL path:$path serverName:$serverName destination
           {
               if ($connectionInfo)
               { Set-ISConnectionString $package $connectionInfo }
+              if ($protectionLevel)
+              { $package.ProtectionLevel = [Microsoft.SqlServer.Dts.Runtime.DTSProtectionLevel]$protectionLevel }
               if ($force)
               { Set-ISPackage  -package $package -path $destination -serverName $destinationServer -force }
               else
@@ -146,6 +157,8 @@ Write-Verbose "Copy-ISItemSQLToSQL path:$path serverName:$serverName destination
                     Write-Progress -activity "Copying ISItems..." -status "Copying $($pInfo.Name)" -percentcomplete ($i/$count.count*100)
                     if ($connectionInfo)
                     { Set-ISConnectionString $package $connectionInfo }
+                    if ($protectionLevel)
+                    { $package.ProtectionLevel = [Microsoft.SqlServer.Dts.Runtime.DTSProtectionLevel]$protectionLevel }
                     if ($force)
                     { Set-ISPackage  -package $package -path $destPath -serverName $destinationServer -force }
                     else
@@ -189,7 +202,10 @@ function Copy-ISItemSQLToFile
     [Parameter(Position=5, Mandatory=$false)] [ValidateNOTNullOrEmpty()] [string]$include="*",
     [Parameter(Position=6, Mandatory=$false)] [string]$exclude=$null,
     [Parameter(Position=7, Mandatory=$false)] [switch]$force,
-    [Parameter(Position=8, Mandatory=$false)] [hashtable]$connectionInfo
+    [Parameter(Position=8, Mandatory=$false)] [hashtable]$connectionInfo,
+#Valid values are: DontSaveSensitive, EncryptSensitiveWithUserKey, EncryptSensitiveWithPassword, EncryptAllWithPassword, EncryptAllWithUserKey, ServerStorage
+    [Parameter(Position=9, Mandatory=$false)]
+    [ValidateScript({[Enum]::GetNames([Microsoft.SqlServer.Dts.Runtime.DTSProtectionLevel]) -ccontains $_ })] [string]$protectionLevel
     )
 
 Write-Verbose "Copy-ISItemSQLToFile path:$path serverName:$serverName destination:$destination recurse:$($recurse.IsPresent) include:$include exclude:$exclude"
@@ -207,6 +223,8 @@ Write-Verbose "Copy-ISItemSQLToFile path:$path serverName:$serverName destinatio
           {
               if ($connectionInfo)
               { Set-ISConnectionString $package $connectionInfo }
+              if ($protectionLevel)
+              { $package.ProtectionLevel = [Microsoft.SqlServer.Dts.Runtime.DTSProtectionLevel]$protectionLevel }
               if ($force)
               { Set-ISPackage  -package $package -path $destination -force }
               else
@@ -256,6 +274,8 @@ Write-Verbose "Copy-ISItemSQLToFile path:$path serverName:$serverName destinatio
                     Write-Progress -activity "Copying ISItems..." -status "Copying $($pInfo.Name)" -percentcomplete ($i/$count.count*100) 
                     if ($connectionInfo)
                     { Set-ISConnectionString $package $connectionInfo }
+                    if ($protectionLevel)
+                    { $package.ProtectionLevel = [Microsoft.SqlServer.Dts.Runtime.DTSProtectionLevel]$protectionLevel }
                      if ($force)
                      { Set-ISPackage  -package $package -path $destPath -force }
                      else
@@ -298,7 +318,10 @@ function Copy-ISItemFileToSQL
     [Parameter(Position=4, Mandatory=$false)] [ValidateNOTNullOrEmpty()] [string]$include="*",
     [Parameter(Position=5, Mandatory=$false)] [string]$exclude=$null,
     [Parameter(Position=6, Mandatory=$false)] [switch]$force,
-    [Parameter(Position=7, Mandatory=$false)] [hashtable]$connectionInfo
+    [Parameter(Position=7, Mandatory=$false)] [hashtable]$connectionInfo,
+#Valid values are: DontSaveSensitive, EncryptSensitiveWithUserKey, EncryptSensitiveWithPassword, EncryptAllWithPassword, EncryptAllWithUserKey, ServerStorage
+    [Parameter(Position=8, Mandatory=$false)]
+    [ValidateScript({[Enum]::GetNames([Microsoft.SqlServer.Dts.Runtime.DTSProtectionLevel]) -ccontains $_ })] [string]$protectionLevel
     )
 
     #If destinationServer contains instance i.e. server\instance, convert to just servername:
@@ -334,6 +357,8 @@ function Copy-ISItemFileToSQL
           {
               if ($connectionInfo)
               { Set-ISConnectionString $package $connectionInfo }
+              if ($protectionLevel)
+              { $package.ProtectionLevel = [Microsoft.SqlServer.Dts.Runtime.DTSProtectionLevel]$protectionLevel }
               if ($force)
               { Set-ISPackage  -package $package -path $destPath -serverName $destinationServer -force }
               else

@@ -21,6 +21,6 @@
     <?define MajorVersion="2" ?>
     <?define MinorVersion="3" ?>
     <?define MicroVersion="2" ?>
-    <?define BuildVersion="0" ?>
+    <?define BuildVersion="1" ?>
 </Include>
 

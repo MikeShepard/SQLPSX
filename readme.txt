@@ -38,7 +38,7 @@ Optional Database and Reporting Services Components
 7. Run Write-SmoToCsvFile.ps1 to import the csv file into the database
 
 What's New
-    Version 2.3.2
+    Version 2.3.2.1
         Added MySQLLib Module
         Modified adolib Module
             Changed SQLBulkCopy to use System.Data.Common classes rather than SQLClient-specific classes for platform interoperability 
@@ -48,6 +48,11 @@ What's New
         Modified SQLServer Module
             Added FileListOnly to Invoke-SqlRestore function
             Fixed issue in PBM module when writing to Windows Event log
+        Modified SSIS Module
+            Added ProtectionLevel parameter 
+                The package protection level can changed/specified as part of copy process:
+                DontSaveSensitive, EncryptSensitiveWithUserKey, EncryptSensitiveWithPassword, EncryptAllWithPassword, EncryptAllWithUserKey,
+                ServerStorage
     Version 2.3.1
         Added PerfCounters Module
         Added SQLProfiler Module
