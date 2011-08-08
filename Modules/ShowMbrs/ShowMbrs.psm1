@@ -12,6 +12,9 @@
 ### </Usage>
 ### </Script>
 # ---------------------------------------------------------------------------
+
+add-type -AssemblyName System.DirectoryServices.AccountManagement
+
 #######################
 function New-ShowMbrs
 {
@@ -48,34 +51,34 @@ function Get-GroupUser
     #If we haven't already enumerated the group this Powershell session
     if (!($__SQLPSXGroupUser[$groupkey] -contains $group))
     {
-        if ($__SQLPSXGroupUser.Contains($group))
-        { Set-ShowMbrs $__SQLPSXGroupUser[$group] $groupkey }
-        else
-        {
             Set-ShowMbrs $group $groupkey
 
             $domain = $($group.ToString()).split("\")[0]
             $groupname = $($group.ToString()).split("\")[1]
             
-            if ($domain -ne 'NT AUTHORITY' -and $domain -ne 'BUILTIN' -and $domain -ne 'NT SERVICE')
+            if ( @('NT AUTHORITY','BUILTIN','NT SERVICE') -notcontains $domain )
             {
-            
-                $groupUser= [ADSI]"WinNT://$($domain)/$($groupname),group"
-	        $groupUser.psbase.Invoke("Members") | foreach {
-                    $name = $_.GetType().InvokeMember("Name", 'GetProperty', $null, $_, $null)
-                    $type = $_.GetType().InvokeMember("Class", 'GetProperty', $null, $_, $null)
-                    $path = $_.GetType().InvokeMember("AdsPath", 'GetProperty', $null, $_, $null)
-                    $arPath = $path.Split("/")
-                    $domain = $arPath[$arPath.length - 2]	
-                    $account = $domain + "\" + $name
-                    if ($type -eq 'Group')
-                    { Get-GroupUser $account $groupkey }
-                    else
-                    { Set-ShowMbrs $account $groupkey }
+                try {
+                    $domainName = [System.DirectoryServices.ActiveDirectory.Domain]::GetComputerDomain() | select -ExpandProperty Name
+                    $isDomain = $domainName -match "$domain\."
                 }
-
+                catch {
+                    $isDomain = $false
+                }
+                
+                if ($isDomain)
+                { $ctype = [System.DirectoryServices.AccountManagement.ContextType]::Domain }
+                else
+                { $ctype = [System.DirectoryServices.AccountManagement.ContextType]::Machine }
+                
+                $principal = new-object System.DirectoryServices.AccountManagement.PrincipalContext $ctype,$domain
+                $groupPrincipal = new-object System.DirectoryServices.AccountManagement.GroupPrincipal $principal,$groupname
+                $searcher = new-object System.DirectoryServices.AccountManagement.PrincipalSearcher 
+                $searcher.QueryFilter = $groupPrincipal
+                #Note GetMembers(true) recursively enumerates groups while GetMembers() does not
+                $searcher.FindAll() | foreach {$_.GetMembers($true)} | foreach { Set-ShowMbrs "$domain\$($_.SamAccountName)" $groupkey }
+                
             }
-        }
     }
 
 } #Get-GroupUser
