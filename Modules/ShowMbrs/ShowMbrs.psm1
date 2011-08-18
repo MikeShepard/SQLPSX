@@ -55,6 +55,9 @@ function Get-GroupUser
 
             $domain = $($group.ToString()).split("\")[0]
             $groupname = $($group.ToString()).split("\")[1]
+
+            #Regex to extract Domain from DistinguishedName
+            $regex = '^[A-Z0-9+_.-]+@([A-Z0-9.-]+)\.(?:[A-Z]{2}|com|org|net|edu|gov|mil|biz|info|mobi|name|aero|asia|jobs|museum)$'
             
             if ( @('NT AUTHORITY','BUILTIN','NT SERVICE') -notcontains $domain )
             {
@@ -76,7 +79,8 @@ function Get-GroupUser
                 $searcher = new-object System.DirectoryServices.AccountManagement.PrincipalSearcher 
                 $searcher.QueryFilter = $groupPrincipal
                 #Note GetMembers(true) recursively enumerates groups while GetMembers() does not
-                $searcher.FindAll() | foreach {$_.GetMembers($true)} | foreach { Set-ShowMbrs "$domain\$($_.SamAccountName)" $groupkey }
+                $searcher.FindAll() | foreach {$_.GetMembers($true)} | foreach { if ($_.DistinguishedName) {$null = $_.Distinguished -match $regex; $domain = $matches[1]};
+                Set-ShowMbrs "$domain\$($_.SamAccountName)" $groupkey }
                 
             }
     }
