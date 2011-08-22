@@ -79,7 +79,7 @@ function Get-GroupUser
                 $searcher = new-object System.DirectoryServices.AccountManagement.PrincipalSearcher 
                 $searcher.QueryFilter = $groupPrincipal
                 #Note GetMembers(true) recursively enumerates groups while GetMembers() does not
-                $searcher.FindAll() | foreach {$_.GetMembers($true)} | foreach { if ($_.DistinguishedName) {$null = $_.Distinguished -match $regex; $domain = $matches[1]};
+                $searcher.FindAll() | foreach {$_.GetMembers($true)} | foreach { if ($_.UserPrincipalName) {$null = $_.UserPrincipalName -match $regex; $domain = $matches[1]};
                 Set-ShowMbrs "$domain\$($_.SamAccountName)" $groupkey }
                 
             }
