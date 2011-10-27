@@ -1,9 +1,16 @@
+Add-Type -Namespace SQLPS -Name IsolatedStorage -MemberDefinition @"
+public static System.IO.IsolatedStorage.IsolatedStorageFile GetUserStoreForAssembly() {
+   return System.IO.IsolatedStorage.IsolatedStorageFile.GetUserStoreForAssembly();
+}
+"@
+$userStore = [SQLPS.IsolatedStorage]::GetUserStoreForAssembly()
+
 #######################
 function Test-UserStore
 {
     param([string]$fileName,[string]$dirName)
 
-    $userStore = [System.IO.IsolatedStorage.IsolatedStorageFile]::GetUserStoreForAssembly()  
+    #$userStore = [System.IO.IsolatedStorage.IsolatedStorageFile]::GetUserStoreForAssembly()  
 
     if ($userStore.GetDirectoryNames($dirName))
     { 
@@ -35,7 +42,7 @@ function Write-UserStore
 {
     param([string]$fileName,[string]$dirName,$object)
 
-    $userStore = [System.IO.IsolatedStorage.IsolatedStorageFile]::GetUserStoreForAssembly()  
+    #$userStore = [System.IO.IsolatedStorage.IsolatedStorageFile]::GetUserStoreForAssembly()  
 
     if (-not $userStore.GetDirectoryNames($dirName))
     { $userStore.CreateDirectory($dirName) }
@@ -63,7 +70,7 @@ function Write-UserStore
     }
     finally {
         $file.Close()
-        $userStore.Close()
+        #$userStore.Close()
     }
 
 
@@ -74,7 +81,7 @@ function Read-UserStore
 {
     param([string]$fileName,[string]$dirName,[string]$typeName)
 
-    $userStore = [System.IO.IsolatedStorage.IsolatedStorageFile]::GetUserStoreForAssembly()
+    #$userStore = [System.IO.IsolatedStorage.IsolatedStorageFile]::GetUserStoreForAssembly()
 
     try {
         $file = New-Object System.IO.IsolatedStorage.IsolatedStorageFileStream("$dirName\$fileName",[System.IO.FileMode]::Open,$userStore)
@@ -105,7 +112,7 @@ function Read-UserStore
     }
     finally { 
         $file.Close()
-        $userStore.Close()
+        #$userStore.Close()
     }
     
 } #Read-UserStore
@@ -115,10 +122,10 @@ function Remove-UserStore
 {
     param([string]$fileName,[string]$dirName)
 
-    $userStore = [System.IO.IsolatedStorage.IsolatedStorageFile]::GetUserStoreForAssembly()
+    #$userStore = [System.IO.IsolatedStorage.IsolatedStorageFile]::GetUserStoreForAssembly()
     $userStore.DeleteFile("$dirName\$fileName")
     $userStore.DeleteDirectory("$dirName")
-    $userStore.Close()
+    #$userStore.Close()
 
 } #Remove-UserStore
 
@@ -127,8 +134,8 @@ function New-UserStore
 {
     param([string]$dirName)
 
-    $userStore = [System.IO.IsolatedStorage.IsolatedStorageFile]::GetUserStoreForAssembly()
+    #$userStore = [System.IO.IsolatedStorage.IsolatedStorageFile]::GetUserStoreForAssembly()
     $userStore.CreateDirectory("$dirName")
-    $userStore.Close()
+    #$userStore.Close()
 
 } #New-UserStore
