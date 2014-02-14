@@ -11,17 +11,30 @@
 ### </Usage>
 ### </Script>
 # ---------------------------------------------------------------------------
-if ( $Args[0] -eq 2005 )
-{
-    add-type -AssemblyName "Microsoft.SqlServer.ManagedDTS, Version=9.0.242.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91" 
-    #add-type -Path "C:\Program Files\Microsoft SQL Server\90\SDK\Assemblies\Microsoft.SQLServer.ManagedDTS.dll"
-}
-else
-{
-    add-type -AssemblyName "Microsoft.SqlServer.ManagedDTS, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91"
-    #add-type -Path "C:\Program Files\Microsoft SQL Server\100\SDK\Assemblies\Microsoft.SQLServer.ManagedDTS.dll"
+#20140207 SDL: In order to support multiple versions of SSIS, we need to see what versions
+#              current machine has access to
+# ---------------------------------------------------------------------------
+Param(
+	[string] $VersionNumber
+)
+
+$drives = get-wmiobject Win32_LogicalDisk | ? {$_.drivetype -eq 3} | % {get-psdrive $_.deviceid[0]} |Select Root;
+$foundDlls = @();
+$maxDTSVersion = 0;
+foreach ($drive in $drives) {
+	$foundDlls += get-childitem -path $drive.Root -filter "Microsoft.SQLServer.ManagedDTS.dll" -Recurse -ErrorAction SilentlyContinue;
 }
 
+#now accepts any number, but should be 9,10,10.5,11,12...
+if (-not [string]::IsNullOrEmpty($VersionNumber)) {
+		$version = $foundDlls.VersionInfo| Where-Object -Property ProductVersion -Like "$($versionNumber)*"|sort ProductVersion -Descending|Select FileName -First 1;	
+} else {
+	#if not passed through args, get the latest version
+	$version = $foundDlls.VersionInfo|sort ProductVersion -Descending|Select FileName -First 1
+
+}
+#add-type -AssemblyName "Microsoft.SqlServer.ManagedDTS, Version=$($version)" #, Culture=neutral, PublicKeyToken=89845dcd8080cc91"
+add-type -Path $version.FileName #"C:\Program Files\Microsoft SQL Server\100\SDK\Assemblies\Microsoft.SQLServer.ManagedDTS.dll"
 #######################
 <#
 .SYNOPSIS
