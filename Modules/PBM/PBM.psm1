@@ -32,7 +32,7 @@ function Get-TargetServer
 {
  [CmdletBinding()]
     param(
-    [Parameter(Position=0, Mandatory=$true)] [string]$ConfigurationGroup)
+    [Parameter(Mandatory=$true)] [string]$ConfigurationGroup)
 
 $query = @"
 SELECT s.server_name AS server_name
@@ -49,10 +49,10 @@ WHERE cg.name = '$ConfigurationGroup'
 function Write-PolicyEvalError
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] [string]$ServerInstance,
-    [Parameter(Position=1, Mandatory=$true)] [string]$PolicyName,
-    [Parameter(Position=2, Mandatory=$true)] [string]$Exception,
-    [Parameter(Position=3, Mandatory=$true)] [string]$PolicyEvalErrorDate)
+    [Parameter(Mandatory=$true)] [string]$ServerInstance,
+    [Parameter(Mandatory=$true)] [string]$PolicyName,
+    [Parameter(Mandatory=$true)] [string]$Exception,
+    [Parameter(Mandatory=$true)] [string]$PolicyEvalErrorDate)
 
 
     $query = "INSERT INTO PolicyEvalError (ServerInstance, PolicyName, Exception) VALUES('{0}','{1}','{2}', '{3}')"  -f $ServerInstance,$PolicyName,$Exception, $PolicyEvalErrorDate
@@ -64,15 +64,15 @@ function Write-PolicyEvalError
 function Write-PolicyEval
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] [string]$ConfigurationGroup,
-    [Parameter(Position=1, Mandatory=$true)] [string]$PolicyCategoryFilter,
-    [Parameter(Position=2, Mandatory=$true)] [string]$PolicyEvalMode,
-    [Parameter(Position=3, Mandatory=$true)] [string]$PolicyName,
-    [Parameter(Position=4, Mandatory=$true)] [string]$ServerInstance,
-    [Parameter(Position=5, Mandatory=$true)] [string]$TargetQueryExpression,
-    [Parameter(Position=6, Mandatory=$true)] [bool]$Result,
-    [Parameter(Position=7, Mandatory=$true)] [string]$PolicyEvalDate,
-    [Parameter(Position=8, Mandatory=$false)] [string]$Exception)
+    [Parameter(Mandatory=$true)] [string]$ConfigurationGroup,
+    [Parameter(Mandatory=$true)] [string]$PolicyCategoryFilter,
+    [Parameter(Mandatory=$true)] [string]$PolicyEvalMode,
+    [Parameter(Mandatory=$true)] [string]$PolicyName,
+    [Parameter(Mandatory=$true)] [string]$ServerInstance,
+    [Parameter(Mandatory=$true)] [string]$TargetQueryExpression,
+    [Parameter(Mandatory=$true)] [bool]$Result,
+    [Parameter(Mandatory=$true)] [string]$PolicyEvalDate,
+    [Parameter(Mandatory=$false)] [string]$Exception)
 
 
 $query = @"
@@ -90,8 +90,8 @@ function Import-PolicyEvaluation
 
    [CmdletBinding()]
     param(
-    [Parameter(Position=0, Mandatory=$true)] [string]$ConfigurationGroup,
-    [Parameter(Position=1, Mandatory=$true)] [string]$PolicyCategoryFilter)
+    [Parameter(Mandatory=$true)] [string]$ConfigurationGroup,
+    [Parameter(Mandatory=$true)] [string]$PolicyCategoryFilter)
 
     $PolicyStore = Get-PolicyStore
     $date = (get-date -Format u) -replace 'Z'

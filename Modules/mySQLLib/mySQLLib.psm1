@@ -39,7 +39,7 @@
 
 #>
 function Is-NULL{
-  param([Parameter(Position=0, Mandatory=$true)]$value)
+  param([Parameter(Mandatory=$true)]$value)
   return  [System.DBNull]::Value.Equals($value)
 }
 
@@ -78,8 +78,8 @@ function Is-NULL{
 
 #>
 function New-MySQLConnection{
-param([Parameter(Position=0, Mandatory=$true)][string]$server, 
-      [Parameter(Position=1, Mandatory=$false)][string]$database='',
+param([Parameter(Mandatory=$true)][string]$server, 
+      [string]$database='',
       [string]$user='',
       [string]$password='',
       [int]$port=3306)
@@ -116,8 +116,8 @@ param([MySql.Data.MySqlClient.MySqlConnection]$conn,
 }
 
 function Put-OutputParameters{
-param([Parameter(Position=0, Mandatory=$true)][MySql.Data.MySqlClient.MySqlCommand]$cmd, 
-      [Parameter(Position=1, Mandatory=$false)][hashtable]$outparams)
+param([Parameter(Mandatory=$true)][MySql.Data.MySqlClient.MySqlCommand]$cmd, 
+      [hashtable]$outparams)
     if ($outparams){
     	foreach($outp in $outparams.Keys){
             $paramtype=get-paramtype $outparams[$outp]
@@ -131,8 +131,8 @@ param([Parameter(Position=0, Mandatory=$true)][MySql.Data.MySqlClient.MySqlComma
 }
 
 function Get-Outputparameters{
-param([Parameter(Position=0, Mandatory=$true)][MySql.Data.MySqlClient.MySqlCommand]$cmd,
-      [Parameter(Position=1, Mandatory=$true)][hashtable]$outparams)
+param([Parameter(Mandatory=$true)][MySql.Data.MySqlClient.MySqlCommand]$cmd,
+      [Parameter(Mandatory=$true)][hashtable]$outparams)
 	foreach($p in $cmd.Parameters){
 		if ($p.Direction -eq [System.Data.ParameterDirection]::Output){
 		  $outparams[$p.ParameterName.Replace("@","")]=$p.Value
@@ -202,8 +202,8 @@ Options are:
 
 #>
 function Get-CommandResults{
-param([Parameter(Position=0, Mandatory=$true)][System.Data.Dataset]$ds
-    ,       [Parameter(Position=1, Mandatory=$true)][HashTable]$outparams
+param([Parameter(Mandatory=$true)][System.Data.Dataset]$ds
+    , [Parameter(Mandatory=$true)][HashTable]$outparams
     )   
 
 	if ($ds.tables.count -eq 1){
@@ -282,16 +282,16 @@ param([Parameter(Position=0, Mandatory=$true)][System.Data.Dataset]$ds
 
 #>
 function New-MySQLCommand{
-param([Parameter(Position=0, Mandatory=$true)][Alias('storedProcName')][string]$sql,
-      [Parameter(ParameterSetName="SuppliedConnection",Position=1, Mandatory=$false)][ MySql.Data.MySqlClient.MySQLConnection]$connection,
-      [Parameter(Position=2, Mandatory=$false)][hashtable]$parameters=@{},
-      [Parameter(Position=3, Mandatory=$false)][int]$timeout=30,
-      [Parameter(ParameterSetName="AdHocConnection",Position=4, Mandatory=$false)][string]$server,
-      [Parameter(ParameterSetName="AdHocConnection",Position=5, Mandatory=$false)][string]$database,
-      [Parameter(ParameterSetName="AdHocConnection",Position=6, Mandatory=$false)][string]$user,
-      [Parameter(Position=7, Mandatory=$false)][string]$password,
-      [Parameter(Position=8, Mandatory=$false)][MySql.Data.MySqlClient.MySqlTransaction]$transaction=$null
-	  ,[Parameter(Position=9, Mandatory=$false)][hashtable]$outparameters=@{}
+param([Parameter(Mandatory=$true)][Alias('storedProcName')][string]$sql,
+      [Parameter(ParameterSetName="SuppliedConnection")][ MySql.Data.MySqlClient.MySQLConnection]$connection,
+      [hashtable]$parameters=@{},
+      [int]$timeout=30,
+      [Parameter(ParameterSetName="AdHocConnection")][string]$server,
+      [Parameter(ParameterSetName="AdHocConnection")][string]$database,
+      [Parameter(ParameterSetName="AdHocConnection")][string]$user,
+      [string]$password,
+      [MySql.Data.MySqlClient.MySqlTransaction]$transaction=$null,
+	  [hashtable]$outparameters=@{}
      )
    
     $dbconn=Get-Connection -conn $connection -server $server -database $database -user $user -password $password
@@ -371,16 +371,16 @@ param([Parameter(Position=0, Mandatory=$true)][Alias('storedProcName')][string]$
 
 #>
 function Invoke-MySql{
-param([Parameter(Position=0, Mandatory=$true)][string]$sql,
-      [Parameter(ParameterSetName="SuppliedConnection",Position=1, Mandatory=$false)][MySql.Data.MySqlClient.MySqlConnection]$connection,
-      [Parameter(Position=2, Mandatory=$false)][hashtable]$parameters=@{},
-      [Parameter(Position=3, Mandatory=$false)][hashtable]$outparameters=@{},
-      [Parameter(Position=4, Mandatory=$false)][int]$timeout=30,
-      [Parameter(ParameterSetName="AdHocConnection",Position=5, Mandatory=$false)][string]$server,
-      [Parameter(ParameterSetName="AdHocConnection",Position=6, Mandatory=$false)][string]$database,
-      [Parameter(ParameterSetName="AdHocConnection",Position=7, Mandatory=$false)][string]$user,
-      [Parameter(ParameterSetName="AdHocConnection",Position=8, Mandatory=$false)][string]$password,
-      [Parameter(Position=9, Mandatory=$false)][System.Data.SqlClient.SqlTransaction]$transaction=$null)
+param([Parameter(Mandatory=$true)][string]$sql,
+      [Parameter(ParameterSetName="SuppliedConnection")][MySql.Data.MySqlClient.MySqlConnection]$connection,
+      [hashtable]$parameters=@{},
+      [hashtable]$outparameters=@{},
+      [int]$timeout=30,
+      [Parameter(ParameterSetName="AdHocConnection")][string]$server,
+      [Parameter(ParameterSetName="AdHocConnection")][string]$database,
+      [Parameter(ParameterSetName="AdHocConnection")][string]$user,
+      [Parameter(ParameterSetName="AdHocConnection")][string]$password,
+      [System.Data.SqlClient.SqlTransaction]$transaction=$null)
 	
 
        $cmd=new-mysqlcommand @PSBoundParameters
@@ -455,17 +455,17 @@ param([Parameter(Position=0, Mandatory=$true)][string]$sql,
         3.  An object that contains a dictionary of ouptut parameters and their values and either 1 or 2 (for queries that contain output parameters)
 #>
 function Invoke-MySQLQuery{
-param( [Parameter(Position=0, Mandatory=$true)][string]$sql,
-       [Parameter(ParameterSetName="SuppliedConnection", Position=1, Mandatory=$false)][MySql.Data.MySqlClient.MySqlConnection]$connection,
-       [Parameter(Position=2, Mandatory=$false)][hashtable]$parameters=@{},
-       [Parameter(Position=3, Mandatory=$false)][hashtable]$outparameters=@{},
-       [Parameter(Position=4, Mandatory=$false)][int]$timeout=30,
-       [Parameter(ParameterSetName="AdHocConnection",Position=5, Mandatory=$false)][string]$server,
-       [Parameter(ParameterSetName="AdHocConnection",Position=6, Mandatory=$false)][string]$database,
-       [Parameter(ParameterSetName="AdHocConnection",Position=7, Mandatory=$false)][string]$user,
-       [Parameter(ParameterSetName="AdHocConnection",Position=8, Mandatory=$false)][string]$password,
-       [Parameter(Position=9, Mandatory=$false)][System.Data.SqlClient.SqlTransaction]$transaction=$null,
-       [Parameter(Position=10, Mandatory=$false)] [ValidateSet("DataSet", "DataTable", "DataRow", "Dynamic")] [string]$AsResult="Dynamic"
+param( [Parameter(Mandatory=$true)][string]$sql,
+       [Parameter(ParameterSetName="SuppliedConnection")][MySql.Data.MySqlClient.MySqlConnection]$connection,
+       [hashtable]$parameters=@{},
+       [hashtable]$outparameters=@{},
+       [int]$timeout=30,
+       [Parameter(ParameterSetName="AdHocConnection")][string]$server,
+       [Parameter(ParameterSetName="AdHocConnection")][string]$database,
+       [Parameter(ParameterSetName="AdHocConnection")][string]$user,
+       [Parameter(ParameterSetName="AdHocConnection")][string]$password,
+       [System.Data.SqlClient.SqlTransaction]$transaction=$null,
+       [ValidateSet("DataSet", "DataTable", "DataRow", "Dynamic")] [string]$AsResult="Dynamic"
        )
     
 	$connectionparameters=copy-hashtable $PSBoundParameters -exclude AsResult
@@ -561,16 +561,16 @@ param( [Parameter(Position=0, Mandatory=$true)][string]$sql,
         3.  An object that contains a hashtables of ouptut parameters and their values and either 1 or 2 (for queries that contain output parameters)
 #>
 function Invoke-MySQLStoredProcedure{
-param([Parameter(Position=0, Mandatory=$true)][string]$storedProcName,
-      [Parameter(ParameterSetName="SuppliedConnection",Position=1, Mandatory=$false)][MySql.Data.MySqlClient.MySqlConnection]$connection,
-      [Parameter(Position=2, Mandatory=$false)][hashtable] $parameters=@{},
-      [Parameter(Position=3, Mandatory=$false)][hashtable]$outparameters=@{},
-      [Parameter(Position=4, Mandatory=$false)][int]$timeout=30,
-      [Parameter(ParameterSetName="AdHocConnection",Position=5, Mandatory=$false)][string]$server,
-      [Parameter(ParameterSetName="AdHocConnection",Position=6, Mandatory=$false)][string]$database,
-      [Parameter(ParameterSetName="AdHocConnection",Position=7, Mandatory=$false)][string]$user,
-      [Parameter(ParameterSetName="AdHocConnection",Position=8, Mandatory=$false)][string]$password,
-      [Parameter(Position=9, Mandatory=$false)][System.Data.SqlClient.SqlTransaction]$transaction=$null) 
+param([Parameter(Mandatory=$true)][string]$storedProcName,
+      [Parameter(ParameterSetName="SuppliedConnection")][MySql.Data.MySqlClient.MySqlConnection]$connection,
+      [hashtable] $parameters=@{},
+      [hashtable]$outparameters=@{},
+      [int]$timeout=30,
+      [Parameter(ParameterSetName="AdHocConnection")][string]$server,
+      [Parameter(ParameterSetName="AdHocConnection")][string]$database,
+      [Parameter(ParameterSetName="AdHocConnection")][string]$user,
+      [Parameter(ParameterSetName="AdHocConnection")][string]$password,
+      [System.Data.SqlClient.SqlTransaction]$transaction=$null) 
 
 	$cmd=new-MySqlCommand @PSBoundParameters
 	$cmd.CommandType=[System.Data.CommandType]::StoredProcedure  

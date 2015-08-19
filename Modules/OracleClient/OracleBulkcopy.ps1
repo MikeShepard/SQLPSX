@@ -63,16 +63,16 @@
 
 #>
 function Invoke-OracleBulkcopy{
-  param([Parameter(Position=0, Mandatory=$true)]$records,
-        [Parameter(Position=1, Mandatory=$true)]$tns,
-        [Parameter(Position=2, Mandatory=$false)][string]$user,
-        [Parameter(Position=3, Mandatory=$false)][string]$password,
-        [Parameter(Position=4, Mandatory=$true)][string]$table,
-        [Parameter(Position=5, Mandatory=$false)][string]$dbaPrivilege,
-        [Parameter(Position=6, Mandatory=$false)]$mapping=@{},
-        [Parameter(Position=7, Mandatory=$false)]$batchsize=0,
-        [Parameter(Position=8, Mandatory=$false)]$notifyAfter=0,
-        [Parameter(Position=9, Mandatory=$false)][scriptblock]$notifyFunction={Write-Host "$($args[1].RowsCopied) rows copied."}
+  param([Parameter(Mandatory=$true)]$records,
+        [Parameter(Mandatory=$true)]$tns,
+        [string]$user,
+        [string]$password,
+        [Parameter(Mandatory=$true)][string]$table,
+        [string]$dbaPrivilege,
+        [hashtable]$mapping=@{},
+        [int]$batchsize=0,
+        [int]$notifyAfter=0,
+        [scriptblock]$notifyFunction={Write-Host "$($args[1].RowsCopied) rows copied."}
         #[Parameter(Position=10, Mandatory=$false)][Oracle.DataAccess.Client.OracleBulkCopyOptions ]$options=[Oracle.DataAccess.Client.OracleBulkCopyOptions ]::Default
         )
 

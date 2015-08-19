@@ -83,18 +83,17 @@ Copy-ISItemSQLToSQL
 function Copy-ISItemSQLToSQL
 {
     [CmdletBinding(SupportsShouldProcess=$true)] param(
-    [Parameter(Position=0, Mandatory=$true)] [string]$path,
-    [Parameter(Position=1, Mandatory=$true)] [string]$topLevelFolder,
-    [Parameter(Position=2, Mandatory=$true)] [string]$serverName,
-    [Parameter(Position=3, Mandatory=$true)] [string]$destination,
-    [Parameter(Position=4, Mandatory=$true)] [string]$destinationServer,
-    [Parameter(Position=5, Mandatory=$false)] [switch]$recurse,
-    [Parameter(Position=6, Mandatory=$false)] [ValidateNOTNullOrEmpty()] [string]$include="*",
-    [Parameter(Position=7, Mandatory=$false)] [string]$exclude=$null,
-    [Parameter(Position=8, Mandatory=$false)] [switch]$force,
-    [Parameter(Position=9, Mandatory=$false)] [hashtable]$connectionInfo,
+    [Parameter(Mandatory=$true)] [string]$path,
+    [Parameter(Mandatory=$true)] [string]$topLevelFolder,
+    [Parameter(Mandatory=$true)] [string]$serverName,
+    [Parameter(Mandatory=$true)] [string]$destination,
+    [Parameter(Mandatory=$true)] [string]$destinationServer,
+    [switch]$recurse,
+    [ValidateNOTNullOrEmpty()] [string]$include="*",
+    [string]$exclude=$null,
+    [switch]$force,
+    [hashtable]$connectionInfo,
 #Valid values are: DontSaveSensitive, EncryptSensitiveWithUserKey, EncryptSensitiveWithPassword, EncryptAllWithPassword, EncryptAllWithUserKey, ServerStorage
-    [Parameter(Position=10, Mandatory=$false)]
     [ValidateScript({[Enum]::GetNames([Microsoft.SqlServer.Dts.Runtime.DTSProtectionLevel]) -ccontains $_ })] [string]$protectionLevel
     )
 
@@ -207,17 +206,16 @@ Copy-ISItemSQLToFile
 function Copy-ISItemSQLToFile
 {
     [CmdletBinding(SupportsShouldProcess=$true)] param(
-    [Parameter(Position=0, Mandatory=$true)] [string]$path,
-    [Parameter(Position=1, Mandatory=$true)] [string]$topLevelFolder,
-    [Parameter(Position=2, Mandatory=$true)] [string]$serverName,
-    [Parameter(Position=3, Mandatory=$true)] [string]$destination,
-    [Parameter(Position=4, Mandatory=$false)] [switch]$recurse,
-    [Parameter(Position=5, Mandatory=$false)] [ValidateNOTNullOrEmpty()] [string]$include="*",
-    [Parameter(Position=6, Mandatory=$false)] [string]$exclude=$null,
-    [Parameter(Position=7, Mandatory=$false)] [switch]$force,
-    [Parameter(Position=8, Mandatory=$false)] [hashtable]$connectionInfo,
+    [Parameter(Mandatory=$true)] [string]$path,
+    [Parameter(Mandatory=$true)] [string]$topLevelFolder,
+    [Parameter(Mandatory=$true)] [string]$serverName,
+    [Parameter(Mandatory=$true)] [string]$destination,
+    [switch]$recurse,
+    [ValidateNOTNullOrEmpty()] [string]$include="*",
+    [string]$exclude=$null,
+    [switch]$force,
+    [hashtable]$connectionInfo,
 #Valid values are: DontSaveSensitive, EncryptSensitiveWithUserKey, EncryptSensitiveWithPassword, EncryptAllWithPassword, EncryptAllWithUserKey, ServerStorage
-    [Parameter(Position=9, Mandatory=$false)]
     [ValidateScript({[Enum]::GetNames([Microsoft.SqlServer.Dts.Runtime.DTSProtectionLevel]) -ccontains $_ })] [string]$protectionLevel
     )
 
@@ -324,16 +322,15 @@ Copy-ISItemFileToSQL
 function Copy-ISItemFileToSQL
 {
     [CmdletBinding(SupportsShouldProcess=$true)] param(
-    [Parameter(Position=0, Mandatory=$true)] [string]$path,
-    [Parameter(Position=1, Mandatory=$true)] [string]$destination,
-    [Parameter(Position=2, Mandatory=$true)] [string]$destinationServer,
-    [Parameter(Position=3, Mandatory=$false)] [switch]$recurse,
-    [Parameter(Position=4, Mandatory=$false)] [ValidateNOTNullOrEmpty()] [string]$include="*",
-    [Parameter(Position=5, Mandatory=$false)] [string]$exclude=$null,
-    [Parameter(Position=6, Mandatory=$false)] [switch]$force,
-    [Parameter(Position=7, Mandatory=$false)] [hashtable]$connectionInfo,
+    [Parameter(Mandatory=$true)] [string]$path,
+    [Parameter(Mandatory=$true)] [string]$destination,
+    [Parameter(Mandatory=$true)] [string]$destinationServer,
+    [switch]$recurse,
+    [ValidateNOTNullOrEmpty()] [string]$include="*",
+    [string]$exclude=$null,
+    [switch]$force,
+    [hashtable]$connectionInfo,
 #Valid values are: DontSaveSensitive, EncryptSensitiveWithUserKey, EncryptSensitiveWithPassword, EncryptAllWithPassword, EncryptAllWithUserKey, ServerStorage
-    [Parameter(Position=8, Mandatory=$false)]
     [ValidateScript({[Enum]::GetNames([Microsoft.SqlServer.Dts.Runtime.DTSProtectionLevel]) -ccontains $_ })] [string]$protectionLevel
     )
 
@@ -450,12 +447,12 @@ Get-ISItem
 function Get-ISItem
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] [string]$path="\",
-    [Parameter(Position=1, Mandatory=$true)] [string]$topLevelFolder,
-    [Parameter(Position=2, Mandatory=$true)] [string]$serverName,
-    [Parameter(Position=3, Mandatory=$false)] [switch]$recurse,
-    [Parameter(Position=4, Mandatory=$false)] [ValidateNOTNullOrEmpty()] [string]$include="*",
-    [Parameter(Position=5, Mandatory=$false)] [string]$exclude=$null
+    [Parameter(Mandatory=$true)] [string]$path="\",
+    [Parameter(Mandatory=$true)] [string]$topLevelFolder,
+    [Parameter(Mandatory=$true)] [string]$serverName,
+    [switch]$recurse,
+    [ValidateNOTNullOrEmpty()] [string]$include="*",
+    [string]$exclude=$null
     )
 
  Write-Verbose "Get-ISItem path:$path topLevelFolder:$topLevelFolder serverName:$serverName recurse:$($recurse.IsPresent) include:$include exclude:$exclude"
@@ -522,9 +519,9 @@ Test-ISPath
 function Test-ISPath
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] [string]$path,
-    [Parameter(Position=1, Mandatory=$true)] [string]$serverName,
-    [Parameter(Position=2, Mandatory=$true)] [ValidateSet("Package", "Folder", "Any")] [string]$pathType='Any'
+    [Parameter(Mandatory=$true)] [string]$path,
+    [Parameter(Mandatory=$true)] [string]$serverName,
+    [Parameter(Mandatory=$true)] [ValidateSet("Package", "Folder", "Any")] [string]$pathType='Any'
     )
 
     #If serverName contains instance i.e. server\instance, convert to just servername:
@@ -566,9 +563,9 @@ New-ISItem
 function New-ISItem
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] [string]$path,
-    [Parameter(Position=1, Mandatory=$true)] [string]$value,
-    [Parameter(Position=2, Mandatory=$true)] [string]$serverName
+    [Parameter(Mandatory=$true)] [string]$path,
+    [Parameter(Mandatory=$true)] [string]$value,
+    [Parameter(Mandatory=$true)] [string]$serverName
     )
 
     #If serverName contains instance i.e. server\instance, convert to just servername:
@@ -608,10 +605,10 @@ Rename-ISItem
 function Rename-ISItem
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] [string]$path,
-    [Parameter(Position=1, Mandatory=$true)] [string]$oldName,
-    [Parameter(Position=2, Mandatory=$true)] [string]$newName,
-    [Parameter(Position=3, Mandatory=$true)] [string]$serverName
+    [Parameter(Mandatory=$true)] [string]$path,
+    [Parameter(Mandatory=$true)] [string]$oldName,
+    [Parameter(Mandatory=$true)] [string]$newName,
+    [Parameter(Mandatory=$true)] [string]$serverName
     )
 
     #If serverName contains instance i.e. server\instance, convert to just servername:
@@ -651,7 +648,7 @@ Remove-ISItem
 function Remove-ISItem
 {
     [CmdletBinding(SupportsShouldProcess=$true)] param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] $pInfo)
+    [Parameter(Mandatory=$true, ValueFromPipeline = $true)] $pInfo)
     begin
     {
         $app = New-ISApplication
@@ -708,8 +705,8 @@ Get-ISPackage
 function Get-ISPackage
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] [string]$path,
-    [Parameter(ParameterSetName="server", Position=1, Mandatory=$false)] [ValidateNOTNullOrEmpty()] [string]$serverName
+    [Parameter(Mandatory=$true)] [string]$path,
+    [Parameter(ParameterSetName="server")] [ValidateNOTNullOrEmpty()] [string]$serverName
     )
 
     #If serverName contains instance i.e. server\instance, convert to just servername:
@@ -765,10 +762,10 @@ Get-ISPackage
 function Set-ISPackage
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] $package,
-    [Parameter(Position=1, Mandatory=$true)] [string]$path,
-    [Parameter(ParameterSetName="server", Position=2, Mandatory=$false)] [ValidateNOTNullOrEmpty()] [string]$serverName,
-    [Parameter(Position=3, Mandatory=$false)] [switch]$force
+    [Parameter(Mandatory=$true)] $package,
+    [Parameter(Mandatory=$true)] [string]$path,
+    [Parameter(ParameterSetName="server")] [ValidateNOTNullOrEmpty()] [string]$serverName,
+    [switch]$force
     )
 
     #If serverName contains instance i.e. server\instance, convert to just servername:
@@ -818,7 +815,7 @@ Get-ISRunningPackage
 #>
 function Get-ISRunningPackage
 {
-    param([Parameter(Position=0, Mandatory=$true)] [string]$serverName)
+    param([Parameter(Mandatory=$true)] [string]$serverName)
 
     #If serverName contains instance i.e. server\instance, convert to just servername:
     $serverName = $serverName -replace "\\.*"
@@ -853,8 +850,8 @@ Set-ISConnectionString
 function Set-ISConnectionString
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] $package,
-    [Parameter(Position=1, Mandatory=$true)] [hashtable]$connectionInfo
+    [Parameter(Mandatory=$true)] $package,
+    [Parameter(Mandatory=$true)] [hashtable]$connectionInfo
     )
 
     Write-Verbose "Set-ISConnectionString"
@@ -900,9 +897,9 @@ Get-ISData
 function Get-ISData
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] [string]$serverName,
-    [Parameter(Position=1, Mandatory=$true)] [string]$databaseName,
-    [Parameter(Position=2, Mandatory=$true)] [string]$query
+    [Parameter(Mandatory=$true)] [string]$serverName,
+    [Parameter(Mandatory=$true)] [string]$databaseName,
+    [Parameter(Mandatory=$true)] [string]$query
     )
 
     Write-Verbose "Get-ISData serverName:$serverName databaseName:$databaseName query:$query"
@@ -936,11 +933,11 @@ Get-ISSqlConfigurationItem
 function Get-ISSqlConfigurationItem
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] [string]$serverName,
-    [Parameter(Position=1, Mandatory=$true)] [string]$databaseName, 
-    [Parameter(Position=2, Mandatory=$true)] [string]$configurationTable,
-    [Parameter(Position=3, Mandatory=$true)] [string]$configurationFilter,
-    [Parameter(Position=4, Mandatory=$true)] [string]$packagePath
+    [Parameter(Mandatory=$true)] [string]$serverName,
+    [Parameter(Mandatory=$true)] [string]$databaseName, 
+    [Parameter(Mandatory=$true)] [string]$configurationTable,
+    [Parameter(Mandatory=$true)] [string]$configurationFilter,
+    [Parameter(Mandatory=$true)] [string]$packagePath
     )
 
 Write-Verbose "Get-ISSqlConfigurationItem serverName:$serverName db:$databaseName table:$configurationTable filer:$configurationFilter path:$packagePath query:$query"

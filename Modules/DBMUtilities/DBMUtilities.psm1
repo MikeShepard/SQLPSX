@@ -110,11 +110,7 @@ Function Find-SqlDatabase
            $excMsg = $ex.InnerException.Message.ToString()
         }
     }
-    finally
-    {
-        return $status
-    }
-     
+    return $status     
 } 
 
 Function Get-DBMDatabases

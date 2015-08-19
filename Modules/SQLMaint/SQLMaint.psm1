@@ -41,40 +41,33 @@
 	
 	
 	param (
-			[Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Server] $Server,
+			[Parameter(Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Server] $Server,
 			
-			[Parameter(position=1,Mandatory = $true )]
+			[Parameter(Mandatory = $true )]
 			[ValidateSet("ALL", "USER", "SYSTEM","DELHIST")]
 			[string] 	$Databases ,
 			
-			[Parameter(position=2,Mandatory = $true )]
+			[Parameter(Mandatory = $true )]
 			[ValidateSet("BKP_DB","BKP_LOG","BKP_FILE","BKP_DIFF","IDX_ALL","IDX_REBUILD","IDX_REORG","STATS_SAMPLE","STATS_FULL","CHECK_DB","DEL_HIST")]
 			[String]  	$Action ,
 
-			[Parameter(position=3,Mandatory = $false )]
 			[string] 	$UserName = "" ,
 			
-			[Parameter(position=4,Mandatory = $false )]
 			[string] 	$Password = "" ,
 			
 		
-			[Parameter(position=5,Mandatory = $false )] 
 			[ValidateScript({Test-Path -path $_})]
 			[String] 	$BackupOn = "c:\temp",
 			
-			[Parameter(position=6,Mandatory = $false )]
 			[ValidateScript({Test-Path -path $_})]
 			[String] 	$ReportOn = "",
 			
-			[Parameter(position=7,Mandatory = $false )]
 			[ValidateRange(1,365)]
 			[System.Int32] 	$RemoveOldBackups = 0,
 			
-			[Parameter(position=8,Mandatory = $false )]
 			[ValidateRange(1,365)]
 			[System.Int32]  $RemoveOldBackupsReports = 0,
 			
-			[Parameter(position=9,Mandatory = $false )]
 			[ValidateRange(1,365)]
 			[System.Int32]  $RemoveDataBackupsMSDB = 0
 			
