@@ -22,9 +22,9 @@ $scriptRoot = Split-Path (Resolve-Path $myInvocation.MyCommand.Path)
 function Get-SqlConnection
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] [string]$sqlserver,
-    [Parameter(Position=1, Mandatory=$false)] [string]$username, 
-    [Parameter(Position=2, Mandatory=$false)] [string]$password
+    [Parameter(Mandatory=$true)] [string]$sqlserver,
+    [string]$username, 
+    [string]$password
     )
 
     Write-Verbose "Get-SqlConnection $sqlserver"
@@ -64,9 +64,9 @@ Get-ReplServer
 function Get-ReplServer
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] [string]$replServer,
-    [Parameter(Position=1, Mandatory=$false)] [string]$username, 
-    [Parameter(Position=2, Mandatory=$false)] [string]$password
+    [Parameter( Mandatory=$true)] [string]$replServer,
+    [string]$username, 
+    [string]$password
     )
 
     [Microsoft.SqlServer.Management.Common.ServerConnection]$con = Get-SqlConnection $replServer $username $password
@@ -86,7 +86,7 @@ function Get-ReplLightPublication
     #from your code. This is a bit a of problem as enumlightpublications() appears to be the only method to retrieve a list of publications from a
     #ReplicationServer. So this method will be used by Get-ReplPublication.
     param(
-    [Parameter(Position=0, Mandatory=$true)] $replServer
+    [Parameter(Mandatory=$true)] $replServer
     )
     
     switch ($replServer.GetType().Name)
@@ -108,10 +108,10 @@ function Get-ReplLightPublication
 function New-ReplTransPublication
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] [string]$name,
-    [Parameter(Position=1, Mandatory=$true)] [string]$databaseName,
-    [Parameter(Position=2, Mandatory=$true)] $connectionContext,
-    [Parameter(Position=3, Mandatory=$false)] [switch]$createSnapshotAgent
+    [Parameter(Mandatory=$true)] [string]$name,
+    [Parameter(Mandatory=$true)] [string]$databaseName,
+    [Parameter(Mandatory=$true)] $connectionContext,
+    [switch]$createSnapshotAgent
     )
 
     Write-Verbose "New-ReplTransPublication $name"
@@ -126,10 +126,10 @@ function New-ReplTransPublication
 function New-ReplMergePublication
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] [string]$name,
-    [Parameter(Position=1, Mandatory=$true)] [string]$databaseName,
-    [Parameter(Position=2, Mandatory=$true)] $connectionContext,
-    [Parameter(Position=3, Mandatory=$false)] [switch]$createSnapshotAgent
+    [Parameter(Mandatory=$true)] [string]$name,
+    [Parameter(Mandatory=$true)] [string]$databaseName,
+    [Parameter(Mandatory=$true)] $connectionContext,
+    [switch]$createSnapshotAgent
     )
 
     Write-Verbose "New-ReplMergePublication $name"
@@ -168,7 +168,7 @@ function Get-ReplSubscriberSubscription
 {
     #Note: This function is meant to be called on the subscriber. All other functions are called from the publisher/distributor
     param(
-    [Parameter(Position=0, Mandatory=$true)] $replServer
+    [Parameter(Mandatory=$true)] $replServer
     )
         
     switch ($replServer.GetType().Name)
@@ -212,7 +212,7 @@ Get-ReplServer
 function Get-ReplPublication
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] $replServer
+    [Parameter(Mandatory=$true)] $replServer
     )
 
     switch ($replServer.GetType().Name)
@@ -266,7 +266,7 @@ function Get-ReplSubscription
 {
     #equivalent to executing sp_helpmergepublication or sp_helparticle
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] $pub
+    [Parameter(Mandatory=$true, ValueFromPipeline = $true)] $pub
     )
 
     process
@@ -306,7 +306,7 @@ function Get-ReplArticle
 {
     #equivalent to executing sp_helpmergepublication or sp_helparticle
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] $pub
+    [Parameter(Mandatory=$true, ValueFromPipeline = $true)] $pub
     )
 
     process
@@ -355,7 +355,7 @@ function Get-ReplMonitor
     #There is a basic hierarchy with monitoring:
     #ReplicationServer => PublisherMonitor => PublicationMonitor
     param(
-    [Parameter(Position=0, Mandatory=$true)] $replServer
+    [Parameter(Mandatory=$true)] $replServer
     )
 
     switch ($replServer.GetType().Name)
@@ -404,7 +404,7 @@ Get-ReplMonitor
 function Get-ReplPublisherMonitor
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] $replServer
+    [Parameter(Mandatory=$true)] $replServer
     )
 
     Write-Verbose "Get-ReplPublisherMonitor"
@@ -446,7 +446,7 @@ Get-ReplMonitor
 function Get-ReplPublicationMonitor
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] $replServer
+    [Parameter(Mandatory=$true)] $replServer
     )
 
     Write-Verbose "Get-ReplPublicationMonitor"
@@ -479,7 +479,7 @@ Get-ReplPublisherMonitor
 function Get-ReplEnumPublications
 {
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Replication.PublisherMonitor]$publisherMon
+    [Parameter(Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Replication.PublisherMonitor]$publisherMon
     )
 
     process
@@ -516,7 +516,7 @@ function Get-ReplEnumPublications2
     #equivalent to executing sp_replmonitorhelppublication
     #Only available for Microsoft SQL Server version 2005 or later
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Replication.PublisherMonitor]$publisherMon
+    [Parameter(Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Replication.PublisherMonitor]$publisherMon
     )
 
     process
@@ -549,7 +549,7 @@ Get-ReplPublicationMonitor
 function Get-ReplEnumSubscriptions
 {
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Replication.PublicationMonitor]$pubMon
+    [Parameter(Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Replication.PublicationMonitor]$pubMon
     )
 
     process
@@ -586,7 +586,7 @@ function Get-ReplEnumSubscriptions2
     #equivalent to executing sp_replmonitorhelpSubscription
     #Only available for Microsoft SQL Server version 2005 or later
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Replication.PublicationMonitor]$pubMon
+    [Parameter(Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Replication.PublicationMonitor]$pubMon
     )
 
     process
@@ -623,7 +623,7 @@ function Get-ReplTransPendingCommandInfo
     #equivalent to executing sp_replmonitorsubscriptionpendingcmds
     #Only available for Microsoft SQL Server version 2005 or later
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Replication.PublicationMonitor]$pubMon
+    [Parameter(Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Replication.PublicationMonitor]$pubMon
     )
 
     process
@@ -657,7 +657,7 @@ Get-ReplPublicationMonitor
 function Get-ReplEnumLogReaderAgent
 {
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Replication.PublicationMonitor]$pubMon
+    [Parameter(Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Replication.PublicationMonitor]$pubMon
     )
 
     process
@@ -690,7 +690,7 @@ Get-ReplPublicationMonitor
 function Get-ReplEnumSnapshotAgent
 {
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Replication.PublicationMonitor]$pubMon
+    [Parameter(Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Replication.PublicationMonitor]$pubMon
     )
 
     process
@@ -783,9 +783,9 @@ New-ReplScriptOptions
 function Get-ReplScript
 {
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)]
+    [Parameter(Mandatory=$true, ValueFromPipeline = $true)]
     [ValidateScript({$_.GetType().Namespace -like "Microsoft.SqlServer.Replication*"})] $rmo,
-    [Parameter(Position=1, Mandatory=$false)] $scriptOpts=$(New-ReplScriptOptions).ScriptOptions
+    $scriptOpts=$(New-ReplScriptOptions).ScriptOptions
     )
     process
     { 

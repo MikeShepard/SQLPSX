@@ -53,12 +53,12 @@ try {
 function Invoke-Sqlcmd2
 {
     param(
-    [Parameter(Position=0, Mandatory=$true ,ValueFromPipeline = $false)] [string]$ServerInstance,
-    [Parameter(Position=1, Mandatory=$true ,ValueFromPipeline = $false)] [string]$Database,
-	[Parameter(Position=2, Mandatory=$false ,ValueFromPipeline = $false)] [string]$UserName,
-	[Parameter(Position=3, Mandatory=$false ,ValueFromPipeline = $false)] [string]$Password,
-    [Parameter(Position=4, Mandatory=$true ,ValueFromPipeline = $false)] [string]$Query,
-    [Parameter(Position=5, Mandatory=$false ,ValueFromPipeline = $false)] [Int32]$QueryTimeout=30
+    [Parameter(Mandatory=$true)] [string]$ServerInstance,
+    [Parameter(Mandatory=$true)] [string]$Database,
+	[string]$UserName,
+	[string]$Password,
+    [Parameter(Mandatory=$true)] [string]$Query,
+    [Int32]$QueryTimeout=30
     )
 
     $conn=new-object System.Data.SqlClient.SQLConnection
@@ -128,14 +128,14 @@ Function Save-InfoToSQLTable {
 
 	
 	PARAM(
-			[Parameter(Position=1,Mandatory=$true, ValueFromPipeline=$true,HelpMessage="Object SQL Server Trace")] 
+			[Parameter(Mandatory=$true, ValueFromPipeline=$true,HelpMessage="Object SQL Server Trace")] 
 			[ValidateScript({$_.GetType().Name -is [System.Object]})] $TraceFile ,
-			[Parameter(Position=2, Mandatory=$true, ValueFromPipeline = $false,HelpMessage="SQL Server Name")] [String] $ServerName,
-			[Parameter(Position=3, Mandatory=$true, ValueFromPipeline = $false,HelpMessage="SQL Server Database Name")] [String] $DatabaseName,
-			[Parameter(Position=4, Mandatory=$false, ValueFromPipeline = $false,HelpMessage="SQL Server Server User Name")] [string] $UserName,
-			[Parameter(Position=5, Mandatory=$false, ValueFromPipeline = $false,HelpMessage="Password")] [string] $Password,
-			[Parameter(Position=6, Mandatory=$false, ValueFromPipeline = $false,HelpMessage="SQL Server Table Name")] [String] $TableName ="",
-			[Parameter(Position=7, Mandatory=$false, ValueFromPipeline = $false,HelpMessage="New Table will be created")] [switch] $NewTable = $false
+			[Parameter(Mandatory=$true,HelpMessage="SQL Server Name")] [String] $ServerName,
+			[Parameter(Mandatory=$true,HelpMessage="SQL Server Database Name")] [String] $DatabaseName,
+			[Parameter(HelpMessage="SQL Server Server User Name")] [string] $UserName,
+			[Parameter(HelpMessage="Password")] [string] $Password,
+			[Parameter(HelpMessage="SQL Server Table Name")] [String] $TableName ="",
+			[Parameter(HelpMessage="New Table will be created")] [switch] $NewTable = $false
 
 			
 		)	

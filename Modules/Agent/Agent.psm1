@@ -21,9 +21,9 @@ catch {add-type -AssemblyName "Microsoft.SqlServer.Smo"; $smoVersion = 9}
 function Get-SqlConnection
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] [string]$sqlserver,
-    [Parameter(Position=1, Mandatory=$false)] [string]$username, 
-    [Parameter(Position=2, Mandatory=$false)] [string]$password
+    [Parameter(Mandatory=$true)] [string]$sqlserver,
+    [string]$username, 
+    [string]$password
     )
 
     Write-Verbose "Get-SqlConnection $sqlserver"
@@ -43,9 +43,9 @@ function Get-SqlConnection
 function Get-SqlServer
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] [string]$sqlserver,
-    [Parameter(Position=1, Mandatory=$false)] [string]$username, 
-    [Parameter(Position=2, Mandatory=$false)] [string]$password
+    [Parameter(Mandatory=$true)] [string]$sqlserver,
+    [string]$username, 
+    [string]$password
     )
     #When $sqlserver passed in from the SMO Name property, brackets
     #are automatically inserted which then need to be removed
@@ -81,9 +81,9 @@ Get-AgentJobServer
 function Get-AgentJobServer
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] $sqlserver,
-    [Parameter(Position=1, Mandatory=$false)] [string]$username, 
-    [Parameter(Position=2, Mandatory=$false)] [string]$password
+    [Parameter(Mandatory=$true)] $sqlserver,
+    [string]$username, 
+    [string]$password
     )
 
     switch ($sqlserver.GetType().Name)
@@ -119,8 +119,8 @@ Get-AgentAlertCategory
 function Get-AgentAlertCategory
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] $jobserver,
-    [Parameter(Position=1, Mandatory=$false)] [string]$name 
+    [Parameter(PMandatory=$true)] $jobserver,
+    [string]$name 
     )
 
     switch ($jobserver.GetType().Name)
@@ -165,8 +165,8 @@ Get-AgentAlert
 function Get-AgentAlert
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] $jobserver,
-    [Parameter(Position=1, Mandatory=$false)] [string]$name 
+    [Parameter(Mandatory=$true)] $jobserver,
+    [string]$name 
     )
 
     switch ($jobserver.GetType().Name)
@@ -211,8 +211,8 @@ Get-AgentJob
 function Get-AgentJob
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] $jobserver,
-    [Parameter(Position=1, Mandatory=$false)] [string]$name 
+    [Parameter(Mandatory=$true)] $jobserver,
+    [string]$name 
     )
 
     switch ($jobserver.GetType().Name)
@@ -257,8 +257,8 @@ Get-AgentJob
 function Get-AgentJobSchedule
 {
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Agent.Job]$job,
-    [Parameter(Position=1, Mandatory=$false)] [ValidateNOTNullOrEmpty()] [string]$name="*"
+    [Parameter(Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Agent.Job]$job,
+    [ValidateNOTNullOrEmpty()] [string]$name="*"
     )
 
     process
@@ -298,8 +298,8 @@ Get-AgentJob
 function Get-AgentJobStep
 {
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Agent.Job]$job,
-    [Parameter(Position=1, Mandatory=$false)] [ValidateNOTNullOrEmpty()] [string]$name="*"
+    [Parameter(Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Agent.Job]$job,
+    [ValidateNOTNullOrEmpty()] [string]$name="*"
     )
 
     process
@@ -338,8 +338,8 @@ Get-AgentOperator
 function Get-AgentOperator
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] $jobserver,
-    [Parameter(Position=1, Mandatory=$false)] [string]$name 
+    [Parameter(Mandatory=$true)] $jobserver,
+    [string]$name 
     )
 
     switch ($jobserver.GetType().Name)
@@ -383,8 +383,8 @@ Get-AgentOperatorCategory
 function Get-AgentOperatorCategory
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] $jobserver,
-    [Parameter(Position=1, Mandatory=$false)] [string]$name 
+    [Parameter(Mandatory=$true)] $jobserver,
+    [string]$name 
     )
 
     switch ($jobserver.GetType().Name)
@@ -428,8 +428,8 @@ Get-AgentProxyAccount
 function Get-AgentProxyAccount
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] $jobserver,
-    [Parameter(Position=1, Mandatory=$false)] [string]$name 
+    [Parameter(Mandatory=$true)] $jobserver,
+    [string]$name 
     )
 
     switch ($jobserver.GetType().Name)
@@ -476,8 +476,8 @@ Get-AgentJobSchedule
 function Get-AgentSchedule
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] $jobserver,
-    [Parameter(Position=1, Mandatory=$false)] [string]$name 
+    [Parameter(Mandatory=$true)] $jobserver,
+    [string]$name 
     )
 
     switch ($jobserver.GetType().Name)
@@ -521,8 +521,8 @@ Get-AgentTargetServerGroup
 function Get-AgentTargetServerGroup
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] $jobserver,
-    [Parameter(Position=1, Mandatory=$false)] [string]$name 
+    [Parameter(Mandatory=$true)] $jobserver,
+    [string]$name 
     )
 
     switch ($jobserver.GetType().Name)
@@ -566,8 +566,8 @@ Get-AgentTargetServer
 function Get-AgentTargetServer
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] $jobserver,
-    [Parameter(Position=1, Mandatory=$false)] [string]$name 
+    [Parameter(Mandatory=$true)] $jobserver,
+    [string]$name 
     )
 
     switch ($jobserver.GetType().Name)
@@ -612,10 +612,10 @@ Get-AgentJobHistory
 function Set-AgentJobHistoryFilter
 {
     param(
-    [Parameter(Position=0, Mandatory=$false)] [string]$name,
-    [Parameter(Position=1, Mandatory=$false)] [datetime]$endDate,
-    [Parameter(Position=2, Mandatory=$false)] [datetime]$startDate,
-    [Parameter(Position=3, Mandatory=$false)] [string]$outCome
+    [string]$name,
+    [datetime]$endDate,
+    [datetime]$startDate,
+    [string]$outCome
     )
 
     $jobHistoryFilter = New-Object Microsoft.SqlServer.Management.Smo.Agent.JobHistoryFilter
@@ -649,8 +649,8 @@ Set-AgentJobHistoryFilter
 function Get-AgentJobHistory
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] $jobserver,
-    [Parameter(Position=1, Mandatory=$false)] [Microsoft.SqlServer.Management.Smo.Agent.JobHistoryFilter]$jobHistoryFilter
+    [Parameter(Mandatory=$true)] $jobserver,
+    [Microsoft.SqlServer.Management.Smo.Agent.JobHistoryFilter]$jobHistoryFilter
     )
 
     switch ($jobserver.GetType().Name)

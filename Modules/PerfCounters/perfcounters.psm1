@@ -19,12 +19,12 @@
 function Invoke-Sqlcmd2
 {
     param(
-    [Parameter(Position=0, Mandatory=$true ,ValueFromPipeline = $false)] [string]$ServerInstance,
-    [Parameter(Position=1, Mandatory=$true ,ValueFromPipeline = $false)] [string]$Database,
-	[Parameter(Position=2, Mandatory=$false ,ValueFromPipeline = $false)] [string]$UserName,
-	[Parameter(Position=3, Mandatory=$false ,ValueFromPipeline = $false)] [string]$Password,
-    [Parameter(Position=4, Mandatory=$true ,ValueFromPipeline = $false)] [string]$Query,
-    [Parameter(Position=5, Mandatory=$false ,ValueFromPipeline = $false)] [Int32]$QueryTimeout=30
+    [Parameter(Mandatory=$true)] [string]$ServerInstance,
+    [Parameter(Mandatory=$true ,ValueFromPipeline = $false)] [string]$Database,
+	[string]$UserName,
+	[string]$Password,
+    [Parameter(Mandatory=$true)] [string]$Query,
+    [Int32]$QueryTimeout=30
     )
 
     $conn=new-object System.Data.SqlClient.SQLConnection
@@ -140,8 +140,8 @@ Get-PerfCounterCategory
 function Get-PerfCounterCategory
 {
     param(
-    [Parameter(Position=0, Mandatory=$false ,ValueFromPipeline = $true)] [string]$ComputerName = $env:COMPUTERNAME,
-    [Parameter(Position=1, Mandatory=$false)] [string]$CategoryName = "*"
+    [Parameter(ValueFromPipeline = $true)] [string]$ComputerName = $env:COMPUTERNAME,
+    [string]$CategoryName = "*"
     )
 	
 	
@@ -201,9 +201,9 @@ function Get-PerfCounterInstance
 
 
 	 param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] 
+    [Parameter(Mandatory=$true, ValueFromPipeline = $true)] 
 	[ValidateScript({$_.GetType().Name -is [System.Object]})] $CategoryName,
-	[Parameter(Position=1, Mandatory=$false, ValueFromPipeline = $false)] $InstanceName = "*"
+	$InstanceName = "*"
 	)
 
 	process {
@@ -298,9 +298,9 @@ function Get-PerfCounterCounters
 {
 
 	 param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] 
+    [Parameter(Mandatory=$true, ValueFromPipeline = $true)] 
 	[ValidateScript({$_.GetType().Name -is [System.Object]})] $ObjectPerf ,
-	[Parameter(Position=1, Mandatory=$false, ValueFromPipeline = $false)] $CounterName = "*" )
+	$CounterName = "*" )
 
 	process {
 		
@@ -391,10 +391,9 @@ Function Save-ConfigPerfCounter
 {
 
 	param (	
-	    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] 
+	    [Parameter(Mandatory=$true, ValueFromPipeline = $true)] 
 		[ValidateScript({$_.GetType().Name -is [System.Object]})] $ObjectPerf ,
-		[Parameter(Position=1, Mandatory=$true, ValueFromPipeline = $false)] $PathConfigFile,
-		[Parameter(Position=2, Mandatory=$false, ValueFromPipeline = $false)] 
+		[Parameter(Mandatory=$true)] $PathConfigFile,
 		[switch] $NewFile = $false
 	)	
 	Begin {
@@ -523,18 +522,18 @@ http://sqlpsx.codeplex.com/
 Function Set-CollectPerfCounter {
 
 	 param(
-		[Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)][string] $PathConfigFile  ,
-		[Parameter(Position=1, Mandatory=$true, ValueFromPipeline = $false)] $PathOutputFile,
-		[Parameter(Position=2, Mandatory=$true, ValueFromPipeline = $false)] [system.DateTime] $DateTimeStart = (get-date) ,
-		[Parameter(Position=3, Mandatory=$true, ValueFromPipeline = $false)] [system.datetime] $DateTimeEnd ,
-		[Parameter(Position=4, Mandatory=$false, ValueFromPipeline = $false)] [system.Int32] $Interval = 10,
-		[Parameter(Position=5, Mandatory=$false, ValueFromPipeline = $false)] [switch] $RunAsJob = $false,
-		[Parameter(Position=6, Mandatory=$false, ValueFromPipeline = $false)] [String] $ServerName ,
-		[Parameter(Position=7, Mandatory=$false, ValueFromPipeline = $false)] [String] $DatabaseName ,
-		[Parameter(Position=8, Mandatory=$false, ValueFromPipeline = $false)] [String] $TableName ,
-		[Parameter(Position=9, Mandatory=$false, ValueFromPipeline = $false)] [String] $UserName ,
-		[Parameter(Position=10, Mandatory=$false, ValueFromPipeline = $false)] [String] $Password ,
-		[Parameter(Position=11, Mandatory=$false, ValueFromPipeline = $false)] [switch] $NewTable = $false
+		[Parameter(Mandatory=$true, ValueFromPipeline = $true)][string] $PathConfigFile  ,
+		[Parameter(Mandatory=$true)] $PathOutputFile,
+		[Parameter(Mandatory=$true)] [system.DateTime] $DateTimeStart = (get-date) ,
+		[Parameter(Mandatory=$true)] [system.datetime] $DateTimeEnd ,
+		[system.Int32] $Interval = 10,
+		[switch] $RunAsJob = $false,
+		[String] $ServerName ,
+		[String] $DatabaseName ,
+		[String] $TableName ,
+		[String] $UserName ,
+		[String] $Password ,
+		[switch] $NewTable = $false
 
 	)
 	Begin {
@@ -705,16 +704,16 @@ Set-CollectPerfCounter
 Function Save-PerfCounterSQLTable 
 {
  param(
-		[Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $false)] 
+		[Parameter(Mandatory=$true)] 
 		[ValidateScript({Test-Path -path $_})] [string] $PathConfigFile  ,
-		[Parameter(Position=1, Mandatory=$true, ValueFromPipeline = $false)]
+		[Parameter(Mandatory=$true)]
 		[ValidateScript({Test-Path -path $_})] [string] $PathOutputFile,
-		[Parameter(Position=2, Mandatory=$true, ValueFromPipeline = $false)] [String] $ServerName,
-		[Parameter(Position=3, Mandatory=$true, ValueFromPipeline = $false)] [String] $DatabaseName,
-		[Parameter(Position=4, Mandatory=$false, ValueFromPipeline = $false)] [string] $UserName,
-		[Parameter(Position=5, Mandatory=$false, ValueFromPipeline = $false)] [string] $Password,
-		[Parameter(Position=6, Mandatory=$false, ValueFromPipeline = $false)] [String] $TableName ="",
-		[Parameter(Position=7, Mandatory=$false, ValueFromPipeline = $false)] [switch] $NewTable = $false
+		[Parameter(Mandatory=$true)] [String] $ServerName,
+		[Parameter(Mandatory=$true)] [String] $DatabaseName,
+		[string] $UserName,
+		[string] $Password,
+		[String] $TableName ="",
+		[switch] $NewTable = $false
 	
 	)
 	

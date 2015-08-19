@@ -111,7 +111,7 @@ Get-ShowMbrs
 function Get-ShowMbrs
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] [string]$group
+    [Parameter(Mandatory=$true)] [string]$group
     )
     
     Write-Verbose "Get-ShowMbrs $group"

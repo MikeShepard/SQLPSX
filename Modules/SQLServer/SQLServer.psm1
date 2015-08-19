@@ -55,9 +55,9 @@ Get-SqlConnection
 function Get-SqlConnection
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] [string]$sqlserver,
-    [Parameter(Position=1, Mandatory=$false)] [string]$username, 
-    [Parameter(Position=2, Mandatory=$false)] [string]$password
+    [Parameter(Mandatory=$true)] [string]$sqlserver,
+    [string]$username, 
+    [string]$password
     )
 
     Write-Verbose "Get-SqlConnection $sqlserver"
@@ -97,10 +97,10 @@ Get-SqlServer
 function Get-SqlServer
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] [string]$sqlserver,
-    [Parameter(Position=1, Mandatory=$false)] [string]$username, 
-    [Parameter(Position=2, Mandatory=$false)] [string]$password,
-    [Parameter(Position=3, Mandatory=$false)] [string]$StatementTimeout=0
+    [Parameter(Mandatory=$true)] [string]$sqlserver,
+    [string]$username, 
+    [string]$password,
+    [string]$StatementTimeout=0
     )
     #When $sqlserver passed in from the SMO Name property, brackets
     #are automatically inserted which then need to be removed
@@ -146,9 +146,9 @@ Get-SqlDatabase
 function Get-SqlDatabase
 { 
     param(
-    [Parameter(Position=0, Mandatory=$true)] $sqlserver,
-    [Parameter(Position=1, Mandatory=$false)] [string]$dbname,
-    [Parameter(Position=2, Mandatory=$false)] [switch]$force
+    [Parameter(Mandatory=$true)] $sqlserver,
+    [string]$dbname,
+    [switch]$force
     )
 
     switch ($sqlserver.GetType().Name)
@@ -199,9 +199,9 @@ Get-SqlData
 function Get-SqlData
 {
     param(
-    [Parameter(Position=0, Mandatory=$false)] $sqlserver,
-    [Parameter(Position=1, Mandatory=$true)] $dbname,
-    [Parameter(Position=2, Mandatory=$true)] [string]$qry
+    [Parameter(Mandatory=$false)] $sqlserver,
+    $dbname,
+    [Parameter(Mandatory=$true)] [string]$qry
     )
 
     switch ($dbname.GetType().Name)
@@ -244,9 +244,9 @@ Set-SqlData
 function Set-SqlData
 {
     param(
-    [Parameter(Position=0, Mandatory=$false)] $sqlserver,
-    [Parameter(Position=1, Mandatory=$true)] [string]$dbname,
-    [Parameter(Position=2, Mandatory=$true)] [string]$qry
+    $sqlserver,
+    [Parameter(Mandatory=$true)] [string]$dbname,
+    [Parameter(Mandatory=$true)] [string]$qry
     )
 
     switch ($dbname.GetType().Name)
@@ -295,8 +295,8 @@ Get-SqlShowMbrs
 function Get-SqlShowMbrs
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] [Microsoft.SqlServer.Management.Smo.Server]$server,
-    [Parameter(Position=1, Mandatory=$true)] [string]$group
+    [Parameter(Mandatory=$true)] [Microsoft.SqlServer.Management.Smo.Server]$server,
+    [Parameter(Mandatory=$true)] [string]$group
     )
 
     Write-Verbose "Get-SqlShowMbrs $($server.Name) $group"
@@ -373,7 +373,7 @@ Get-SqlUser
 function Get-SqlUser
 {
    param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database
+    [Parameter(Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database
     )
 
     process
@@ -507,7 +507,7 @@ Get-SqlDatabaseRole
 function Get-SqlDatabaseRole
 {
    param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database
+    [Parameter(Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database
     )
 
     process
@@ -636,7 +636,7 @@ Get-SqlLogin
 function Get-SqlLogin
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] $sqlserver
+    [Parameter(Mandatory=$true)] $sqlserver
     )
 
     switch ($sqlserver.GetType().Name)
@@ -686,7 +686,7 @@ Get-SqlLinkedServerLogin
 function Get-SqlLinkedServerLogin
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] $sqlserver
+    [Parameter(Mandatory=$true)] $sqlserver
     )
 
     switch ($sqlserver.GetType().Name)
@@ -797,7 +797,7 @@ Get-SqlServerRole
 function Get-SqlServerRole
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] $sqlserver
+    [Parameter(Mandatory=$true)] $sqlserver
     )
 
     switch ($sqlserver.GetType().Name)
@@ -864,7 +864,7 @@ Get-SqlServerPermission
 function Get-SqlServerPermission
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] $sqlserver
+    [Parameter(Mandatory=$true)] $sqlserver
     )
 
     switch ($sqlserver.GetType().Name)
@@ -886,7 +886,7 @@ function Get-SqlServerPermission
 function Get-ServerPermission90
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] [Microsoft.SqlServer.Management.Smo.Server]$server
+    [Parameter(Mandatory=$true)] [Microsoft.SqlServer.Management.Smo.Server]$server
     )
 
     Write-Verbose "Get-ServerPermission90 $($server.Name)"
@@ -920,7 +920,7 @@ function Get-ServerPermission90
 function Get-Permission80
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] [Microsoft.SqlServer.Management.Smo.Database]$database
+    [Parameter(Mandatory=$true)] [Microsoft.SqlServer.Management.Smo.Database]$database
     )
 
     Write-Verbose "Get-Permission80 $($database.Name)"
@@ -1002,7 +1002,7 @@ Get-SqlDatabasePermission
 function Get-SqlDatabasePermission
 {
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database
+    [Parameter(Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database
     )
 
     begin
@@ -1103,7 +1103,7 @@ Get-SqlObjectPermission
 function Get-SqlObjectPermission
 {
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database
+    [Parameter(Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database
     )
 
     begin
@@ -1212,11 +1212,11 @@ function Get-SqlTable
 {
     [CmdletBinding()]
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$Database,
-    [Parameter(Position=1, Mandatory=$false)] [String]$Name,
-    [Parameter(Position=2, Mandatory=$false)] [String]$Schema,
-    [Parameter(Position=3, Mandatory=$false)] [String]$Include,
-    [Parameter(Position=4, Mandatory=$false)] [String]$Exclude,
+    [Parameter(Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$Database,
+    [String]$Name,
+    [String]$Schema,
+    [String]$Include,
+    [String]$Exclude,
     [Switch] $Force
     )
 
@@ -1277,11 +1277,11 @@ function Get-SqlStoredProcedure
 {
     [CmdletBinding()]
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$Database,
-    [Parameter(Position=1, Mandatory=$false)] [String]$Name,
-    [Parameter(Position=2, Mandatory=$false)] [String]$Schema,
-    [Parameter(Position=3, Mandatory=$false)] [String]$Include,
-    [Parameter(Position=4, Mandatory=$false)] [String]$Exclude,
+    [Parameter(Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$Database,
+    [String]$Name,
+    [String]$Schema,
+    [String]$Include,
+    [String]$Exclude,
     [Switch] $Force
     )
 
@@ -1342,11 +1342,11 @@ function Get-SqlView
 {
     [CmdletBinding()]
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$Database,
-    [Parameter(Position=1, Mandatory=$false)] [String]$Name,
-    [Parameter(Position=2, Mandatory=$false)] [String]$Schema,
-    [Parameter(Position=3, Mandatory=$false)] [String]$Include,
-    [Parameter(Position=4, Mandatory=$false)] [String]$Exclude,
+    [Parameter(Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$Database,
+    [String]$Name,
+    [String]$Schema,
+    [String]$Include,
+    [String]$Exclude,
     [Switch] $Force
     )
 
@@ -1407,11 +1407,11 @@ function Get-SqlUserDefinedDataType
 {
     [CmdletBinding()]
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$Database,
-    [Parameter(Position=1, Mandatory=$false)] [String]$Name,
-    [Parameter(Position=2, Mandatory=$false)] [String]$Schema,
-    [Parameter(Position=3, Mandatory=$false)] [String]$Include,
-    [Parameter(Position=4, Mandatory=$false)] [String]$Exclude
+    [Parameter(Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$Database,
+    [String]$Name,
+    [String]$Schema,
+    [String]$Include,
+    [String]$Exclude
     )
 
     process
@@ -1470,11 +1470,11 @@ function Get-SqlUserDefinedFunction
 {
     [CmdletBinding()]
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$Database,
-    [Parameter(Position=1, Mandatory=$false)] [String]$Name,
-    [Parameter(Position=2, Mandatory=$false)] [String]$Schema,
-    [Parameter(Position=3, Mandatory=$false)] [String]$Include,
-    [Parameter(Position=4, Mandatory=$false)] [String]$Exclude,
+    [Parameter(Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$Database,
+    [String]$Name,
+    [String]$Schema,
+    [String]$Include,
+    [String]$Exclude,
     [Switch] $Force
     )
 
@@ -1535,11 +1535,11 @@ function Get-SqlSynonym
 {
     [CmdletBinding()]
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$Database,
-    [Parameter(Position=1, Mandatory=$false)] [String]$Name,
-    [Parameter(Position=2, Mandatory=$false)] [String]$Schema,
-    [Parameter(Position=3, Mandatory=$false)] [String]$Include,
-    [Parameter(Position=4, Mandatory=$false)] [String]$Exclude,
+    [Parameter(Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$Database,
+    [String]$Name,
+    [String]$Schema,
+    [String]$Include,
+    [String]$Exclude,
     [Switch] $Force
     )
 
@@ -1600,10 +1600,10 @@ Get-SqlTrigger
 function Get-SqlTrigger
 {
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] $smo,
-    [Parameter(Position=1, Mandatory=$false)] [String]$Name,
-    [Parameter(Position=3, Mandatory=$false)] [String]$Include,
-    [Parameter(Position=4, Mandatory=$false)] [String]$Exclude,
+    [Parameter(Mandatory=$true, ValueFromPipeline = $true)] $smo,
+    [String]$Name,
+    [String]$Include,
+    [String]$Exclude,
     [Switch] $Force
 
     )
@@ -1664,7 +1664,7 @@ Get-SqlColumn
 function Get-SqlColumn
 {
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)]
+    [Parameter(Mandatory=$true, ValueFromPipeline = $true)]
     [ValidateScript({$_.GetType().Name -eq 'Table' -or $_.GetType().Name -eq 'View'})] $table
     )
 
@@ -1709,7 +1709,7 @@ Get-SqlIndex
 function Get-SqlIndex
 {
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)]
+    [Parameter(Mandatory=$true, ValueFromPipeline = $true)]
     [ValidateScript({$_.GetType().Name -eq 'Table' -or $_.GetType().Name -eq 'View'})] $table
     )
 
@@ -1755,7 +1755,7 @@ Get-SqlStatistic
 function Get-SqlStatistic
 {
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)]
+    [Parameter(Mandatory=$true, ValueFromPipeline = $true)]
     [ValidateScript({$_.GetType().Name -eq 'Table' -or $_.GetType().Name -eq 'View'})] $table
     )
 
@@ -1805,7 +1805,7 @@ Get-SqlCheck
 function Get-SqlCheck
 {
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)]
+    [Parameter(Mandatory=$true, ValueFromPipeline = $true)]
     [ValidateScript({$_.GetType().Name -eq 'Table' -or $_.GetType().Name -eq 'View'})] $table
     )
 
@@ -1849,7 +1849,7 @@ Get-SqlForeignKey
 function Get-SqlForeignKey
 {
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)]
+    [Parameter(Mandatory=$true, ValueFromPipeline = $true)]
     [ValidateScript({$_.GetType().Name -eq 'Table' -or $_.GetType().Name -eq 'View'})] $table
     )
 
@@ -1929,9 +1929,9 @@ New-SqlScriptingOptions
 function Get-SqlScripter
 {
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)]
+    [Parameter(Mandatory=$true, ValueFromPipeline = $true)]
     [ValidateScript({$_.GetType().Namespace -like "Microsoft.SqlServer.Management.Smo*"})] $smo,
-    [Parameter(Position=1, Mandatory=$false)] [Microsoft.SqlServer.Management.Smo.ScriptingOptions]$scriptingOptions=$(New-SqlScriptingOptions)
+    [Microsoft.SqlServer.Management.Smo.ScriptingOptions]$scriptingOptions=$(New-SqlScriptingOptions)
     )
 
     process
@@ -1963,8 +1963,8 @@ Get-SqlInformation_Schema.Tables
 function Get-SqlInformation_Schema.Tables
 {
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database,
-    [Parameter(Position=1, Mandatory=$false)] [String]$name='%'
+    [Parameter(Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database,
+    [String]$name='%'
     )
 
     process
@@ -2005,9 +2005,9 @@ Get-SqlInformation_Schema.Columns
 function Get-SqlInformation_Schema.Columns
 {
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database,
-    [Parameter(Position=1, Mandatory=$false)] [String]$tblname='%',
-    [Parameter(Position=2, Mandatory=$false)] [String]$colname='%'
+    [Parameter(Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database,
+    [String]$tblname='%',
+    [String]$colname='%'
     )
 
     process
@@ -2047,8 +2047,8 @@ Get-SqlInformation_Schema.Views
 function Get-SqlInformation_Schema.Views
 {
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database,
-    [Parameter(Position=1, Mandatory=$false)] [String]$name='%'
+    [Parameter(Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database,
+    [String]$name='%'
     )
 
     process
@@ -2086,9 +2086,9 @@ Get-SqlInformation_Schema.Routines
 function Get-SqlInformation_Schema.Routines
 {
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database,
-    [Parameter(Position=1, Mandatory=$false)] [String]$name='%',
-    [Parameter(Position=2, Mandatory=$false)] [String]$text='%'
+    [Parameter(Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database,
+    [String]$name='%',
+    [String]$text='%'
     )
 
     process
@@ -2128,8 +2128,8 @@ Get-SqlSysDatabases
 function Get-SqlSysDatabases
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] $sqlserver,
-    [Parameter(Position=1, Mandatory=$false)] [String]$name='%'
+    [Parameter(Mandatory=$true)] $sqlserver,
+    [String]$name='%'
     )
 
     switch ($sqlserver.GetType().Name)
@@ -2173,7 +2173,7 @@ Get-SqlDataFile
 function Get-SqlDataFile
 {
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database
+    [Parameter(Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database
     )
 
     process
@@ -2213,7 +2213,7 @@ Get-SqlLogFile
 function Get-SqlLogFile
 {
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database
+    [Parameter(Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database
     )
 
     process
@@ -2250,7 +2250,7 @@ Get-SqlVersion
 function Get-SqlVersion
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] $sqlserver
+    [Parameter(Mandatory=$true)] $sqlserver
     )
 
     switch ($sqlserver.GetType().Name)
@@ -2287,7 +2287,7 @@ Get-SqlPort
 function Get-SqlPort
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] [string]$sqlserver
+    [Parameter(Mandatory=$true)] [string]$sqlserver
     )
 
     #This can be done using Microsoft.SqlServer.Management.Smo.Wmi.ManagedComputer,
@@ -2312,7 +2312,7 @@ function Get-SqlPort
 function ConvertTo-ExtendedPropertyXML
 {
     param(
-    [Parameter(Position=0, Mandatory=$false)] $extendedProperty
+    $extendedProperty
     )
 
     Write-Verbose "ConvertTo-SqlExtendedPropertyXML"
@@ -2348,7 +2348,7 @@ Get-Sql
 function Get-Sql
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] [string]$computername
+    [Parameter(Mandatory=$true)] [string]$computername
     )
 
     if((get-wmiobject win32_pingstatus -Filter "address='$computername'").protocoladdress) 
@@ -2362,7 +2362,7 @@ Where {($_.Name -Like "MSSQL*" -or $_.Name -Like "SQLAgent*" -or $_.Name -Like "
 function ConvertTo-StatisticColumnXML
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] $statisticColumn
+    [Parameter(Mandatory=$true)] $statisticColumn
     )
 
     Write-Verbose "ConvertTo-SqlStatisticColumnXML"
@@ -2380,7 +2380,7 @@ function ConvertTo-StatisticColumnXML
 function ConvertTo-IndexedColumnXML
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] $indexedColumn
+    [Parameter(Mandatory=$true)] $indexedColumn
     )
 
     Write-Verbose "ConvertTo-SqlIndexedColumnXML"
@@ -2417,7 +2417,7 @@ Invoke-SqlDatabaseCheck
 function Invoke-SqlDatabaseCheck
 {
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database
+    [Parameter(Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database
     )
 
     begin
@@ -2462,7 +2462,7 @@ Invoke-SqlIndexRebuild
 function Invoke-SqlIndexRebuild
 {
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Index]$index
+    [Parameter(Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Index]$index
     )
 
     begin
@@ -2509,7 +2509,7 @@ Invoke-SqlIndexDefrag
 function Invoke-SqlIndexDefrag
 {
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Index]$index
+    [Parameter(Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Index]$index
     )
 
     begin
@@ -2556,7 +2556,7 @@ Get-SqlIndexFragmentation
 function Get-SqlIndexFragmentation
 {
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Index]$index
+    [Parameter(Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Index]$index
     )
 
     process
@@ -2588,10 +2588,10 @@ Update-SqlStatistic
 function Update-SqlStatistic
 {
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Statistic]$statistic,
-    [Parameter(Position=1, Mandatory=$false)] [Microsoft.SqlServer.Management.Smo.StatisticsScanType]$scanType='Default',
-    [Parameter(Position=2, Mandatory=$false)] [int]$sampleValue,
-    [Parameter(Position=3, Mandatory=$false)] [switch]$recompute
+    [Parameter(Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Statistic]$statistic,
+    [Microsoft.SqlServer.Management.Smo.StatisticsScanType]$scanType='Default',
+    [int]$sampleValue,
+    [switch]$recompute
     )
 
     begin
@@ -2644,15 +2644,15 @@ Invoke-SqlBackup
 function Invoke-SqlBackup
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] $sqlserver,
-    [Parameter(Position=1, Mandatory=$true)] [string]$dbname,
-    [Parameter(Position=2, Mandatory=$true)] [string]$filepath,
-    [Parameter(Position=3, Mandatory=$false)] [Microsoft.SqlServer.Management.Smo.BackupActionType]$action='Database',
-    [Parameter(Position=4, Mandatory=$false)] [string]$description='',
-    [Parameter(Position=5, Mandatory=$false)] [string]$name='',
-    [Parameter(Position=6, Mandatory=$false)] [switch]$force,
-    [Parameter(Position=7, Mandatory=$false)] [switch]$incremental,
-    [Parameter(Position=8, Mandatory=$false)] [switch]$copyOnly
+    [Parameter(Mandatory=$true)] $sqlserver,
+    [Parameter(Mandatory=$true)] [string]$dbname,
+    [Parameter(Mandatory=$true)] [string]$filepath,
+    [Microsoft.SqlServer.Management.Smo.BackupActionType]$action='Database',
+    [string]$description='',
+    [string]$name='',
+    [switch]$force,
+    [switch]$incremental,
+    [switch]$copyOnly
     )
 
     $ErrorActionPreference = "Stop"
@@ -2733,16 +2733,16 @@ function Invoke-SqlRestore
 {
     param(
     [CmdletBinding(DefaultParametersetName="Restore")]
-    [Parameter(Position=0, Mandatory=$true)] $sqlserver,
-    [Parameter(ParameterSetName="Restore", Position=1, Mandatory=$true)] [string]$dbname,
-    [Parameter(Position=2, Mandatory=$true)] [string]$filepath,
-    [Parameter(ParameterSetName="Restore", Position=3, Mandatory=$false)] [Microsoft.SqlServer.Management.Smo.RestoreActionType]$action='Database',
-    [Parameter(ParameterSetName="Restore", Position=4, Mandatory=$false)] [string]$stopat,
-    [Parameter(ParameterSetName="Restore", Position=5, Mandatory=$false)] [hashtable]$relocatefiles,
-    [Parameter(ParameterSetName="Restore", Position=6, Mandatory=$false)] [switch]$force,
-    [Parameter(ParameterSetName="Restore", Position=7, Mandatory=$false)] [switch]$norecovery,
-    [Parameter(ParameterSetName="Restore", Position=8, Mandatory=$false)] [switch]$keepreplication,
-    [Parameter(ParameterSetName="FileList", Position=9, Mandatory=$false)] [switch]$FileListOnly
+    [Parameter(Mandatory=$true)] $sqlserver,
+    [Parameter(ParameterSetName="Restore", Mandatory=$true)] [string]$dbname,
+    [Parameter(Mandatory=$true)] [string]$filepath,
+    [Parameter(ParameterSetName="Restore")] [Microsoft.SqlServer.Management.Smo.RestoreActionType]$action='Database',
+    [Parameter(ParameterSetName="Restore")] [string]$stopat,
+    [Parameter(ParameterSetName="Restore")] [hashtable]$relocatefiles,
+    [Parameter(ParameterSetName="Restore")] [switch]$force,
+    [Parameter(ParameterSetName="Restore")] [switch]$norecovery,
+    [Parameter(ParameterSetName="Restore")] [switch]$keepreplication,
+    [Parameter(ParameterSetName="FileList")] [switch]$FileListOnly
     )
 
 
@@ -2831,8 +2831,8 @@ function Remove-SqlDatabase
 {
     
     param(
-    [Parameter(Position=0, Mandatory=$true)] $sqlserver,
-    [Parameter(Position=1, Mandatory=$true)] [string]$dbname
+    [Parameter(Mandatory=$true)] $sqlserver,
+    [Parameter(Mandatory=$true)] [string]$dbname
     )
     
     $ErrorActionPreference = "Stop"
@@ -2880,8 +2880,8 @@ Get-SqlDatabase
 function Add-SqlFileGroup
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] [Microsoft.SqlServer.Management.Smo.Database]$database,
-    [Parameter(Position=1, Mandatory=$true)] [string]$name
+    [Parameter(Mandatory=$true)] [Microsoft.SqlServer.Management.Smo.Database]$database,
+    [Parameter(Mandatory=$true)] [string]$name
     )
 
     $ErrorActionPreference = "Stop"
@@ -2934,13 +2934,13 @@ Get-SqlDatabase
 function Add-SqlDataFile
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] [Microsoft.SqlServer.Management.Smo.FileGroup]$filegroup,
-    [Parameter(Position=1, Mandatory=$true)] [string]$name,
-    [Parameter(Position=2, Mandatory=$true)] [string]$filepath,
-    [Parameter(Position=3, Mandatory=$false)] [double]$size,
-    [Parameter(Position=4, Mandatory=$false)] [Microsoft.SqlServer.Management.Smo.FileGrowthType]$growthType,
-    [Parameter(Position=5, Mandatory=$false)] [double]$growth,
-    [Parameter(Position=6, Mandatory=$false)] [double]$maxSize
+    [Parameter(Mandatory=$true)] [Microsoft.SqlServer.Management.Smo.FileGroup]$filegroup,
+    [Parameter(Mandatory=$true)] [string]$name,
+    [Parameter(Mandatory=$true)] [string]$filepath,
+    [double]$size,
+    [Microsoft.SqlServer.Management.Smo.FileGrowthType]$growthType,
+    [double]$growth,
+    [double]$maxSize
     )
 
     $ErrorActionPreference = "Stop"
@@ -3000,13 +3000,13 @@ Get-SqlDatabase
 function Add-SqlLogFile
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] [Microsoft.SqlServer.Management.Smo.Database]$database,
-    [Parameter(Position=1, Mandatory=$true)] [string]$name,
-    [Parameter(Position=2, Mandatory=$true)] [string]$filepath,
-    [Parameter(Position=3, Mandatory=$false)] [double]$size,
-    [Parameter(Position=4, Mandatory=$false)] [Microsoft.SqlServer.Management.Smo.FileGrowthType]$growthType,
-    [Parameter(Position=5, Mandatory=$false)] [double]$growth,
-    [Parameter(Position=6, Mandatory=$false)] [double]$maxSize
+    [Parameter(Mandatory=$true)] [Microsoft.SqlServer.Management.Smo.Database]$database,
+    [Parameter(Mandatory=$true)] [string]$name,
+    [Parameter(Mandatory=$true)] [string]$filepath,
+    [double]$size,
+    [Microsoft.SqlServer.Management.Smo.FileGrowthType]$growthType,
+    [double]$growth,
+    [double]$maxSize
     )
 
     $ErrorActionPreference = "Stop"
@@ -3059,20 +3059,20 @@ Add-SqlDatabase
 function Add-SqlDatabase
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] $sqlserver,
-    [Parameter(Position=1, Mandatory=$true)] [string]$dbname,
-    [Parameter(Position=2, Mandatory=$false)] [string]$dataName,
-    [Parameter(Position=3, Mandatory=$false)] [string]$dataFilePath,
-    [Parameter(Position=4, Mandatory=$false)] [double]$dataSize,
-    [Parameter(Position=5, Mandatory=$false)] [Microsoft.SqlServer.Management.Smo.FileGrowthType]$dataGrowthType='KB',
-    [Parameter(Position=6, Mandatory=$false)] [double]$dataGrowth=1,
-    [Parameter(Position=7, Mandatory=$false)] [double]$dataMaxSize,
-    [Parameter(Position=8, Mandatory=$false)] [string]$logName,
-    [Parameter(Position=9, Mandatory=$false)] [string]$logFilePath,
-    [Parameter(Position=10, Mandatory=$false)] [double]$logSize,
-    [Parameter(Position=11, Mandatory=$false)] [Microsoft.SqlServer.Management.Smo.FileGrowthType]$logGrowthType='Percent',
-    [Parameter(Position=12, Mandatory=$false)] [double]$logGrowth=10,
-    [Parameter(Position=13, Mandatory=$false)] [double]$logMaxSize
+    [Parameter(Mandatory=$true)] $sqlserver,
+    [Parameter(Mandatory=$true)] [string]$dbname,
+    [string]$dataName,
+    [string]$dataFilePath,
+    [double]$dataSize,
+    [Microsoft.SqlServer.Management.Smo.FileGrowthType]$dataGrowthType='KB',
+    [double]$dataGrowth=1,
+    [double]$dataMaxSize,
+    [string]$logName,
+    [string]$logFilePath,
+    [double]$logSize,
+    [Microsoft.SqlServer.Management.Smo.FileGrowthType]$logGrowthType='Percent',
+    [double]$logGrowth=10,
+    [double]$logMaxSize
     )
 
     $ErrorActionPreference = "Stop"
@@ -3150,9 +3150,9 @@ Get-SqlDefaultDir
 function Get-SqlDefaultDir
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] $sqlserver,
+    [Parameter(Mandatory=$true)] $sqlserver,
     [ValidateSet("Data", "Log")]
-    [Parameter(Position=1, Mandatory=$true)] [string]$dirtype
+    [Parameter(Mandatory=$true)] [string]$dirtype
     )
     
     switch ($sqlserver.GetType().Name)
@@ -3200,11 +3200,11 @@ Add-SqlUser
 function Add-SqlUser
 {
     param(
-    [Parameter(Position=0, Mandatory=$false)] $sqlserver,
-    [Parameter(Position=1, Mandatory=$true)] $dbname,
-    [Parameter(Position=2, Mandatory=$true)] [string]$name,
-    [Parameter(Position=3, Mandatory=$false)] [string]$login=$name,
-    [Parameter(Position=4, Mandatory=$false)] [string]$defaultSchema='dbo'
+    [Parameter(Mandatory=$false)] $sqlserver,
+    [Parameter(Mandatory=$true)] $dbname,
+    [Parameter(Mandatory=$true)] [string]$name,
+    [string]$login=$name,
+    [string]$defaultSchema='dbo'
     )
 
     $ErrorActionPreference = "Stop"
@@ -3262,9 +3262,9 @@ Remove-SqlUser
 function Remove-SqlUser
 {
     param(
-    [Parameter(Position=0, Mandatory=$false)] $sqlserver,
-    [Parameter(Position=1, Mandatory=$true)] $dbname,
-    [Parameter(Position=2, Mandatory=$true)] [string]$name
+    $sqlserver,
+    [Parameter(Mandatory=$true)] $dbname,
+    [Parameter(Mandatory=$true)] [string]$name
     )
 
     switch ($dbname.GetType().Name)
@@ -3309,13 +3309,13 @@ Add-SqlLogin
 function Add-SqlLogin
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] $sqlserver,
-    [Parameter(Position=1, Mandatory=$true)] [string]$name,
-    [Parameter(Position=2, Mandatory=$false)] [string]$password,
-    [Parameter(Position=3, Mandatory=$false)] [Microsoft.SqlServer.Management.Smo.LoginType]$logintype='WindowsUser',
-    [Parameter(Position=4, Mandatory=$false)] [string]$DefaultDatabase='master',
-    [Parameter(Position=5, Mandatory=$false)] [switch]$PasswordExpirationEnabled,
-    [Parameter(Position=6, Mandatory=$false)] [switch]$PasswordPolicyEnforced
+    [Parameter(Mandatory=$true)] $sqlserver,
+    [Parameter(Mandatory=$true)] [string]$name,
+    [string]$password,
+    [Microsoft.SqlServer.Management.Smo.LoginType]$logintype='WindowsUser',
+    [string]$DefaultDatabase='master',
+    [switch]$PasswordExpirationEnabled,
+    [switch]$PasswordPolicyEnforced
     )
 
     $ErrorActionPreference = "Stop"
@@ -3399,8 +3399,8 @@ function Remove-SqlLogin
 {
 
     param(
-    [Parameter(Position=0, Mandatory=$true)] $sqlserver,
-    [Parameter(Position=1, Mandatory=$true)] [string]$name
+    [Parameter(Mandatory=$true)] $sqlserver,
+    [Parameter(Mandatory=$true)] [string]$name
     )
 
     switch ($sqlserver.GetType().Name)
@@ -3445,9 +3445,9 @@ Add-SqlServerRoleMember
 function Add-SqlServerRoleMember
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] $sqlserver,
-    [Parameter(Position=1, Mandatory=$true)] [string]$loginame,
-    [Parameter(Position=2, Mandatory=$true)] [string]$rolename
+    [Parameter(Mandatory=$true)] $sqlserver,
+    [Parameter(Mandatory=$true)] [string]$loginame,
+    [Parameter(Mandatory=$true)] [string]$rolename
     )
 
     switch ($sqlserver.GetType().Name)
@@ -3498,9 +3498,9 @@ Remove-SqlServerRoleMember
 function Remove-SqlServerRoleMember
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] $sqlserver,
-    [Parameter(Position=1, Mandatory=$true)] [string]$loginame,
-    [Parameter(Position=2, Mandatory=$true)] [string]$rolename
+    [Parameter(Mandatory=$true)] $sqlserver,
+    [Parameter(Mandatory=$true)] [string]$loginame,
+    [Parameter(Mandatory=$true)] [string]$rolename
     )
 
     switch ($sqlserver.GetType().Name)
@@ -3551,9 +3551,9 @@ Add-SqlDatabaseRole
 function Add-SqlDatabaseRole
 {
     param(
-    [Parameter(Position=0, Mandatory=$false)] $sqlserver,
-    [Parameter(Position=1, Mandatory=$true)] $dbname,
-    [Parameter(Position=2, Mandatory=$true)] [string]$name
+    $sqlserver,
+    [Parameter(Mandatory=$true)] $dbname,
+    [Parameter(Mandatory=$true)] [string]$name
     )
 
     switch ($dbname.GetType().Name)
@@ -3600,7 +3600,7 @@ Remove-SqlDatabaseRole
 function Remove-SqlDatabaseRole
 {
     param(
-    [Parameter(Position=0, Mandatory=$false)] $sqlserver,
+    $sqlserver,
     [Parameter(Position=1, Mandatory=$true)] $dbname,
     [Parameter(Position=2, Mandatory=$true)] [string]$name
     )
@@ -3648,10 +3648,10 @@ Add-SqlDatabaseRoleMember
 function Add-SqlDatabaseRoleMember
 {
     param(
-    [Parameter(Position=0, Mandatory=$false)] $sqlserver,
-    [Parameter(Position=1, Mandatory=$true)] $dbname,
-    [Parameter(Position=2, Mandatory=$true)] [string]$name,
-    [Parameter(Position=3, Mandatory=$true)] [string]$rolename
+    $sqlserver,
+    [Parameter(Mandatory=$true)] $dbname,
+    [Parameter(Mandatory=$true)] [string]$name,
+    [Parameter(Mandatory=$true)] [string]$rolename
     )
 
     switch ($dbname.GetType().Name)
@@ -3702,10 +3702,10 @@ Remove-SqlDatabaseRoleMember
 function Remove-SqlDatabaseRoleMember
 {
     param(
-    [Parameter(Position=0, Mandatory=$false)] $sqlserver,
-    [Parameter(Position=1, Mandatory=$true)] $dbname,
-    [Parameter(Position=2, Mandatory=$true)] [string]$name,
-    [Parameter(Position=3, Mandatory=$true)] [string]$rolename
+    $sqlserver,
+    [Parameter(Mandatory=$true)] $dbname,
+    [Parameter(Mandatory=$true)] [string]$name,
+    [Parameter(Mandatory=$true)] [string]$rolename
     )
 
     switch ($dbname.GetType().Name)
@@ -3756,11 +3756,11 @@ Set-SqlServerPermission
 function Set-SqlServerPermission
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] $sqlserver,
-    [Parameter(Position=1, Mandatory=$true)] [Microsoft.SqlServer.Management.Smo.ServerPermissionSetValue]$permission,
-    [Parameter(Position=2, Mandatory=$true)] [string]$name,
+    [Parameter(Mandatory=$true)] $sqlserver,
+    [Parameter(Mandatory=$true)] [Microsoft.SqlServer.Management.Smo.ServerPermissionSetValue]$permission,
+    [Parameter(Mandatory=$true)] [string]$name,
     [ValidateSet("Grant", "Deny", "Revoke")]
-    [Parameter(Position=3, Mandatory=$true)] [string]$action
+    [Parameter(Mandatory=$true)] [string]$action
     )
 
 #Valid serverpermissions:
@@ -3820,12 +3820,12 @@ Set-SqlDatabasePermission
 function Set-SqlDatabasePermission
 {
     param(
-    [Parameter(Position=0, Mandatory=$false)] $sqlserver,
-    [Parameter(Position=1, Mandatory=$true)] $dbname,
-    [Parameter(Position=2, Mandatory=$true)] [Microsoft.SqlServer.Management.Smo.DatabasePermissionSetValue]$permission,
-    [Parameter(Position=3, Mandatory=$true)] [string]$name,
+    $sqlserver,
+    [Parameter(Mandatory=$true)] $dbname,
+    [Parameter(Mandatory=$true)] [Microsoft.SqlServer.Management.Smo.DatabasePermissionSetValue]$permission,
+    [Parameter(Mandatory=$true)] [string]$name,
     [ValidateSet("Grant", "Deny", "Revoke")]
-    [Parameter(Position=4, Mandatory=$true)] [string]$action
+    [Parameter(Mandatory=$true)] [string]$action
     )
 
 #Valid databasepermissions:
@@ -3887,12 +3887,12 @@ function Set-SqlObjectPermission
 {
 
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)]
+    [Parameter(Mandatory=$true, ValueFromPipeline = $true)]
     [ValidateScript({$_.GetType().Namespace -like "Microsoft.SqlServer.Management.Smo*"})] $smo,
-    [Parameter(Position=1, Mandatory=$true)] [Microsoft.SqlServer.Management.Smo.ObjectPermissionSetValue]$permission,
-    [Parameter(Position=2, Mandatory=$true)] [string]$name,
+    [Parameter(Mandatory=$true)] [Microsoft.SqlServer.Management.Smo.ObjectPermissionSetValue]$permission,
+    [Parameter(Mandatory=$true)] [string]$name,
     [ValidateSet("Grant", "Deny", "Revoke")]
-    [Parameter(Position=3, Mandatory=$true)] [string]$action
+    [Parameter(Mandatory=$true)] [string]$action
     )
 #Alter Connect Control Delete Execute Impersonate Insert Receive References Select Send TakeOwnership Update ViewChangeTracking ViewDefinition 
 #Example: Get-SqlDatabase 'Z002\Sql1 pubs | get-sqlschema -name dbo | set-sqlobjectpermission -permission Select -name test5 -action Grant
@@ -3948,10 +3948,10 @@ Get-SqlSchema
 function Get-SqlSchema
 {
     param(
-    [Parameter(Position=0, Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database,
-    [Parameter(Position=1, Mandatory=$false)] [String]$Name,
-    [Parameter(Position=3, Mandatory=$false)] [String]$Include,
-    [Parameter(Position=4, Mandatory=$false)] [String]$Exclude
+    [Parameter(Mandatory=$true, ValueFromPipeline = $true)] [Microsoft.SqlServer.Management.Smo.Database]$database,
+    [String]$Name,
+    [String]$Include,
+    [String]$Exclude
     )
 
     process
@@ -3994,10 +3994,10 @@ Get-SqlProcess
 function Get-SqlProcess
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] $sqlserver,
-    [Parameter(Position=1, Mandatory=$false)] [int]$spid,
-    [Parameter(Position=2, Mandatory=$false)] [string]$name,
-    [Parameter(Position=3, Mandatory=$false)] [switch]$excludeSystemProcesses
+    [Parameter(Mandatory=$true)] $sqlserver,
+    [int]$spid,
+    [string]$name,
+    [switch]$excludeSystemProcesses
     )
 
     switch ($sqlserver.GetType().Name)
@@ -4039,8 +4039,8 @@ Get-SqlTransaction
 function Get-SqlTransaction
 {
     param(
-    [Parameter(Position=0, Mandatory=$false)] $sqlserver,
-    [Parameter(Position=1, Mandatory=$true)] $dbname
+    $sqlserver,
+    [Parameter(Mandatory=$true)] $dbname
     )
 
     switch ($dbname.GetType().Name)
@@ -4077,8 +4077,8 @@ Get-SqlErrorLog
 function Get-SqlErrorLog
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] $sqlserver,
-    [Parameter(Position=1, Mandatory=$false)] [int]$lognumber=0
+    [Parameter(Mandatory=$true)] $sqlserver,
+    [int]$lognumber=0
     )
 
     switch ($sqlserver.GetType().Name)
@@ -4114,7 +4114,7 @@ Get-SqlEdition
 function Get-SqlEdition
 {
     param(
-    [Parameter(Position=0, Mandatory=$true)] $sqlserver
+    [Parameter(Mandatory=$true)] $sqlserver
     )
 
     switch ($sqlserver.GetType().Name)
