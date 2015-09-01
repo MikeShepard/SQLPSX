@@ -640,10 +640,7 @@ param([Parameter(Mandatory=$true)][string]$storedProcName,
 		PS C:\> $cmd=new-sqlcommand -server MyServer -sql "Select * from MyTable"
         PS C:\> invoke-sqlbulkcopy -records $cmd -server MyOtherServer -table CopyOfMyTable
 
-	.EXAMPLE
-		PS C:\> $rows=invoke-query -server MyServer -sql "Select * from MyTable"
-        PS C:\> invoke-sqlbulkcopy -records $rows -server MyOtherServer -table CopyOfMyTable
-
+	
     .INPUTS
         None.
         You cannot pipe objects to invoke-bulkcopy
@@ -694,7 +691,7 @@ function Invoke-Bulkcopy{
 	if ($records -is [System.Data.Common.DBCommand]){
 		#if passed a command object (rather than a datatable), ask it for a datareader to stream the records
 		$bulkCopy.WriteToServer($records.ExecuteReader())
-    } elsif ($records -is [System.Data.Common.DbDataReader]){
+    } elseif ($records -is [System.Data.Common.DbDataReader]){
 		#if passed a Datareader object use it to stream the records
 		$bulkCopy.WriteToServer($records)
 	} else {
