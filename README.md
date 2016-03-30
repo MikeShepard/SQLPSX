@@ -1,34 +1,39 @@
-Getting Started with SQLPSX
-** NOTE: You must have SMO installed to run the SQLPSX, SMO is installed with SQL Server Management Studio ***
-** Powershell 2.0 is required **
-Installer installation
-* Run SQLPSX.msi installer
+# SQL Server PowerShell Extensions
 
-Manual installation
+## Getting Started with SQLPSX
+
+**NOTE: You must have SMO installed to run the SQLPSX, SMO is installed with SQL Server Management Studio**
+
+**Powershell 2.0 is required**
+
+Installer installation: **Run SQLPSX.msi installer**
+
+### Manual installation
 1. Unblock zip file
 2. Copy all Modules to $env:psmodulepath directory and Script files to any directory. 
 
-Using Modules
+### Using Modules
 1. Run import-module
-    1a. Import the master module sqlpsx (modify sqlpsx.psm1 as needed)
-        import-module sqlpsx
-    1b. Or import individual modules
-        import-module SQLServer
-        import-module Agent
-        import-module Repl
-        import-module SSIS
-        import-module SQLParser
-        import-module Showmbrs
-        import-module adolib
-        import-module sqlmaint
-        import-module sqlise
-        import-module oracleise
-    1c. PBM module should be used in the sqlps mini-shell. Because import-module isn't supported in 
-        Microsoft's sqlps shell, source the functions:
-        . ./pbm.psm1
+  1. Import the master module sqlpsx (modify sqlpsx.psm1 as needed)
+    - import-module sqlpsx
+  2. Or import individual modules
+    - import-module SQLServer
+    - import-module Agent
+    - import-module Repl
+    - import-module SSIS
+    - import-module SQLParser
+    - import-module Showmbrs
+    - import-module adolib
+    - import-module sqlmaint
+    - import-module sqlise
+    - import-module oracleise
+  1. PBM module should be used in the sqlps mini-shell. Because import-module isn't supported in 
+   - Microsoft's sqlps shell, source the functions:
+   - . ./pbm.psm1
 2. Add import-module commands to your Profile if desired
 
 Optional Database and Reporting Services Components
+
 1. Create a database, for example SQLPSX and run the SQLPSX.AllObject.sql script to create the all database objects
 2. Modify SSRS Data Source file SQLPSX.rds to point to the newly created database
 3. Deploy the SSRS reports and Data Source files to a SSRS Server or run locally
@@ -37,7 +42,8 @@ Optional Database and Reporting Services Components
 6. Run Run-SmoToCsvFile.ps1 to create csv files of all available security information
 7. Run Write-SmoToCsvFile.ps1 to import the csv file into the database
 
-What's New
+
+## What's New
     Version 2.3.2.1
         Added MySQLLib Module
         Modified adolib Module
@@ -186,7 +192,7 @@ What's New
         Get-Information_Schema.Columns Get-Information_Schema.Views Get-Information_Schema.Routines Get-SysDatabases Get-SqlDataFile Get-SqlLogFile
         Get-SqlVersion Get-SqlPort ConvertTo-ExtendedPropertyXML Get-Sql ConvertTo-StatisticColumnXML ConvertTo-IndexedColumnXML
 
-Modules
+### Modules
     SQLMaint Module functions
         Invoke-DbMaint
             Implements full database maintenance including backups, index maintenance, statistics, and backup cleanup. 
@@ -482,7 +488,7 @@ Modules
         New-MySQLCommand
         New-MySQLConnection
         
-Scripts
+### Scripts
     Get-InvalidLogins.ps1
         Lists invalid AD/NT logins/groups which have been granted access to the
         specified SQL Server instance. Script calls the system stored procedure
@@ -510,7 +516,7 @@ Scripts
     formatsql.bat
         Simple bat file for calling powershell.exe with the command set to out-sqlscript
 
-SQL Server Reporting Services (2008) reports
+### SQL Server Reporting Services (2008) reports
     See the screenshots_sqlpsx.docx for sample output of reports
 
     SQLPSXChangedDatabasePermission.rdl
@@ -533,7 +539,7 @@ SQL Server Reporting Services (2008) reports
     SQLPSXSqlUserGrouped.rdl
     SQLPSXSqlUserOwnedObject.rdl
 
-Global Variables
+### Global Variables
     The following global session variables are used to cache information used across functions
 
     $__SQLPSXUserMember
@@ -544,7 +550,7 @@ Global Variables
     $__SQLPSXInvalidLogin
     $__SQLPSXSessionTimeStamp
 
-SQLPSX Database
+### SQLPSX Database
     SQLPSX.AllObject.sql
         Single script for all database objects
     SQLPSX.Job.sql
