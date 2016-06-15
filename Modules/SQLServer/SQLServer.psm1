@@ -13,18 +13,25 @@
 ### </Usage>
 ### </Script>
 # ---------------------------------------------------------------------------
-try {add-type -AssemblyName "Microsoft.SqlServer.ConnectionInfo, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91" -EA Stop}
-catch {add-type -AssemblyName "Microsoft.SqlServer.ConnectionInfo"}
-
-try {add-type -AssemblyName "Microsoft.SqlServer.Smo, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91" -EA Stop; $smoVersion = 10}
-catch {add-type -AssemblyName "Microsoft.SqlServer.Smo"; $smoVersion = 9}
-
-try
-{
-    try {add-type -AssemblyName "Microsoft.SqlServer.SMOExtended, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91" -EA Stop}
-    catch {add-type -AssemblyName "Microsoft.SqlServer.SMOExtended" -EA Stop}
+try {
+	Add-Type -AssemblyName "Microsoft.SqlServer.SMO, Version=13.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91" -ErrorAction Stop; $smoVersion = 13
 }
-catch {Write-Warning "SMOExtended not available"}
+catch {
+	try {
+		Add-Type -AssemblyName "Microsoft.SqlServer.SMO, Version=12.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91" -ErrorAction Stop; $smoVersion = 12
+	}
+	catch {
+		try {
+			Add-Type -AssemblyName "Microsoft.SqlServer.SMO, Version=11.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91" -ErrorAction Stop; $smoVersion = 11
+		}
+		catch {
+			Write-Warning "SMO components not available. Download from https://goo.gl/HfrWCB."
+		}
+	}
+}
+
+try {Add-Type -AssemblyName "Microsoft.SqlServer.SMOExtended, Version=11.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91" -ErrorAction Stop} catch {Write-Warning "SMOExtended v11 not available. Download from https://goo.gl/HfrWCB."}
+try {Add-Type -AssemblyName "Microsoft.SqlServer.ConnectionInfo, Version=11.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91" -ErrorAction Stop} catch {Write-Warning "ConnectionInfo v11 not available. Download from https://goo.gl/HfrWCB."}
 
 $scriptRoot = Split-Path (Resolve-Path $myInvocation.MyCommand.Path)
 
@@ -57,7 +64,8 @@ function Get-SqlConnection
     param(
     [Parameter(Mandatory=$true)] [string]$sqlserver,
     [string]$username, 
-    [string]$password
+    [string]$password,
+	[Parameter(Mandatory=$false)] [string]$applicationName="SQLPSX"
     )
 
     Write-Verbose "Get-SqlConnection $sqlserver"
@@ -67,6 +75,7 @@ function Get-SqlConnection
     else
     { $con = new-object ("Microsoft.SqlServer.Management.Common.ServerConnection") $sqlserver }
 	
+	$con.ApplicationName = $applicationName
     $con.Connect()
 
     Write-Output $con
@@ -100,7 +109,8 @@ function Get-SqlServer
     [Parameter(Mandatory=$true)] [string]$sqlserver,
     [string]$username, 
     [string]$password,
-    [string]$StatementTimeout=0
+    [string]$StatementTimeout=0,
+	[Parameter(Mandatory=$false)] [string]$applicationName="SQLPSX"
     )
     #When $sqlserver passed in from the SMO Name property, brackets
     #are automatically inserted which then need to be removed
@@ -108,7 +118,7 @@ function Get-SqlServer
 
     Write-Verbose "Get-SqlServer $sqlserver"
 
-    $con = Get-SqlConnection $sqlserver $Username $Password
+    $con = Get-SqlConnection $sqlserver $Username $Password $applicationName
 
     $server = new-object ("Microsoft.SqlServer.Management.Smo.Server") $con
     #Some operations might take longer than the default timeout of 600 seconnds (10 minutes). Set new default to unlimited
@@ -2647,12 +2657,14 @@ function Invoke-SqlBackup
     [Parameter(Mandatory=$true)] $sqlserver,
     [Parameter(Mandatory=$true)] [string]$dbname,
     [Parameter(Mandatory=$true)] [string]$filepath,
-    [Microsoft.SqlServer.Management.Smo.BackupActionType]$action='Database',
+    [ValidateSet('Database','Log')][Microsoft.SqlServer.Management.Smo.BackupActionType]$action='Database',
     [string]$description='',
     [string]$name='',
     [switch]$force,
     [switch]$incremental,
-    [switch]$copyOnly
+    [switch]$copyOnly,
+	[switch]$compress,
+	[switch]$checksum
     )
 
     $ErrorActionPreference = "Stop"
@@ -2685,6 +2697,8 @@ function Invoke-SqlBackup
       else
       { throw 'CopyOnly is supported in SQL Server 2005(9.0) or higher with SMO version 10.0 or higher.' }
     }
+	if ($compress) {$backup.CompressionOption = "On"} else {$backup.CompressionOption = "Default"}
+	$backup.Checksum = $($checksum.IsPresent)
     
     $percentHandler = [Microsoft.SqlServer.Management.Smo.PercentCompleteEventHandler] {Write-Progress -activity "Backing up Database..." `
     -status "$($backup.Database)" -percentcomplete $($_.Percent); Write-Verbose "$($_.Percent) percent processed."}
