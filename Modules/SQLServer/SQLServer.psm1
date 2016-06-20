@@ -13,25 +13,38 @@
 ### </Usage>
 ### </Script>
 # ---------------------------------------------------------------------------
+
+#Attempt to load SMO by name starting with the latest version
 try {
 	Add-Type -AssemblyName "Microsoft.SqlServer.SMO, Version=13.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91" -ErrorAction Stop; $smoVersion = 13
+    Add-Type -AssemblyName "Microsoft.SqlServer.SMOExtended, Version=13.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91" -ErrorAction Stop
+    Add-Type -AssemblyName "Microsoft.SqlServer.ConnectionInfo, Version=13.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91" -ErrorAction Stop
 }
 catch {
 	try {
 		Add-Type -AssemblyName "Microsoft.SqlServer.SMO, Version=12.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91" -ErrorAction Stop; $smoVersion = 12
+        Add-Type -AssemblyName "Microsoft.SqlServer.SMOExtended, Version=12.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91" -ErrorAction Stop
+        Add-Type -AssemblyName "Microsoft.SqlServer.ConnectionInfo, Version=12.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91" -ErrorAction Stop
 	}
 	catch {
 		try {
 			Add-Type -AssemblyName "Microsoft.SqlServer.SMO, Version=11.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91" -ErrorAction Stop; $smoVersion = 11
-		}
+            Add-Type -AssemblyName "Microsoft.SqlServer.SMOExtended, Version=11.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91" -ErrorAction Stop
+    	    Add-Type -AssemblyName "Microsoft.SqlServer.ConnectionInfo, Version=11.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91" -ErrorAction Stop
+	    }
 		catch {
-			Write-Warning "SMO components not available. Download from https://goo.gl/HfrWCB."
+		    try {
+			    Add-Type -AssemblyName "Microsoft.SqlServer.SMO, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91" -ErrorAction Stop; $smoVersion = 10
+                Add-Type -AssemblyName "Microsoft.SqlServer.SMOExtended, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91" -ErrorAction Stop
+                Add-Type -AssemblyName "Microsoft.SqlServer.ConnectionInfo, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91" -ErrorAction Stop
+		    }
+		    catch {
+			    Write-Warning "SMO components not installed. Download from https://goo.gl/E700bG"
+                Break
+		    }
 		}
 	}
 }
-
-try {Add-Type -AssemblyName "Microsoft.SqlServer.SMOExtended, Version=11.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91" -ErrorAction Stop} catch {Write-Warning "SMOExtended v11 not available. Download from https://goo.gl/HfrWCB."}
-try {Add-Type -AssemblyName "Microsoft.SqlServer.ConnectionInfo, Version=11.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91" -ErrorAction Stop} catch {Write-Warning "ConnectionInfo v11 not available. Download from https://goo.gl/HfrWCB."}
 
 $scriptRoot = Split-Path (Resolve-Path $myInvocation.MyCommand.Path)
 
@@ -4143,6 +4156,435 @@ function Get-SqlEdition
     $server.information | Select @{name='Server';Expression={$server.Name}}, Edition
 
 }#Get-SqlEdition
+
+#######################
+<#
+.SYNOPSIS
+Creates a new endpoint for Database Mirroring.
+.DESCRIPTION
+The New-MirroringEndpoint function creates a new endpoint for Database Mirroring.
+.INPUTS
+None
+    You cannot pipe objects to New-MirroringEndpoint 
+.OUTPUTS
+None
+.EXAMPLE
+New-MirroringEndpoint "Z002\sql2K8" "Partner"
+	This command gets a ServerConnection to SQL Server Z002\SQL2K8.
+.LINK
+New-MirroringEndpoint
+#>
+function New-MirroringEndpoint {
+	[CmdletBinding()]
+	Param (
+	    [parameter(Mandatory=$true,Position=1)]
+	    [ValidateNotNullOrEmpty()]
+	    $sqlServer,
+	    [parameter(Mandatory=$false,Position=2)]
+		[ValidateSet("All","None","Partner","Witness")]
+	    [String]
+	    $mirroringRole="Partner",
+	    [parameter(Mandatory=$false,Position=3)]
+		[ValidateRange(1024,65535)]
+	    [int]
+	    $tcpPort=5022,
+	    [parameter(Mandatory=$false,Position=4)]
+	    [ValidateNotNullOrEmpty()]
+	    [String]
+	    $endpointOwner="sa",
+		[parameter(Mandatory=$false,Position=5)]
+		[ValidateSet("RC4","AES")]
+	    [string]
+		$encryptionAlgorithm="AES"
+	)
+
+	Write-Verbose "New-MirroringEndpoint $sqlServer $mirroringRole $tcpPort $endpointOwner $encryptionAlgorithm"
+
+	#Get the server object.
+    switch ($sqlServer.GetType().Name) {
+        'String' { $server = Get-SqlServer $sqlServer }
+        'Server' { $server = $sqlServer }
+        default { throw 'New-MirroringEndpoint:Param `$sqlserver must be a String or Server object.' }
+    }
+
+	#Throw error because only 1 database mirroring endpoint can exist per SQL Server instance.
+	if ($server.EndPoints | Where-Object {$_.EndpointType -eq "DatabaseMirroring"}) {
+		throw "A database mirroring endpoint already exists on $($server.Name)."
+	}
+
+	#Create a new endpoint object.
+    $endpoint  = new-object Microsoft.SqlServer.Management.Smo.EndPoint ($server, "DatabaseMirroring")
+
+	#Set the properties for the endpoint object.
+    $endpoint.EndpointType = "DatabaseMirroring"
+    $endpoint.ProtocolType = "Tcp"
+	$endpoint.Protocol.Tcp.ListenerPort = $tcpPort
+	$endpoint.Payload.DatabaseMirroring.EndpointEncryption = "Required"
+	$endpoint.Payload.DatabaseMirroring.EndpointEncryptionAlgorithm = $encryptionAlgorithm
+	$endpoint.Payload.DatabaseMirroring.ServerMirroringRole = $mirroringRole
+
+	#Throw error if the login does not exist on the server.
+	if ($server.Logins.Contains($endpointOwner)) {
+		$endpoint.Owner = $endpointOwner
+	}
+	else {
+		Write-Error "New-MirroringEndpoint: Endpoint owner [$endPointOwner] does not exist on $($server.Name)."
+		throw
+	}
+
+	#Create the endpoint and start it.
+	try {
+        $endpoint.Create()
+        $endpoint.Start()
+    }
+	catch {
+		$ex = $_.Exception
+		$message = $ex.message
+		$ex = $ex.InnerException
+		while ($ex.InnerException) {
+			$message += "`n$ex.InnerException.message"
+			$ex = $ex.InnerException
+		}
+		Write-Error $message
+	}
+} #New-MirroringEndpoint
+
+#######################
+<#
+.SYNOPSIS
+Gets permissions for an endpoint.
+.DESCRIPTION
+The Get-EndpointPermission function gets all permissions on an endpoint.
+.INPUTS
+None
+    You cannot pipe objects to Get-EndpointPermission 
+.OUTPUTS
+None
+.EXAMPLE
+Get-EndpointPermission "Z002\sql2K8" "DatabaseMirroring"
+	This command gets all permissions on the DatabaseMirroring endpoint.
+.LINK
+Get-EndpointPermission
+#>
+function Get-EndpointPermission {
+	[CmdletBinding()]
+	Param (
+	    [parameter(Mandatory=$true,Position=1)]
+	    [ValidateNotNullOrEmpty()]
+	    $sqlServer,
+	    [parameter(Mandatory=$true,Position=2)]
+	    [ValidateNotNullOrEmpty()]
+		$endpoint
+	)
+
+    Write-Verbose "Get-EndpointPermission $sqlServer $endpoint"
+
+	#Get the server object.    
+	switch ($sqlServer.GetType().Name) {
+        'String' { $server = Get-SqlServer $sqlServer }
+        'Server' { $server = $sqlServer }
+        default { throw 'Get-EndpointPermission:Param `$sqlserver must be a String or Server object.' }
+    }
+
+	#Get the endpoint object.
+	switch ($endpoint.GetType().Name) {
+        'String' { $ep = $server.EndPoints | Where-Object {$_.Name -eq $endpoint} }
+        'Endpoint' { $ep = $endpoint }
+        default { throw 'GSet-EndpointPermission:Param `$endpoint must be a String or Endpoint object.' }
+    }
+
+	Write-Output $ep.EnumObjectPermissions()
+
+} #Get-EndpointPermission
+
+#######################
+<#
+.SYNOPSIS
+Sets permissions for an endpoint.
+.DESCRIPTION
+The Set-EndpointPermission function set permissions on an endpoint.
+.INPUTS
+None
+    You cannot pipe objects to Set-EndpointPermission 
+.OUTPUTS
+None
+.EXAMPLE
+Set-EndpointPermission "Z002\sql2K8" "DatabaseMirroring" "Partner" "Domain\svcSQL" "Grant" "Connect"
+	This command grants connect permission on the DatabaseMirroring endpoint for the login [Domain\svcSQL].
+.LINK
+Set-EndpointPermission
+#>
+function Set-EndpointPermission {
+	[CmdletBinding()]
+	Param (
+	    [parameter(Mandatory=$true,Position=1)]
+	    [ValidateNotNullOrEmpty()]
+	    $sqlServer,
+	    [parameter(Mandatory=$true,Position=2)]
+	    [ValidateNotNullOrEmpty()]
+		$endpoint,
+	    [parameter(Mandatory=$true,Position=3)]
+	    [ValidateNotNullOrEmpty()]
+	    [string]
+	    $loginName,
+	    [parameter(Mandatory=$true,Position=4)]
+		[ValidateSet('Grant','Deny','Revoke')]
+	    [string]
+	    $action,
+	    [parameter(Mandatory=$true,Position=5)]
+		[ValidateSet('Alter','Connect','Control','TakeOwnership','ViewDefinition')]
+	    [string]
+	    $permission
+	)
+
+    Write-Verbose "Set-EndpointPermission $sqlServer $endpoint $loginName $action $permission"
+
+	#Get the server object.    
+	switch ($sqlServer.GetType().Name) {
+        'String' { $server = Get-SqlServer $sqlServer }
+        'Server' { $server = $sqlServer }
+        default { throw 'Set-EndpointPermission:Param `$sqlserver must be a String or Server object.' }
+    }
+
+	#Get the endpoint object.
+	switch ($endpoint.GetType().Name) {
+        'String' { $ep = $server.EndPoints | Where-Object {$_.Name -eq $endpoint} }
+        'Endpoint' { $ep = $endpoint }
+        default { throw 'Set-EndpointPermission:Param `$endpoint must be a String or Endpoint object.' }
+    }
+
+	#Create a new ObjectPermission object.
+	$ops  =  New-Object Microsoft.SqlServer.Management.SMO.ObjectPermissionSet
+
+	#Set the permission that will be changed.
+	$ops.$($permission) = $true
+
+	#Change the permission.
+	if ($server.Logins.Contains($loginName)) {
+		switch ($action) {
+			'Grant' {$ep.Grant($ops,$loginName)}
+			'Deny' {$ep.Deny($ops,$loginName)}
+			'Revoke' {$ep.Revoke($ops,$loginName)}
+		}
+	}
+	else {
+		Write-Error "Set-EndpointPermission: Login [$loginName] does not exist on $($server.Name)."
+	}
+} #Set-EndpointPermission
+
+#######################
+<#
+.SYNOPSIS
+Sets the database mirroring saftey level for a database.
+.DESCRIPTION
+The Set-MirroringSafetyLevel function change the database mirroring saftey level between HighSaftey(Synchronous) and HighPerformance(Asynchronous).
+.INPUTS
+None
+    You cannot pipe objects to Set-MirroringSafetyLevel 
+.OUTPUTS
+None
+.EXAMPLE
+Set-MirroringSafetyLevel "Z002\sql2K8" "AdventureWorks2012" "HighSafety"
+	This command changes the saftey level of AdventureWorks2012 to HighSaftey(Synchronous).
+.LINK
+Set-MirroringSafetyLevel
+#>
+function Set-MirroringSafetyLevel {
+	[CmdletBinding()]
+	Param (
+	    [parameter(Mandatory=$true,Position=1)]
+	    [ValidateNotNullOrEmpty()]
+		$sqlServer,
+	    [parameter(Mandatory=$true,Position=2)]
+	    [ValidateNotNullOrEmpty()]
+		$database,
+		[parameter(Mandatory=$true,Position=3)]
+		[ValidateSet('HighSafety','HighPerformance')]
+		[string]
+		$safteyLevel
+	)
+
+	Write-Verbose "Set-MirroringSafetyLevel $sqlServer $database $safteyLevel"
+	
+	#Get the server object.    
+	switch ($sqlServer.GetType().Name) {
+        'String' { $server = Get-SqlServer $sqlServer }
+        'Server' { $server = $sqlServer }
+        default { throw 'Set-MirroringSafetyLevel:Param `$sqlserver must be a String or Server object.' }
+    }
+
+	#Get the database object.    
+	switch ($database.GetType().Name) {
+        'String' { $db = $server.Databases[$database] }
+        'Database' { $db = $database }
+        default { throw 'Set-MirroringSafetyLevel:Param `$database must be a String or Database object.' }
+    }
+
+	#Mirroring saftey level can only be changed on the principal.
+	if($db.IsAccessible) {
+		switch ($safteyLevel) {
+			'HighSafety' { $db.MirroringSafetyLevel = [Microsoft.SqlServer.Management.Smo.MirroringSafetyLevel]::Full }
+			'HighPerformance' { $db.MirroringSafetyLevel = [Microsoft.SqlServer.Management.Smo.MirroringSafetyLevel]::Off }
+			}
+	}
+
+	#Change the saftey level.
+    try
+    {
+        $db.Alter()
+    }
+	catch {
+		$ex = $_.Exception
+		$message = $ex.message
+		$ex = $ex.InnerException
+		while ($ex.InnerException) {
+			$message += "`n$ex.InnerException.message"
+			$ex = $ex.InnerException
+		}
+		Write-Error $message
+	}
+
+
+} #Set-MirroringSafetyLevel
+
+#######################
+<#
+.SYNOPSIS
+Set the database mirroring partner.
+.DESCRIPTION
+The Set-MirroringPartner sets the mirroring partner for database.
+.INPUTS
+None
+    You cannot pipe objects to Set-EndpointPermission 
+.OUTPUTS
+None
+.EXAMPLE
+Set-MirroringPartner "Z002\sql2K8" "AdventureWorks2012" "TCP://SERVER.domain.com:5022"
+	This command set the mirroring partner for the AdventureWorks2012 database to TCP://SERVER.domain.com:5022.
+.LINK
+Set-MirroringPartner
+#>
+function Set-MirroringParter {
+	[CmdletBinding()]
+	Param (
+	    [parameter(Mandatory=$true,Position=1)]
+	    [ValidateNotNullOrEmpty()]
+		$sqlServer,
+	    [parameter(Mandatory=$true,Position=2)]
+	    [ValidateNotNullOrEmpty()]
+		$database,
+	    [parameter(Mandatory=$true,Position=3)]
+	    [ValidateSet('Partner','Witness')]
+	    [string]
+		$type,
+	    [parameter(Mandatory=$true,Position=4)]
+	    [ValidateNotNullOrEmpty()]
+	    [string]
+		$mirroringAddress
+	)
+
+	Write-Verbose "Set-MirroringParter $sqlServer $database $type $mirroringAddress"
+    
+	#Get the server object.    
+	switch ($sqlServer.GetType().Name) {
+        'String' { $server = Get-SqlServer $sqlServer }
+        'Server' { $server = $sqlServer }
+        default { throw 'Set-MirroringParter:Param `$sqlserver must be a String or Server object.' }
+    }
+
+	#Get the database object.    
+	switch ($database.GetType().Name) {
+        'String' { $db = $server.Databases[$database] }
+        'Database' { $db = $database }
+        default { throw 'Set-MirroringParter:Param `$database must be a String or Database object.' }
+    }
+
+	#Set the mirroring parter.
+	switch ($type) {
+		'Partner' { $db.MirroringPartner = $mirroringAddress }
+		'Witness' { $db.MirroringWitness = $mirroringAddress }
+	}
+
+	#Change the mirroring partner.
+    try
+    {
+        $db.Alter()
+    }
+	catch {
+		$ex = $_.Exception
+		$message = $ex.message
+		$ex = $ex.InnerException
+		while ($ex.InnerException) {
+			$message += "`n$ex.InnerException.message"
+			$ex = $ex.InnerException
+		}
+		Write-Error $message
+	}
+} #Set-MirroringParter
+
+<#
+.SYNOPSIS
+Changes the mirroring state of a database.
+.DESCRIPTION
+The Set-MirroringState changes the state of database mirroring.
+.INPUTS
+None
+    You cannot pipe objects to Set-MirroringState 
+.OUTPUTS
+None
+.EXAMPLE
+Set-MirroringState "Z002\sql2K8" "AdventureWorks2012" "Failover"
+	This command forces a failover from the principal to the mirror database.
+.LINK
+Set-MirroringState
+#>
+function Set-MirroringState {
+	[CmdletBinding()]
+	Param (
+	    [parameter(Mandatory=$true,Position=1)]
+	    [ValidateNotNullOrEmpty()]
+		$sqlServer,
+	    [parameter(Mandatory=$true,Position=2)]
+	    [ValidateNotNullOrEmpty()]
+		$database,
+	    [parameter(Mandatory=$true,Position=3)]
+		[ValidateSet('Failover','ForceFailoverAndAllowDataLoss','Off','RemoveWitness','Resume','Suspend')]
+	    [string]
+		$state
+	)
+
+	Write-Verbose "Set-MirroringState $sqlServer $database $state"
+
+	#Get the server object.    
+	switch ($sqlServer.GetType().Name) {
+        'String' { $server = Get-SqlServer $sqlServer }
+        'Server' { $server = $sqlServer }
+        default { throw 'Set-MirroringState:Param `$sqlserver must be a String or Server object.' }
+    }
+
+	#Get the database object.    
+	switch ($database.GetType().Name) {
+        'String' { $db = $server.Databases[$database] }
+        'Database' { $db = $database }
+        default { throw 'Set-MirroringState:Param `$database must be a String or Database object.' }
+    }
+
+	#Change the mirroring state.
+    try
+    {
+		$db.ChangeMirroringState($state)
+	}
+	catch {
+		$ex = $_.Exception
+		$message = $ex.message
+		$ex = $ex.InnerException
+		while ($ex.InnerException) {
+			$message += "`n$ex.InnerException.message"
+			$ex = $ex.InnerException
+		}
+		Write-Error $message
+	}
+} #Set-MirroringState
 
 #Aliases
 New-Alias -name Get-Information_Schema.Tables -value Get-SqlInformation_Schema.Tables -Description "SQLPSX Alias"
