@@ -1,0 +1,7 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs/SQLPSX/v14/.suo
+/SQLPSX.sln
+/SQLPSX.pssproj
