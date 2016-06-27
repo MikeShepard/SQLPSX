@@ -11,10 +11,34 @@
 ###  </Usage>
 ### </Script>
 # ---------------------------------------------------------------------------
-try {add-type -AssemblyName "Microsoft.SqlServer.ConnectionInfo, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91" -EA Stop}
-catch {add-type -AssemblyName "Microsoft.SqlServer.ConnectionInfo"}
-try {add-type -AssemblyName "Microsoft.SqlServer.Rmo, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91" -EA Stop}
-catch {add-type -AssemblyName "Microsoft.SqlServer.Rmo"}
+
+#Attempt to load assemblies by name starting with the latest version
+try {
+	Add-Type -AssemblyName "Microsoft.SqlServer.Rmo, Version=13.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91" -ErrorAction Stop; $smoVersion = 13
+    Add-Type -AssemblyName "Microsoft.SqlServer.ConnectionInfo, Version=13.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91" -ErrorAction Stop
+}
+catch {
+	try {
+		Add-Type -AssemblyName "Microsoft.SqlServer.Rmo, Version=12.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91" -ErrorAction Stop; $smoVersion = 12
+        Add-Type -AssemblyName "Microsoft.SqlServer.ConnectionInfo, Version=12.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91" -ErrorAction Stop
+	}
+	catch {
+		try {
+			Add-Type -AssemblyName "Microsoft.SqlServer.Rmo, Version=11.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91" -ErrorAction Stop; $smoVersion = 11
+    	    Add-Type -AssemblyName "Microsoft.SqlServer.ConnectionInfo, Version=11.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91" -ErrorAction Stop
+	    }
+		catch {
+		    try {
+			    Add-Type -AssemblyName "Microsoft.SqlServer.Rmo, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91" -ErrorAction Stop; $smoVersion = 10
+                Add-Type -AssemblyName "Microsoft.SqlServer.ConnectionInfo, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91" -ErrorAction Stop
+		    }
+		    catch {
+			    Write-Warning "SMO components not installed. Download from https://goo.gl/E700bG"
+                Break
+		    }
+		}
+	}
+}
 
 $scriptRoot = Split-Path (Resolve-Path $myInvocation.MyCommand.Path)
 

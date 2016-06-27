@@ -11,30 +11,30 @@
 ### </Usage>
 ### </Script>
 # ---------------------------------------------------------------------------
-#20140207 SDL: In order to support multiple versions of SSIS, we need to see what versions
-#              current machine has access to
-# ---------------------------------------------------------------------------
-Param(
-	[string] $VersionNumber
-)
 
-$drives = get-wmiobject Win32_LogicalDisk | ? {$_.drivetype -eq 3} | % {get-psdrive $_.deviceid[0]} |Select Root;
-$foundDlls = @();
-$maxDTSVersion = 0;
-foreach ($drive in $drives) {
-	$foundDlls += get-childitem -path $drive.Root -filter "Microsoft.SQLServer.ManagedDTS.dll" -Recurse -ErrorAction SilentlyContinue;
+try {
+	Add-Type -AssemblyName "Microsoft.SqlServer.ManagedDTS, Version=13.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91" -ErrorAction Stop; $smoVersion = 13
+}
+catch {
+	try {
+		Add-Type -AssemblyName "Microsoft.SqlServer.ManagedDTS, Version=12.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91" -ErrorAction Stop; $smoVersion = 12
+	}
+	catch {
+		try {
+			Add-Type -AssemblyName "Microsoft.SqlServer.ManagedDTS, Version=11.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91" -ErrorAction Stop; $smoVersion = 11
+	    }
+		catch {
+		    try {
+			    Add-Type -AssemblyName "Microsoft.SqlServer.ManagedDTS, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91" -ErrorAction Stop; $smoVersion = 10
+		    }
+		    catch {
+			    Write-Warning "ManagedDTS components not installed. Download from https://goo.gl/a97EVQ"
+                Break
+		    }
+		}
+	}
 }
 
-#now accepts any number, but should be 9,10,10.5,11,12...
-if (-not [string]::IsNullOrEmpty($VersionNumber)) {
-		$version = $foundDlls.VersionInfo| Where-Object -Property ProductVersion -Like "$($versionNumber)*"|sort ProductVersion -Descending|Select FileName -First 1;	
-} else {
-	#if not passed through args, get the latest version
-	$version = $foundDlls.VersionInfo|sort ProductVersion -Descending|Select FileName -First 1
-
-}
-#add-type -AssemblyName "Microsoft.SqlServer.ManagedDTS, Version=$($version)" #, Culture=neutral, PublicKeyToken=89845dcd8080cc91"
-add-type -Path $version.FileName #"C:\Program Files\Microsoft SQL Server\100\SDK\Assemblies\Microsoft.SQLServer.ManagedDTS.dll"
 #######################
 <#
 .SYNOPSIS
