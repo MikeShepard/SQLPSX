@@ -42,33 +42,54 @@ catch {
 }
 
 <#
-No documentation yet.
+.SYNOPSIS
+Processes errors encoutered in PowerShell code.
+.DESCRIPTION
+The Get-SqlConnection function processes either PowerShell errors or application errors defined within your code.
+.INPUTS
+None
+.OUTPUTS
+None
+.EXAMPLE
+try{ 1/0 } catch { Get-Error $Error }
+This passes the common error object (System.Management.Automation.ErrorRecord) for processing.
+.EXAMPLE
+try{ 1/0 } catch { Get-Error "You attempted to divid by zero. Try again." }
+This passes a string that is output as an error message.
+.LINK
+Get-SqlConnection 
 #>
-function Get-Errors ($Error) {
-	if ($Error.GetType().Name -eq "String") {
+function Get-Error {
+	param(
+	[CmdletBinding()]
+    [Parameter(Position=0,ParameterSetName='PowerShellError',Mandatory=$true)] [System.Management.Automation.ErrorRecord]$PSError,
+    [Parameter(Position=0,ParameterSetName='ApplicationError',Mandatory=$true)] [string]$AppError
+	)
+
+    if ($PSError) {
+		#Process a PowerShell error
+		Write-Host "******************************"
+		Write-Host "Error Count: $($PSError.Count)"
+		Write-Host "******************************"
+
+		$Error = $PSError.Exception
+		Write-Host $Error.Message
+		$Error = $Error.InnerException
+		while ($Error.InnerException) {
+			Write-Host $Error.InnerException.Message
+			$Error = $Error.InnerException
+		}
+		Throw
+    }
+    elseif ($AppError) {
 		#Process an application error
 		Write-Host "******************************"
 		Write-Host "Error Count: 1"
 		Write-Host "******************************"
-		Write-Host $Error
+		Write-Host $AppError
 		Throw
-	}
-	else {
-		#Process a PowerShell error
-		Write-Host "******************************"
-		Write-Host "Error Count: $($Error.Count)"
-		Write-Host "******************************"
-
-		$error = $_.Exception
-		Write-Host $error.Message
-		$error = $error.InnerException
-		while ($error.InnerException) {
-			Write-Host $error.InnerException.Message
-			$error = $error.InnerException
-		}
-		Throw
-	}
-} #Get-Errors
+    }
+} #Get-Error
 
 #######################
 <#
@@ -94,6 +115,7 @@ Get-SqlConnection
 function Get-SqlConnection
 {
     param(
+	[CmdletBinding()]
     [Parameter(Mandatory=$true)] [string]$sqlserver,
     [string]$username, 
     [string]$password,
@@ -124,11 +146,11 @@ Parses registered servers in CMS to return a list of SQL Servers for processing.
 
 .INPUTS
 None
-    You cannot pipe objects to Get-CmsServers 
+    You cannot pipe objects to Get-CmsServer 
 
 .OUTPUTS
 Microsoft.SqlServer.Management.Smo.Server
-    Get-CmsServers returns a PowerShell custom object.
+    Get-CmsServer returns a PowerShell custom object.
  
 .PARAMETER cmsServer
 The name of the CMS SQL Server including instance name.
@@ -147,21 +169,21 @@ Includes code from Chrissy LeMarie (@cl).
 https://blog.netnerds.net/smo-recipes/central-management-server/
 
 .EXAMPLE
-Get-CmsServers -cmsServer "SOLO\CMS"
+Get-CmsServer -cmsServer "SOLO\CMS"
 Returns a list of all registered servers that on the CMS server.
 
 .EXAMPLE
-Get-CmsServers -cmsServer "SOLO\CMS" -cmsFolder "SQL2012" -recurse
+Get-CmsServer -cmsServer "SOLO\CMS" -cmsFolder "SQL2012" -recurse
 Returns a list of all registered servers that are in the SQL2012 folder and any subfolders that exist below it.
 
 .EXAMPLE
-Get-CmsServers -cmsServer "SOLO\CMS" -cmsFolder "SQL2012\Cluster" -unique
+Get-CmsServer -cmsServer "SOLO\CMS" -cmsFolder "SQL2012\Cluster" -unique
 Returns a list of all unique (distinct) registered servers that are in the folder for this exact path "SQL2012\Cluster".
 
 .LINK
 http://www.patrickkeisler.com/
 #>
-function Get-CmsServers {
+function Get-CmsServer {
 	Param
 	(
 	[CmdletBinding()]
@@ -178,14 +200,14 @@ function Get-CmsServers {
 				$cmsStore = new-object Microsoft.SqlServer.Management.RegisteredServers.RegisteredServersStore($sqlConnection)
 			}
 			catch {
-				Get-Errors $_
+				Get-Error $_
 			}
 		}
         'RegisteredServersStore' { $cmsStore = $cmsServer }
         default { throw 'Get-CmsGroup:Param `$cmsStore must be a String or ServerConnection object.' }
     }
 
-    Write-Verbose "Get-CmsServers $($cmsStore.DomainInstanceName) $cmsGroup $recurse $unique"
+    Write-Verbose "Get-CmsServer $($cmsStore.DomainInstanceName) $cmsGroup $recurse $unique"
 
 	############### Declarations ###############
 
@@ -196,7 +218,13 @@ function Get-CmsServers {
 
     ############### Functions ###############
 
-    Function Parse-ServerGroup($serverGroup,$collection) {
+    Function Parse-ServerGroup {
+		Param (
+			[CmdletBinding()]
+			[parameter(Position=0)][Microsoft.SqlServer.Management.RegisteredServers.ServerGroup]$serverGroup,
+			[parameter(Position=1)][System.Object]$collection
+		)
+
 		foreach ($instance in $serverGroup.RegisteredServers) {
 			$urn = $serverGroup.Urn
 			$group = $serverGroup.Name
@@ -281,18 +309,26 @@ function Get-CmsServers {
                 }
             }
         }
-        else {
-            if($unique.IsPresent) {
-                #Return all unique (distinct) servers
-                $serverList | Select-Object Server -Unique
+        elseif ($cmsFolder -eq "" -or $cmsFolder -eq $null) {
+            if($recurse.IsPresent) {
+                if($unique.IsPresent) {
+                    $serverList | Select-Object Server -Unique
+                }
+                else {
+                    $serverList | Select-Object Server
+                }
             }
             else {
-                #Return all servers
-                $serverList | Select-Object Server
+                if($unique.IsPresent) {
+                    $serverList | Where-Object {$_.Group -eq $null} | Select-Object Server -Unique
+                }
+                else {
+                    $serverList | Where-Object {$_.Group -eq $null} | Select-Object Server
+                }
             }
         }
     }
-} #Get-CmsServers
+} #Get-CmsServer
 
 #######################
 <#
@@ -336,7 +372,7 @@ function Get-CmsGroup {
 				$cmsStore = new-object Microsoft.SqlServer.Management.RegisteredServers.RegisteredServersStore($sqlConnection)
 			}
 			catch {
-				Get-Errors $_
+				Get-Error $_
 			}
 		}
         'RegisteredServersStore' { $cmsStore = $cmsServer }
@@ -356,10 +392,15 @@ function Get-CmsGroup {
         default { throw 'Get-CmsGroup:Param `$cmsGroup must be a String or ServerGroup object.' }
     }
 
-	foreach ($folder in $cmsFolders) {
-        $serverGroups = $serverGroups.ServerGroups[$folder]
-    } 
-    $serverGroups
+    if ($cmsGroup -eq "DatabaseEngineServerGroup") {
+        $serverGroups
+    }
+    else {
+	    foreach ($folder in $cmsFolders) {
+            $serverGroups = $serverGroups.ServerGroups[$folder]
+        } 
+        $serverGroups
+    }
 } #Get-CmsGroup
 
 #######################
@@ -414,7 +455,7 @@ function Add-CmsServer {
 				$cmsStore = new-object Microsoft.SqlServer.Management.RegisteredServers.RegisteredServersStore($sqlConnection)
 			}
 			catch {
-				Get-Errors $_
+				Get-Error $_
 			}
 		}
         'RegisteredServersStore' { $cmsStore = $cmsServer }
@@ -440,12 +481,12 @@ function Add-CmsServer {
 			$registeredServer.Create()
 		}
 		catch {
-			Get-Errors $_
+			Get-Error $_
 		}
     }
     else {
 		#Display a warning if the server is already registered in the group.
-        Write-Warning "$displayName is already exists in group `"$($group.Name)`""
+        Write-Warning "$displayName already exists in group `"$cmsGroup`""
     }
 } #Add-CmsServer
 
@@ -493,7 +534,7 @@ function Remove-CmsServer {
 				$cmsStore = new-object Microsoft.SqlServer.Management.RegisteredServers.RegisteredServersStore($sqlConnection)
 			}
 			catch {
-				Get-Errors $_
+				Get-Error $_
 			}
 		}
         'RegisteredServersStore' { $cmsStore = $cmsServer }
@@ -513,7 +554,7 @@ function Remove-CmsServer {
             $group.RegisteredServers[$sqlServerName].Drop()
 		}
 		catch {
-		    Get-Errors $_
+		    Get-Error $_
         }
     }
     else {
@@ -521,3 +562,92 @@ function Remove-CmsServer {
         Write-Warning "$sqlServerName does not exists in group `"$($group.Name)`""
     }
 } #Remove-CmsServer
+
+<#
+No documentation yet.
+#>
+function Add-CmsGroup {
+    Param (
+        [parameter(Position=0,Mandatory=$true)][ValidateNotNullOrEmpty()]$cmsServer,
+        [parameter(Position=1,Mandatory=$true)][ValidateNotNullOrEmpty()]$parentGroup,
+        [parameter(Position=2,Mandatory=$true)][ValidateNotNullOrEmpty()][String]$newGroup
+    )
+	switch ($cmsServer.GetType().Name) {
+        'String' { 
+		    try {
+				$sqlConnection = Get-SqlConnection -sqlserver $cmsServer
+				$cmsStore = new-object Microsoft.SqlServer.Management.RegisteredServers.RegisteredServersStore($sqlConnection)
+			}
+			catch {
+				Get-Error $_
+			}
+		}
+        'RegisteredServersStore' { $cmsStore = $cmsServer }
+        default { throw 'Add-CmsGroup:Param `$cmsStore must be a String or ServerConnection object.' }
+    }
+
+	switch ($parentGroup.GetType().Name)
+    {
+        'String' { $group = Get-CmsGroup -cmsServer $cmsStore -cmsGroup $parentGroup }
+        'ServerGroup' { $group = $parentGroup }
+        default { throw 'Add-CmsGroup:Param `$parentGroup must be a String or ServerGroup object.' }
+    }
+
+    if ($group.ServerGroups.Name -notcontains $newGroup) {
+        $objNewGroup = New-Object Microsoft.SqlServer.Management.RegisteredServers.ServerGroup($group,$newGroup)
+	    try {
+            $objNewGroup.Create()
+	    }
+	    catch {
+		    Get-Error $_
+	    }
+    }
+    else {
+        Write-Warning "$newGroup group already exists in parent group `"$parentGroup`""
+    }
+
+} #Add-CmsGroup
+
+<#
+No documentation yet.
+#>
+function Remove-CmsGroup {
+    Param (
+        [parameter(Position=0,Mandatory=$true)][ValidateNotNullOrEmpty()]$cmsServer,
+        [parameter(Position=1,Mandatory=$true)][ValidateNotNullOrEmpty()]$parentGroup,
+        [parameter(Position=2,Mandatory=$true)][ValidateNotNullOrEmpty()][String]$removeGroup
+    )
+	switch ($cmsServer.GetType().Name) {
+        'String' { 
+		    try {
+				$sqlConnection = Get-SqlConnection -sqlserver $cmsServer
+				$cmsStore = new-object Microsoft.SqlServer.Management.RegisteredServers.RegisteredServersStore($sqlConnection)
+			}
+			catch {
+				Get-Error $_
+			}
+		}
+        'RegisteredServersStore' { $cmsStore = $cmsServer }
+        default { throw 'Remove-CmsGroup:Param `$cmsStore must be a String or ServerConnection object.' }
+    }
+
+	switch ($parentGroup.GetType().Name)
+    {
+        'String' { $group = Get-CmsGroup -cmsServer $cmsStore -cmsGroup $parentGroup }
+        'ServerGroup' { $group = $parentGroup }
+        default { throw 'Remove-CmsGroup:Param `$parentGroup must be a String or ServerGroup object.' }
+    }
+
+    if ($group.ServerGroups.Name -contains $removeGroup) {
+		try {
+            $group.ServerGroups[$removeGroup].Drop()
+		}
+    catch {
+		    Get-Error $_
+	    }
+    }
+    else {
+        Write-Warning "$removeGroup group does not exists in parent group `"$parentGroup`""
+    }
+
+} #Remove-CmsGroup
