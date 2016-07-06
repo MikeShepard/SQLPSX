@@ -51,10 +51,10 @@ None
 .OUTPUTS
 None
 .EXAMPLE
-try{ 1/0 } catch { Get-Error $Error }
+try { 1/0 } catch { Get-Error $Error }
 This passes the common error object (System.Management.Automation.ErrorRecord) for processing.
 .EXAMPLE
-try{ 1/0 } catch { Get-Error "You attempted to divid by zero. Try again." }
+try { 1/0 } catch { Get-Error "You attempted to divid by zero. Try again." }
 This passes a string that is output as an error message.
 .LINK
 Get-SqlConnection 
@@ -204,7 +204,7 @@ function Get-CmsServer {
 			}
 		}
         'RegisteredServersStore' { $cmsStore = $cmsServer }
-        default { throw 'Get-CmsGroup:Param `$cmsStore must be a String or ServerConnection object.' }
+        default { Get-Error "Get-CmsGroup:Param `$cmsStore must be a String or ServerConnection object." }
     }
 
     Write-Verbose "Get-CmsServer $($cmsStore.DomainInstanceName) $cmsGroup $recurse $unique"
@@ -225,6 +225,7 @@ function Get-CmsServer {
 			[parameter(Position=1)][System.Object]$collection
 		)
 
+		#Get registered instances in this group.
 		foreach ($instance in $serverGroup.RegisteredServers) {
 			$urn = $serverGroup.Urn
 			$group = $serverGroup.Name
@@ -238,6 +239,7 @@ function Get-CmsServer {
 				}
 			}
 
+			#Add a new object for each registered instance.
 			$object = New-Object PSObject -Property @{
 				Server = $instance.ServerName
 				Group = $groupName
@@ -246,6 +248,7 @@ function Get-CmsServer {
 			$collection += $object
 		}
  
+		#Loop again if there are more sub groups.
 		foreach($group in $serverGroup.ServerGroups)
 		{
 			$newobject = (Parse-ServerGroup -serverGroup $group -collection $newcollection)
@@ -261,70 +264,64 @@ function Get-CmsServer {
         $serverList = Parse-ServerGroup -serverGroup $serverGroup -collection $newcollection
     }
 
-    if($PSCmdlet.MyInvocation.BoundParameters["Debug"].IsPresent) {
-        Write-Host -BackgroundColor Black -ForegroundColor Yellow "DEBUG OUTPUT:"
-        $serverList
+    if(($cmsFolder.Split("\")).Count -gt 1) {
+        if($recurse.IsPresent) {
+            #Return ones in this folder and subfolders
+            $cmsFolder = "*$cmsFolder\*"
+            if($unique.IsPresent) {
+                $serverList | Where-Object {$_.FullGroupPath -like $cmsFolder} | Select-Object Server -Unique
+            }
+            else {
+                $serverList | Where-Object {$_.FullGroupPath -like $cmsFolder} | Select-Object Server
+            }
+        }
+        else {
+            #Return only the ones in this folder
+            $cmsFolder = "$cmsFolder\"
+            if($unique.IsPresent) {
+                $serverList | Where-Object {$_.FullGroupPath -eq $cmsFolder} | Select-Object Server -Unique
+            }
+            else {
+                $serverList | Where-Object {$_.FullGroupPath -eq $cmsFolder} | Select-Object Server
+            }
+        }
     }
-    else {
-        if(($cmsFolder.Split("\")).Count -gt 1) {
-            if($recurse.IsPresent) {
-                #Return ones in this folder and subfolders
-                $cmsFolder = "*$cmsFolder\*"
-                if($unique.IsPresent) {
-                    $serverList | Where-Object {$_.FullGroupPath -like $cmsFolder} | Select-Object Server -Unique
-                }
-                else {
-                    $serverList | Where-Object {$_.FullGroupPath -like $cmsFolder} | Select-Object Server
-                }
+    elseif (($cmsFolder.Split("\")).Count -eq 1 -and $cmsFolder.Length -ne 0) {
+        if($recurse.IsPresent) {
+            #Return ones in this folder and subfolders
+            $cmsFolder = "*$cmsFolder\*"
+            if($unique.IsPresent) {
+                $serverList | Where-Object {$_.FullGroupPath -like $cmsFolder} | Select-Object Server -Unique
             }
             else {
-                #Return only the ones in this folder
-                $cmsFolder = "$cmsFolder\"
-                if($unique.IsPresent) {
-                    $serverList | Where-Object {$_.FullGroupPath -eq $cmsFolder} | Select-Object Server -Unique
-                }
-                else {
-                    $serverList | Where-Object {$_.FullGroupPath -eq $cmsFolder} | Select-Object Server
-                }
+                $serverList | Where-Object {$_.FullGroupPath -like $cmsFolder} | Select-Object Server
             }
         }
-        elseif (($cmsFolder.Split("\")).Count -eq 1 -and $cmsFolder.Length -ne 0) {
-            if($recurse.IsPresent) {
-                #Return ones in this folder and subfolders
-                $cmsFolder = "*$cmsFolder\*"
-                if($unique.IsPresent) {
-                    $serverList | Where-Object {$_.FullGroupPath -like $cmsFolder} | Select-Object Server -Unique
-                }
-                else {
-                    $serverList | Where-Object {$_.FullGroupPath -like $cmsFolder} | Select-Object Server
-                }
+        else {
+            #Return only the ones in this folder
+            if($unique.IsPresent) {
+                $serverList | Where-Object {$_.Group -eq $cmsFolder} | Select-Object Server -Unique
             }
             else {
-                #Return only the ones in this folder
-                if($unique.IsPresent) {
-                    $serverList | Where-Object {$_.Group -eq $cmsFolder} | Select-Object Server -Unique
-                }
-                else {
-                    $serverList | Where-Object {$_.Group -eq $cmsFolder} | Select-Object Server
-                }
+                $serverList | Where-Object {$_.Group -eq $cmsFolder} | Select-Object Server
             }
         }
-        elseif ($cmsFolder -eq "" -or $cmsFolder -eq $null) {
-            if($recurse.IsPresent) {
-                if($unique.IsPresent) {
-                    $serverList | Select-Object Server -Unique
-                }
-                else {
-                    $serverList | Select-Object Server
-                }
+    }
+    elseif ($cmsFolder -eq "" -or $cmsFolder -eq $null) {
+        if($recurse.IsPresent) {
+            if($unique.IsPresent) {
+                $serverList | Select-Object Server -Unique
             }
             else {
-                if($unique.IsPresent) {
-                    $serverList | Where-Object {$_.Group -eq $null} | Select-Object Server -Unique
-                }
-                else {
-                    $serverList | Where-Object {$_.Group -eq $null} | Select-Object Server
-                }
+                $serverList | Select-Object Server
+            }
+        }
+        else {
+            if($unique.IsPresent) {
+                $serverList | Where-Object {$_.Group -eq $null} | Select-Object Server -Unique
+            }
+            else {
+                $serverList | Where-Object {$_.Group -eq $null} | Select-Object Server
             }
         }
     }
@@ -376,7 +373,7 @@ function Get-CmsGroup {
 			}
 		}
         'RegisteredServersStore' { $cmsStore = $cmsServer }
-        default { throw 'Get-CmsGroup:Param `$cmsStore must be a String or ServerConnection object.' }
+        default { Get-Error "Get-CmsGroup:Param `$cmsStore must be a String or ServerConnection object." }
     }
 
 	switch ($cmsGroup.GetType().Name)
@@ -389,7 +386,7 @@ function Get-CmsGroup {
 			$serverGroups = $cmsGroup
 			$cmsFolders = $cmsGroup.Name
 		}
-        default { throw 'Get-CmsGroup:Param `$cmsGroup must be a String or ServerGroup object.' }
+        default { Get-Error "Get-CmsGroup:Param `$cmsGroup must be a String or ServerGroup object." }
     }
 
     if ($cmsGroup -eq "DatabaseEngineServerGroup") {
@@ -459,14 +456,14 @@ function Add-CmsServer {
 			}
 		}
         'RegisteredServersStore' { $cmsStore = $cmsServer }
-        default { throw 'Add-CmsServer:Param `$cmsStore must be a String or ServerConnection object.' }
+        default { Get-Error "Add-CmsServer:Param `$cmsStore must be a String or ServerConnection object." }
     }
 
 	switch ($cmsGroup.GetType().Name)
     {
         'String' { $group = Get-CmsGroup -cmsServer $cmsStore -cmsGroup $cmsGroup }
         'ServerGroup' { $group = $cmsGroup }
-        default { throw 'Add-CmsServer:Param `$cmsGroup must be a String or ServerGroup object.' }
+        default { Get-Error "Add-CmsServer:Param `$cmsGroup must be a String or ServerGroup object." }
     }
 
 	#Set the display name if user did not specify it
@@ -538,14 +535,14 @@ function Remove-CmsServer {
 			}
 		}
         'RegisteredServersStore' { $cmsStore = $cmsServer }
-        default { throw 'Remove-CmsServer:Param `$cmsStore must be a String or ServerConnection object.' }
+        default { Get-Error "Remove-CmsServer:Param `$cmsStore must be a String or ServerConnection object." }
     }
 
 	switch ($cmsGroup.GetType().Name)
     {
         'String' { $group = Get-CmsGroup -cmsServer $cmsStore -cmsGroup $cmsGroup }
         'ServerGroup' { $group = $cmsGroup }
-        default { throw 'Remove-CmsServer:Param `$cmsGroup must be a String or ServerGroup object.' }
+        default { Get-Error "Remove-CmsServer:Param `$cmsGroup must be a String or ServerGroup object." }
     }
 
 	#Drop the server from the group.
@@ -563,8 +560,36 @@ function Remove-CmsServer {
     }
 } #Remove-CmsServer
 
+#######################
 <#
-No documentation yet.
+.SYNOPSIS
+Adds a new group to a CMS server.
+
+.DESCRIPTION
+Adds a new group to a CMS server in the parent folder path specified.
+
+.INPUTS
+None.
+You cannot pipe objects to Add-CmsGroup.
+
+.OUTPUTS
+None.
+ 
+.PARAMETER cmsServer
+The name of the CMS SQL Server including instance name.
+
+.PARAMETER parentGroup
+The name of a group (and path) in the CMS server where the new folder will be created.
+
+.PARAMETER newGroup
+The name of the group to create.
+
+.EXAMPLE
+Add-CmsGroup -cmsServer "SOLO\CMS" -parentGroup "SQL2012\Cluster" -newGroup "Website1"
+Creates a new group "Website1" in the parent group "SQL2012\Cluster" on the "SOLO\CMS" CMS server.
+
+.LINK
+http://www.patrickkeisler.com/
 #>
 function Add-CmsGroup {
     Param (
@@ -583,17 +608,18 @@ function Add-CmsGroup {
 			}
 		}
         'RegisteredServersStore' { $cmsStore = $cmsServer }
-        default { throw 'Add-CmsGroup:Param `$cmsStore must be a String or ServerConnection object.' }
+        default { Get-Error "Add-CmsGroup:Param `$cmsStore must be a String or RegisteredServersStore object." }
     }
 
 	switch ($parentGroup.GetType().Name)
     {
         'String' { $group = Get-CmsGroup -cmsServer $cmsStore -cmsGroup $parentGroup }
         'ServerGroup' { $group = $parentGroup }
-        default { throw 'Add-CmsGroup:Param `$parentGroup must be a String or ServerGroup object.' }
+        default { Get-Error "Add-CmsGroup:Param `$parentGroup must be a String or ServerGroup object." }
     }
 
     if ($group.ServerGroups.Name -notcontains $newGroup) {
+		#Create the new CMS group if it does not exist.
         $objNewGroup = New-Object Microsoft.SqlServer.Management.RegisteredServers.ServerGroup($group,$newGroup)
 	    try {
             $objNewGroup.Create()
@@ -603,13 +629,42 @@ function Add-CmsGroup {
 	    }
     }
     else {
+		#Write warning if the group already exists.
         Write-Warning "$newGroup group already exists in parent group `"$parentGroup`""
     }
 
 } #Add-CmsGroup
 
+#######################
 <#
-No documentation yet.
+.SYNOPSIS
+Deletes a group from a CMS server.
+
+.DESCRIPTION
+Deletes a group and any subgroups and registered servers from a CMS server in the parent folder path specified.
+
+.INPUTS
+None.
+You cannot pipe objects to Remove-CmsGroup.
+
+.OUTPUTS
+None.
+ 
+.PARAMETER cmsServer
+The name of the CMS SQL Server including instance name.
+
+.PARAMETER parentGroup
+The name of a group (and path) in the CMS server where the folder will be deleted.
+
+.PARAMETER removeGroup
+The name of the group to delete.
+
+.EXAMPLE
+Remove-CmsGroup -cmsServer "SOLO\CMS" -parentGroup "SQL2012\Cluster" -removeGroup "Website1"
+Deletes a group "Website1" in the parent group "SQL2012\Cluster" on the "SOLO\CMS" CMS server.
+
+.LINK
+http://www.patrickkeisler.com/
 #>
 function Remove-CmsGroup {
     Param (
@@ -628,17 +683,18 @@ function Remove-CmsGroup {
 			}
 		}
         'RegisteredServersStore' { $cmsStore = $cmsServer }
-        default { throw 'Remove-CmsGroup:Param `$cmsStore must be a String or ServerConnection object.' }
+        default { Get-Error "Remove-CmsGroup:Param `$cmsStore must be a String or RegisteredServersStore object." }
     }
 
 	switch ($parentGroup.GetType().Name)
     {
         'String' { $group = Get-CmsGroup -cmsServer $cmsStore -cmsGroup $parentGroup }
         'ServerGroup' { $group = $parentGroup }
-        default { throw 'Remove-CmsGroup:Param `$parentGroup must be a String or ServerGroup object.' }
+        default { Get-Error "Remove-CmsGroup:Param `$parentGroup must be a String or ServerGroup object." }
     }
 
     if ($group.ServerGroups.Name -contains $removeGroup) {
+		#Remove the CMS group.
 		try {
             $group.ServerGroups[$removeGroup].Drop()
 		}
@@ -647,6 +703,7 @@ function Remove-CmsGroup {
 	    }
     }
     else {
+		#Write warning if the group does not exist.
         Write-Warning "$removeGroup group does not exists in parent group `"$parentGroup`""
     }
 
