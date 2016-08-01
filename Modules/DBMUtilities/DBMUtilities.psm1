@@ -1,6 +1,6 @@
 #Requires -Version 2.0
 Set-StrictMode -Version 2.0
-Import-Module SQLServer -Force -ErrorAction Stop
+Import-Module SQLPSXServer -Force -ErrorAction Stop
 
 #The type should be available once we import the SQLServer module.
 #These will not be available for export for now.
