@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?include $(sys.CURRENTDIR)\Config.wxi?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Fragment>
+        <ComponentGroup Id="SQLParser">
+            <ComponentRef Id="Microsoft.Data.Schema.ScriptDom.dll" />
+            <ComponentRef Id="Microsoft.Data.Schema.ScriptDom.Sql.dll" />
+            <ComponentRef Id="SQLParser.dll" />
+            <ComponentRef Id="SQLParser.psd1" />
+            <ComponentRef Id="SQLParser.dll_help.xml" />
+        </ComponentGroup>
+    </Fragment>
+    <Fragment>
+        <DirectoryRef Id="SQLParser">
+            <Component Id="Microsoft.Data.Schema.ScriptDom.dll" Guid="*">
+                <File Id="Microsoft.Data.Schema.ScriptDom.dll" KeyPath="yes" Source="$(var.SQLParser)\Microsoft.Data.Schema.ScriptDom.dll" />
+            </Component>
+            <Component Id="Microsoft.Data.Schema.ScriptDom.Sql.dll" Guid="*">
+                <File Id="Microsoft.Data.Schema.ScriptDom.Sql.dll" KeyPath="yes" Source="$(var.SQLParser)\Microsoft.Data.Schema.ScriptDom.Sql.dll" />
+            </Component>
+            <Component Id="SQLParser.dll" Guid="*">
+                <File Id="SQLParser.dll" KeyPath="yes" Source="$(var.SQLParser)\SQLParser.dll" />
+            </Component>
+            <Component Id="SQLParser.psd1" Guid="*">
+                <File Id="SQLParser.psd1" KeyPath="yes" Source="$(var.SQLParser)\SQLParser.psd1" />
+            </Component>
+            <Directory Id="en_US" Name="en-US">
+                <Component Id="SQLParser.dll_help.xml" Guid="*">
+                    <File Id="SQLParser.dll_help.xml" KeyPath="yes" Source="$(var.SQLParser)\en-US\SQLParser.dll-help.xml" />
+                </Component>
+            </Directory>
+        </DirectoryRef>
+    </Fragment>
+</Wix>

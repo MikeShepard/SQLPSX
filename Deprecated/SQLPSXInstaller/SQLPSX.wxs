@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?include $(sys.CURRENTDIR)\Config.wxi?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Fragment>
+        <ComponentGroup Id="SQLPSX">
+            <ComponentRef Id="SQLPSX.psm1" />
+        </ComponentGroup>
+    </Fragment>
+    <Fragment>
+        <DirectoryRef Id="SQLPSX">
+            <Component Id="SQLPSX.psm1" Guid="*">
+                <File Id="SQLPSX.psm1" KeyPath="yes" Source="$(var.SQLPSX)\SQLPSX.psm1" />
+            </Component>
+        </DirectoryRef>
+    </Fragment>
+</Wix>
