@@ -1,0 +1,98 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<doc>
+  <assembly>
+    <name>Microsoft.Data.Schema.ScriptDom</name>
+  </assembly>
+  <members>
+    <member name="T:Microsoft.Data.Schema.ScriptDom.IScriptFragment"></member>
+    <member name="P:Microsoft.Data.Schema.ScriptDom.IScriptFragment.FragmentLength">
+      <summary>
+                    Gets the number of characters in the fragment.
+                </summary>
+    </member>
+    <member name="P:Microsoft.Data.Schema.ScriptDom.IScriptFragment.StartOffset">
+      <summary>
+                    Gets the offset of the fragment.
+                </summary>
+    </member>
+    <member name="T:Microsoft.Data.Schema.ScriptDom.ParseError">
+      <summary>
+                    This class reports on the error that occurred during parsing.
+                </summary>
+    </member>
+    <member name="M:Microsoft.Data.Schema.ScriptDom.ParseError.#ctor(System.String,System.Int32,System.Int32,System.Int32,System.String)"></member>
+    <member name="P:Microsoft.Data.Schema.ScriptDom.ParseError.Column"></member>
+    <member name="P:Microsoft.Data.Schema.ScriptDom.ParseError.Identifier">
+      <summary>
+                    Gets the identifier that uniquely represents the type of error.
+                </summary>
+    </member>
+    <member name="P:Microsoft.Data.Schema.ScriptDom.ParseError.Line"></member>
+    <member name="P:Microsoft.Data.Schema.ScriptDom.ParseError.Message">
+      <summary>
+                    Gets the error description.
+                </summary>
+    </member>
+    <member name="P:Microsoft.Data.Schema.ScriptDom.ParseError.Offset">
+      <summary>
+                    Gets the starting offset of the error.
+                </summary>
+    </member>
+    <member name="T:Microsoft.Data.Schema.ScriptDom.Parser">
+      <summary>
+                    Abstract base inherited by DSP-specific implementations for parsing language scripts.
+                </summary>
+    </member>
+    <member name="M:Microsoft.Data.Schema.ScriptDom.Parser.#ctor">
+      <summary>
+                    Initializes a new instance of the <see cref="T:Microsoft.Data.Schema.ScriptDom.Parser" /> class.
+                </summary>
+    </member>
+    <member name="M:Microsoft.Data.Schema.ScriptDom.Parser.Parse(System.IO.TextReader,System.Collections.Generic.IList{Microsoft.Data.Schema.ScriptDom.ParseError}@)">
+      <summary>
+                    Parses the input text and returns a script fragment.
+                </summary>
+      <returns>
+        <see cref="T:Microsoft.Data.Schema.ScriptDom.IScriptFragment" />
+      </returns>
+      <param name="input">
+                    The text to parse
+                </param>
+      <param name="errors">
+                    List of parsing errors
+                </param>
+    </member>
+    <member name="T:Microsoft.Data.Schema.ScriptDom.ScriptGenerator">
+      <summary>
+                    This class is used to generate a script from a script fragment.
+                </summary>
+    </member>
+    <member name="M:Microsoft.Data.Schema.ScriptDom.ScriptGenerator.#ctor">
+      <summary>
+                    Initializes a new instance of the <see cref="T:Microsoft.Data.Schema.ScriptDom.ScriptGenerator" /> class.
+                </summary>
+    </member>
+    <member name="M:Microsoft.Data.Schema.ScriptDom.ScriptGenerator.GenerateScript(Microsoft.Data.Schema.ScriptDom.IScriptFragment,System.IO.TextWriter)">
+      <summary>
+                    Populates the writer with a script with the scriptFragment.
+                </summary>
+      <param name="scriptFragment">
+                    The script fragment to generate script for.
+                </param>
+      <param name="writer">
+                    The writer that will be populated.
+                </param>
+    </member>
+    <member name="M:Microsoft.Data.Schema.ScriptDom.ScriptGenerator.GenerateScript(Microsoft.Data.Schema.ScriptDom.IScriptFragment,System.String@)">
+      <summary>
+                    Generates a script from a script fragment.
+                </summary>
+      <param name="scriptFragment">
+                    The script fragment to generate script for.
+                </param>
+      <param name="script">
+                    The generated script.
+                </param>
+    </member>
+  </members>
+</doc>

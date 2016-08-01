@@ -1,0 +1,90 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?include $(sys.CURRENTDIR)\Config.wxi?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Fragment>
+        <ComponentGroup Id="PBM">
+            <ComponentRef Id="PBM.psm1" />
+            <ComponentRef Id="PBMreadme.txt" />
+            <ComponentRef Id="dbo.PolicyEval.Table.sql" />
+            <ComponentRef Id="dbo.PolicyEvalError.Table.sql" />
+            <ComponentRef Id="EPM___BUILTIN_Administrators_.xml" />
+            <ComponentRef Id="EPM___Database_Auto_Close_Set_On.xml" />
+            <ComponentRef Id="EPM___Database_Compatability_Mode____master.xml" />
+            <ComponentRef Id="EPM___Database_Not_Owned_by_SA.xml" />
+            <ComponentRef Id="EPM___Default_Collation.xml" />
+            <ComponentRef Id="EPM___File_Growth.xml" />
+            <ComponentRef Id="EPM___Full_Database_Backup.xml" />
+            <ComponentRef Id="EPM___NonProd_Databases_not_in_SIMPLE_Recovery_Mode.xml" />
+            <ComponentRef Id="EPM___Replication_Distribution_Agent_Failure.xml" />
+            <ComponentRef Id="EPM___Replication_Latency_Greater_Than_15_minutes.xml" />
+            <ComponentRef Id="EPM___SQLAgent_is_running.xml" />
+            <ComponentRef Id="EPM___TLog_Not_Backed_Up_in_24_hours.xml" />
+            <ComponentRef Id="FailedPolicyReport.rdl" />
+            <ComponentRef Id="PBMDashBoard.rdl" />
+        </ComponentGroup>
+    </Fragment>
+    <Fragment>
+        <DirectoryRef Id="PBM">
+            <Component Id="PBM.psm1" Guid="*">
+                <File Id="PBM.psm1" KeyPath="yes" Source="$(var.PBM)\PBM.psm1" />
+            </Component>
+            <Component Id="PBMreadme.txt" Guid="*">
+                <File Id="PBMreadme.txt" KeyPath="yes" Source="$(var.PBM)\readme.txt" />
+            </Component>
+            <Directory Id="PBMDatabase" Name="Database">
+                <Component Id="dbo.PolicyEval.Table.sql" Guid="*">
+                    <File Id="dbo.PolicyEval.Table.sql" KeyPath="yes" Source="$(var.PBM)\Database\dbo.PolicyEval.Table.sql" />
+                </Component>
+                <Component Id="dbo.PolicyEvalError.Table.sql" Guid="*">
+                    <File Id="dbo.PolicyEvalError.Table.sql" KeyPath="yes" Source="$(var.PBM)\Database\dbo.PolicyEvalError.Table.sql" />
+                </Component>
+            </Directory>
+            <Directory Id="Policies" Name="Policies">
+                <Component Id="EPM___BUILTIN_Administrators_.xml" Guid="*">
+                    <File Id="EPM___BUILTIN_Administrators_.xml" KeyPath="yes" Source="$(var.PBM)\Policies\EPM - BUILTIN_Administrators .xml" />
+                </Component>
+                <Component Id="EPM___Database_Auto_Close_Set_On.xml" Guid="*">
+                    <File Id="EPM___Database_Auto_Close_Set_On.xml" KeyPath="yes" Source="$(var.PBM)\Policies\EPM - Database Auto Close Set On.xml" />
+                </Component>
+                <Component Id="EPM___Database_Compatability_Mode____master.xml" Guid="*">
+                    <File Id="EPM___Database_Compatability_Mode____master.xml" KeyPath="yes" Source="$(var.PBM)\Policies\EPM - Database Compatability Mode __ master.xml" />
+                </Component>
+                <Component Id="EPM___Database_Not_Owned_by_SA.xml" Guid="*">
+                    <File Id="EPM___Database_Not_Owned_by_SA.xml" KeyPath="yes" Source="$(var.PBM)\Policies\EPM - Database Not Owned by SA.xml" />
+                </Component>
+                <Component Id="EPM___Default_Collation.xml" Guid="*">
+                    <File Id="EPM___Default_Collation.xml" KeyPath="yes" Source="$(var.PBM)\Policies\EPM - Default Collation.xml" />
+                </Component>
+                <Component Id="EPM___File_Growth.xml" Guid="*">
+                    <File Id="EPM___File_Growth.xml" KeyPath="yes" Source="$(var.PBM)\Policies\EPM - File Growth.xml" />
+                </Component>
+                <Component Id="EPM___Full_Database_Backup.xml" Guid="*">
+                    <File Id="EPM___Full_Database_Backup.xml" KeyPath="yes" Source="$(var.PBM)\Policies\EPM - Full Database Backup.xml" />
+                </Component>
+                <Component Id="EPM___NonProd_Databases_not_in_SIMPLE_Recovery_Mode.xml" Guid="*">
+                    <File Id="EPM___NonProd_Databases_not_in_SIMPLE_Recovery_Mode.xml" KeyPath="yes" Source="$(var.PBM)\Policies\EPM - NonProd Databases not in SIMPLE Recovery Mode.xml" />
+                </Component>
+                <Component Id="EPM___Replication_Distribution_Agent_Failure.xml" Guid="*">
+                    <File Id="EPM___Replication_Distribution_Agent_Failure.xml" KeyPath="yes" Source="$(var.PBM)\Policies\EPM - Replication Distribution Agent Failure.xml" />
+                </Component>
+                <Component Id="EPM___Replication_Latency_Greater_Than_15_minutes.xml" Guid="*">
+                    <File Id="EPM___Replication_Latency_Greater_Than_15_minutes.xml" KeyPath="yes" Source="$(var.PBM)\Policies\EPM - Replication Latency Greater Than 15 minutes.xml" />
+                </Component>
+                <Component Id="EPM___SQLAgent_is_running.xml" Guid="*">
+                    <File Id="EPM___SQLAgent_is_running.xml" KeyPath="yes" Source="$(var.PBM)\Policies\EPM - SQLAgent is running.xml" />
+                </Component>
+                <Component Id="EPM___TLog_Not_Backed_Up_in_24_hours.xml" Guid="*">
+                    <File Id="EPM___TLog_Not_Backed_Up_in_24_hours.xml" KeyPath="yes" Source="$(var.PBM)\Policies\EPM - TLog Not Backed Up in 24 hours.xml" />
+                </Component>
+            </Directory>
+            <Directory Id="PBMReports" Name="Reports">
+                <Component Id="FailedPolicyReport.rdl" Guid="*">
+                    <File Id="FailedPolicyReport.rdl" KeyPath="yes" Source="$(var.PBM)\Reports\FailedPolicyReport.rdl" />
+                </Component>
+                <Component Id="PBMDashBoard.rdl" Guid="*">
+                    <File Id="PBMDashBoard.rdl" KeyPath="yes" Source="$(var.PBM)\Reports\PBMDashBoard.rdl" />
+                </Component>
+            </Directory>
+        </DirectoryRef>
+    </Fragment>
+</Wix>
