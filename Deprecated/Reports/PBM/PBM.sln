@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{F14B399A-7131-4C87-9E4B-1186C45EF12D}") = "PBM", "PBM.rptproj", "{EC0A8C85-7431-41A2-B238-0D7E6659A1D2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Default = Debug|Default
+		DebugLocal|Default = DebugLocal|Default
+		Release|Default = Release|Default
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EC0A8C85-7431-41A2-B238-0D7E6659A1D2}.Debug|Default.ActiveCfg = Debug
+		{EC0A8C85-7431-41A2-B238-0D7E6659A1D2}.Debug|Default.Build.0 = DebugLocal
+		{EC0A8C85-7431-41A2-B238-0D7E6659A1D2}.Debug|Default.Deploy.0 = DebugLocal
+		{EC0A8C85-7431-41A2-B238-0D7E6659A1D2}.DebugLocal|Default.ActiveCfg = DebugLocal
+		{EC0A8C85-7431-41A2-B238-0D7E6659A1D2}.DebugLocal|Default.Build.0 = DebugLocal
+		{EC0A8C85-7431-41A2-B238-0D7E6659A1D2}.DebugLocal|Default.Deploy.0 = DebugLocal
+		{EC0A8C85-7431-41A2-B238-0D7E6659A1D2}.Release|Default.ActiveCfg = Release
+		{EC0A8C85-7431-41A2-B238-0D7E6659A1D2}.Release|Default.Build.0 = Release
+		{EC0A8C85-7431-41A2-B238-0D7E6659A1D2}.Release|Default.Deploy.0 = Release
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

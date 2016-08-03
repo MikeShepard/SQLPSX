@@ -1,0 +1,12 @@
+application: sqlpsx
+version: 1
+runtime: python
+api_version: 1
+
+handlers:
+- url: (.*)/
+  static_files: static\1/index.htm
+  upload: static/index.htm
+
+- url: /
+  static_dir: static

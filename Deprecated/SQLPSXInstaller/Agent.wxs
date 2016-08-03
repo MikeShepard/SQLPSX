@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?include $(sys.CURRENTDIR)\Config.wxi?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Fragment>
+        <ComponentGroup Id="Agent">
+            <ComponentRef Id="Agent.psd1" />
+            <ComponentRef Id="Agent.psm1" />
+        </ComponentGroup>
+    </Fragment>
+    <Fragment>
+        <DirectoryRef Id="Agent">
+            <Component Id="Agent.psd1" Guid="*">
+                <File Id="Agent.psd1" KeyPath="yes" Source="$(var.Agent)\Agent.psd1" />
+            </Component>
+            <Component Id="Agent.psm1" Guid="*">
+                <File Id="Agent.psm1" KeyPath="yes" Source="$(var.Agent)\Agent.psm1" />
+            </Component>
+        </DirectoryRef>
+    </Fragment>
+</Wix>

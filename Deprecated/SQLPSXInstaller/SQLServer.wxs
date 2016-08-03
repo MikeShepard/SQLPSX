@@ -1,0 +1,136 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?include $(sys.CURRENTDIR)\Config.wxi?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Fragment>
+        <ComponentGroup Id="SQLServer">
+            <ComponentRef Id="Get_InvalidLogins.ps1" />
+            <ComponentRef Id="Get_SessionTimeStamp.ps1" />
+            <ComponentRef Id="Run_SmoToCsvFile.ps1" />
+            <ComponentRef Id="SQLServer.psd1" />
+            <ComponentRef Id="SQLServer.psm1" />
+            <ComponentRef Id="Test_SqlConn.ps1" />
+            <ComponentRef Id="Write_SmoCsvToDb.ps1" />
+            <ComponentRef Id="Write_SmoToCsvFile.ps1" />
+            <ComponentRef Id="SQLPSX.AllObject.sql" />
+            <ComponentRef Id="SQLPSX.Job.sql" />
+            <ComponentRef Id="SQLPSX.rds" />
+            <ComponentRef Id="SQLPSXChangedDatabasePermission.rdl" />
+            <ComponentRef Id="SQLPSXChangedDatabaseRole.rdl" />
+            <ComponentRef Id="SQLPSXChangedLogin.rdl" />
+            <ComponentRef Id="SQLPSXChangedObjectPermission.rdl" />
+            <ComponentRef Id="SQLPSXChangedServerPermission.rdl" />
+            <ComponentRef Id="SQLPSXChangedServerRole.rdl" />
+            <ComponentRef Id="SQLPSXChangedSqlUser.rdl" />
+            <ComponentRef Id="SQLPSXChangedSqlUserOwnedObject.rdl" />
+            <ComponentRef Id="SQLPSXDatabasePermission.rdl" />
+            <ComponentRef Id="SQLPSXDatabaseRole.rdl" />
+            <ComponentRef Id="SQLPSXLinkedServerLogin.rdl" />
+            <ComponentRef Id="SQLPSXLogin.rdl" />
+            <ComponentRef Id="SQLPSXLoginGrouped.rdl" />
+            <ComponentRef Id="SQLPSXObjectPermission.rdl" />
+            <ComponentRef Id="SQLPSXServerPermission.rdl" />
+            <ComponentRef Id="SQLPSXServerRole.rdl" />
+            <ComponentRef Id="SQLPSXSqlUser.rdl" />
+            <ComponentRef Id="SQLPSXSqlUserGrouped.rdl" />
+            <ComponentRef Id="SQLPSXSqlUserOwnedObject.rdl" />
+        </ComponentGroup>
+    </Fragment>
+    <Fragment>
+        <DirectoryRef Id="SQLServer">
+            <Component Id="Get_InvalidLogins.ps1" Guid="*">
+                <File Id="Get_InvalidLogins.ps1" KeyPath="yes" Source="$(var.SQLServer)\Get-InvalidLogins.ps1" />
+            </Component>
+            <Component Id="Get_SessionTimeStamp.ps1" Guid="*">
+                <File Id="Get_SessionTimeStamp.ps1" KeyPath="yes" Source="$(var.SQLServer)\Get-SessionTimeStamp.ps1" />
+            </Component>
+            <Component Id="Run_SmoToCsvFile.ps1" Guid="*">
+                <File Id="Run_SmoToCsvFile.ps1" KeyPath="yes" Source="$(var.SQLServer)\Run-SmoToCsvFile.ps1" />
+            </Component>
+            <Component Id="SQLServer.psd1" Guid="*">
+                <File Id="SQLServer.psd1" KeyPath="yes" Source="$(var.SQLServer)\SQLServer.psd1" />
+            </Component>
+            <Component Id="SQLServer.psm1" Guid="*">
+                <File Id="SQLServer.psm1" KeyPath="yes" Source="$(var.SQLServer)\SQLServer.psm1" />
+            </Component>
+            <Component Id="Test_SqlConn.ps1" Guid="*">
+                <File Id="Test_SqlConn.ps1" KeyPath="yes" Source="$(var.SQLServer)\Test-SqlConn.ps1" />
+            </Component>
+            <Component Id="Write_SmoCsvToDb.ps1" Guid="*">
+                <File Id="Write_SmoCsvToDb.ps1" KeyPath="yes" Source="$(var.SQLServer)\Write-SmoCsvToDb.ps1" />
+            </Component>
+            <Component Id="Write_SmoToCsvFile.ps1" Guid="*">
+                <File Id="Write_SmoToCsvFile.ps1" KeyPath="yes" Source="$(var.SQLServer)\Write-SmoToCsvFile.ps1" />
+            </Component>
+            <Directory Id="Database" Name="Database">
+                <Component Id="SQLPSX.AllObject.sql" Guid="*">
+                    <File Id="SQLPSX.AllObject.sql" KeyPath="yes" Source="$(var.SQLServer)\Database\SQLPSX.AllObject.sql" />
+                </Component>
+                <Component Id="SQLPSX.Job.sql" Guid="*">
+                    <File Id="SQLPSX.Job.sql" KeyPath="yes" Source="$(var.SQLServer)\Database\SQLPSX.Job.sql" />
+                </Component>
+            </Directory>
+            <Directory Id="Reports" Name="Reports">
+                <Component Id="SQLPSX.rds" Guid="*">
+                    <File Id="SQLPSX.rds" KeyPath="yes" Source="$(var.SQLServer)\Reports\SQLPSX.rds" />
+                </Component>
+                <Component Id="SQLPSXChangedDatabasePermission.rdl" Guid="*">
+                    <File Id="SQLPSXChangedDatabasePermission.rdl" KeyPath="yes" Source="$(var.SQLServer)\Reports\SQLPSXChangedDatabasePermission.rdl" />
+                </Component>
+                <Component Id="SQLPSXChangedDatabaseRole.rdl" Guid="*">
+                    <File Id="SQLPSXChangedDatabaseRole.rdl" KeyPath="yes" Source="$(var.SQLServer)\Reports\SQLPSXChangedDatabaseRole.rdl" />
+                </Component>
+                <Component Id="SQLPSXChangedLogin.rdl" Guid="*">
+                    <File Id="SQLPSXChangedLogin.rdl" KeyPath="yes" Source="$(var.SQLServer)\Reports\SQLPSXChangedLogin.rdl" />
+                </Component>
+                <Component Id="SQLPSXChangedObjectPermission.rdl" Guid="*">
+                    <File Id="SQLPSXChangedObjectPermission.rdl" KeyPath="yes" Source="$(var.SQLServer)\Reports\SQLPSXChangedObjectPermission.rdl" />
+                </Component>
+                <Component Id="SQLPSXChangedServerPermission.rdl" Guid="*">
+                    <File Id="SQLPSXChangedServerPermission.rdl" KeyPath="yes" Source="$(var.SQLServer)\Reports\SQLPSXChangedServerPermission.rdl" />
+                </Component>
+                <Component Id="SQLPSXChangedServerRole.rdl" Guid="*">
+                    <File Id="SQLPSXChangedServerRole.rdl" KeyPath="yes" Source="$(var.SQLServer)\Reports\SQLPSXChangedServerRole.rdl" />
+                </Component>
+                <Component Id="SQLPSXChangedSqlUser.rdl" Guid="*">
+                    <File Id="SQLPSXChangedSqlUser.rdl" KeyPath="yes" Source="$(var.SQLServer)\Reports\SQLPSXChangedSqlUser.rdl" />
+                </Component>
+                <Component Id="SQLPSXChangedSqlUserOwnedObject.rdl" Guid="*">
+                    <File Id="SQLPSXChangedSqlUserOwnedObject.rdl" KeyPath="yes" Source="$(var.SQLServer)\Reports\SQLPSXChangedSqlUserOwnedObject.rdl" />
+                </Component>
+                <Component Id="SQLPSXDatabasePermission.rdl" Guid="*">
+                    <File Id="SQLPSXDatabasePermission.rdl" KeyPath="yes" Source="$(var.SQLServer)\Reports\SQLPSXDatabasePermission.rdl" />
+                </Component>
+                <Component Id="SQLPSXDatabaseRole.rdl" Guid="*">
+                    <File Id="SQLPSXDatabaseRole.rdl" KeyPath="yes" Source="$(var.SQLServer)\Reports\SQLPSXDatabaseRole.rdl" />
+                </Component>
+                <Component Id="SQLPSXLinkedServerLogin.rdl" Guid="*">
+                    <File Id="SQLPSXLinkedServerLogin.rdl" KeyPath="yes" Source="$(var.SQLServer)\Reports\SQLPSXLinkedServerLogin.rdl" />
+                </Component>
+                <Component Id="SQLPSXLogin.rdl" Guid="*">
+                    <File Id="SQLPSXLogin.rdl" KeyPath="yes" Source="$(var.SQLServer)\Reports\SQLPSXLogin.rdl" />
+                </Component>
+                <Component Id="SQLPSXLoginGrouped.rdl" Guid="*">
+                    <File Id="SQLPSXLoginGrouped.rdl" KeyPath="yes" Source="$(var.SQLServer)\Reports\SQLPSXLoginGrouped.rdl" />
+                </Component>
+                <Component Id="SQLPSXObjectPermission.rdl" Guid="*">
+                    <File Id="SQLPSXObjectPermission.rdl" KeyPath="yes" Source="$(var.SQLServer)\Reports\SQLPSXObjectPermission.rdl" />
+                </Component>
+                <Component Id="SQLPSXServerPermission.rdl" Guid="*">
+                    <File Id="SQLPSXServerPermission.rdl" KeyPath="yes" Source="$(var.SQLServer)\Reports\SQLPSXServerPermission.rdl" />
+                </Component>
+                <Component Id="SQLPSXServerRole.rdl" Guid="*">
+                    <File Id="SQLPSXServerRole.rdl" KeyPath="yes" Source="$(var.SQLServer)\Reports\SQLPSXServerRole.rdl" />
+                </Component>
+                <Component Id="SQLPSXSqlUser.rdl" Guid="*">
+                    <File Id="SQLPSXSqlUser.rdl" KeyPath="yes" Source="$(var.SQLServer)\Reports\SQLPSXSqlUser.rdl" />
+                </Component>
+                <Component Id="SQLPSXSqlUserGrouped.rdl" Guid="*">
+                    <File Id="SQLPSXSqlUserGrouped.rdl" KeyPath="yes" Source="$(var.SQLServer)\Reports\SQLPSXSqlUserGrouped.rdl" />
+                </Component>
+                <Component Id="SQLPSXSqlUserOwnedObject.rdl" Guid="*">
+                    <File Id="SQLPSXSqlUserOwnedObject.rdl" KeyPath="yes" Source="$(var.SQLServer)\Reports\SQLPSXSqlUserOwnedObject.rdl" />
+                </Component>
+            </Directory>
+        </DirectoryRef>
+    </Fragment>
+</Wix>
