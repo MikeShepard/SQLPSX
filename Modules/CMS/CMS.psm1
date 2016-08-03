@@ -57,7 +57,7 @@ This passes the common error object (System.Management.Automation.ErrorRecord) f
 try { 1/0 } catch { Get-Error "You attempted to divid by zero. Try again." }
 This passes a string that is output as an error message.
 .LINK
-Get-SqlConnection 
+http://www.patrickkeisler.com/
 #>
 function Get-Error {
 	param(
