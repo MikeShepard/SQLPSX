@@ -391,8 +391,6 @@ function Invoke-SqlPSXPolicyEvaluation {
     [Parameter(Position=3)][String]$outputXML=''
   )
 
-  #Import-Module SQLPS -DisableNameChecking -WarningAction Ignore
-  
   switch ($policyStore.GetType().Name)
   {
     'String' { $store = Get-PolicyStore $policyStore; $sqlConn = Get-SqlConnection -sqlserver $policyStore }
@@ -433,6 +431,7 @@ function Invoke-SqlPSXPolicyEvaluation {
               PolicyResult = $evalResult.Result
               EvalStartDate = $evalResult.StartDate
               EvalEndDate = $evalResult.EndDate
+			  TargetServer = $targetServer
               Target = "SQLSERVER:\SQL\$targetServer"
               EvalResult = 'ERROR'
               ResultDetail = ''
@@ -450,6 +449,7 @@ function Invoke-SqlPSXPolicyEvaluation {
                 PolicyResult = $evalResult.Result
                 EvalStartDate = $evalResult.StartDate
                 EvalEndDate = $evalResult.EndDate
+				TargetServer = $targetServer
                 Target = $evalDetail.TargetQueryExpression
                 EvalResult = $evalDetail.Result
                 ResultDetail = $evalDetail.ResultDetail
@@ -467,41 +467,44 @@ function Invoke-SqlPSXPolicyEvaluation {
   $prevPolicyID = -1
   $recordOpen = $false
   for($x=0; $x -le ($collection.Count)-1; $x++) {
-    if($collection[$x].PolicyResult -eq $false -and $collection[$x].Exception -ne ''){
-      if($recordOpen){
-        #Close the previous parent record
-        $sqlQuery = "EXEC msdb.dbo.sp_syspolicy_log_policy_execution_end @history_id = $($historyId), @result = '$($collection[$x-1].PolicyResult)', @exception_message = N'', @exception = N''"
-        $sqlConn.ExecuteNonQuery($sqlQuery) | Out-Null
-        #Add an entry in SQL ErrorLog if the policy failed
-        if($collection[$x-1].PolicyResult -eq $False -and $collection[$x-1].Exception -eq ''){
-          $ErrorActionPreference = 'SilentlyContinue'
-          $sqlQuery = "RAISERROR(34052, 16, 1, N'Policy ''$($collection[$x-1].PolicyName)'' has been violated.') WITH LOG"
-          $sqlConn.ExecuteNonQuery($sqlQuery) | Out-Null
-          $ErrorActionPreference = 'Continue'
-        }
-        $recordOpen = $false
-      }
-      $sqlQuery = "INSERT msdb.dbo.syspolicy_policy_execution_history_internal (policy_id,start_date,end_date,result,is_full_run,exception_message,exception) VALUES ($($collection[$x].PolicyID),'$($collection[$x].EvalStartDate)','$($collection[$x].EvalEndDate)','$($collection[$x].PolicyResult)',1,'ERROR: Policy evaluation failed.','$($collection[$x].Exception -replace "'",'"')')"
-      $sqlConn.ExecuteNonQuery($sqlQuery) | Out-Null
-    }
-    else {
-      if($collection[$x].PolicyID -ne $prevPolicyID){
-        if($prevPolicyID -ne -1){
-          #Close the previous parent record
-          $sqlQuery = "EXEC msdb.dbo.sp_syspolicy_log_policy_execution_end @history_id = $($historyId), @result = '$($collection[$x-1].PolicyResult)', @exception_message = N'', @exception = N''"
-          $sqlConn.ExecuteNonQuery($sqlQuery) | Out-Null
-          $recordOpen = $false
-        }
-        #Open a new parent record
-        $sqlQuery = "DECLARE @history_id bigint; EXEC msdb.dbo.sp_syspolicy_log_policy_execution_start @history_id = @history_id OUTPUT, @policy_id = $($collection[$x].PolicyID), @is_full_run = True; SELECT @history_id AS history_id"
-        $historyId = $sqlConn.ExecuteScalar($sqlQuery)
-        $recordOpen = $true
-      }
-      #Insert detailed record
-      $sqlQuery = "EXEC msdb.dbo.sp_syspolicy_log_policy_execution_detail @history_id = $($historyId), @target_query_expression = N'$($collection[$x].Target)', @target_query_expression_with_id = N'Server', @result = '$($collection[$x].EvalResult)', @result_detail = N'$($collection[$x].ResultDetail)', @exception_message = N'', @exception = N''"
-      $sqlConn.ExecuteNonQuery($sqlQuery) | Out-Null
-    }
-    $prevPolicyID = $collection[$x].PolicyID
+	#Do not insert rows into msdb if targetServer and policyStore are the same. This will cause duplicate records.
+	if($collection[$x].TargetServer -ne $policyStore.Name) {
+	  if($collection[$x].PolicyResult -eq $false -and $collection[$x].Exception -ne ''){
+		  if($recordOpen){
+		  #Close the previous parent record
+		  $sqlQuery = "EXEC msdb.dbo.sp_syspolicy_log_policy_execution_end @history_id = $($historyId), @result = '$($collection[$x-1].PolicyResult)', @exception_message = N'', @exception = N''"
+		  $sqlConn.ExecuteNonQuery($sqlQuery) | Out-Null
+		  #Add an entry in SQL ErrorLog if the policy failed
+		  if($collection[$x-1].PolicyResult -eq $False -and $collection[$x-1].Exception -eq ''){
+		  	  $ErrorActionPreference = 'SilentlyContinue'
+			  $sqlQuery = "RAISERROR(34052, 16, 1, N'Policy ''$($collection[$x-1].PolicyName)'' has been violated.') WITH LOG"
+			  $sqlConn.ExecuteNonQuery($sqlQuery) | Out-Null
+			  $ErrorActionPreference = 'Continue'
+		  }
+		  $recordOpen = $false
+		  }
+		  $sqlQuery = "INSERT msdb.dbo.syspolicy_policy_execution_history_internal (policy_id,start_date,end_date,result,is_full_run,exception_message,exception) VALUES ($($collection[$x].PolicyID),'$($collection[$x].EvalStartDate)','$($collection[$x].EvalEndDate)','$($collection[$x].PolicyResult)',1,'ERROR: Policy evaluation failed.','$($collection[$x].Exception -replace "'",'"')')"
+		  $sqlConn.ExecuteNonQuery($sqlQuery) | Out-Null
+	  }
+	  else {
+		if($collection[$x].PolicyID -ne $prevPolicyID){
+		if($prevPolicyID -ne -1){
+		 	#Close the previous parent record
+			$sqlQuery = "EXEC msdb.dbo.sp_syspolicy_log_policy_execution_end @history_id = $($historyId), @result = '$($collection[$x-1].PolicyResult)', @exception_message = N'', @exception = N''"
+			$sqlConn.ExecuteNonQuery($sqlQuery) | Out-Null
+			$recordOpen = $false
+		}
+		#Open a new parent record
+		$sqlQuery = "DECLARE @history_id bigint; EXEC msdb.dbo.sp_syspolicy_log_policy_execution_start @history_id = @history_id OUTPUT, @policy_id = $($collection[$x].PolicyID), @is_full_run = True; SELECT @history_id AS history_id"
+		$historyId = $sqlConn.ExecuteScalar($sqlQuery)
+		$recordOpen = $true
+		}
+		#Insert detailed record
+		$sqlQuery = "EXEC msdb.dbo.sp_syspolicy_log_policy_execution_detail @history_id = $($historyId), @target_query_expression = N'$($collection[$x].Target)', @target_query_expression_with_id = N'Server', @result = '$($collection[$x].EvalResult)', @result_detail = N'$($collection[$x].ResultDetail)', @exception_message = N'', @exception = N''"
+		$sqlConn.ExecuteNonQuery($sqlQuery) | Out-Null
+	  }
+	$prevPolicyID = $collection[$x].PolicyID
+	}
   }
 
   if($recordOpen) {
