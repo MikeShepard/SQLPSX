@@ -12,7 +12,7 @@
 ModuleToProcess = 'PBM.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.0'
+ModuleVersion = '1.1'
 
 # ID used to uniquely identify this module
 GUID = '3dda1495-1bcd-4e2a-b931-69c5e126f07d'

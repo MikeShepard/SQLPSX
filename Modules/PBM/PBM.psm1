@@ -13,52 +13,60 @@
 
 #Attempt to load assemblies by name starting with the latest version
 try {
-  #SQL Server 2016
-  Add-Type -AssemblyName 'Microsoft.SqlServer.Smo, Version=13.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91' -ErrorAction Stop; $smoVersion = 13
-  Add-Type -AssemblyName 'Microsoft.SqlServer.ConnectionInfo, Version=13.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91' -ErrorAction Stop
-  Add-Type -AssemblyName 'Microsoft.SqlServer.Dmf, Version=13.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91' -ErrorAction Stop
-  Add-Type -AssemblyName 'Microsoft.SqlServer.Management.Sdk.Sfc, Version=13.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91' -ErrorAction Stop
+  #SMO v14 - SQL Server vNext
+  Add-Type -AssemblyName 'Microsoft.SqlServer.Smo, Version=14.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91' -ErrorAction Stop; $smoVersion = 14
+  Add-Type -AssemblyName 'Microsoft.SqlServer.ConnectionInfo, Version=14.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91' -ErrorAction Stop
+  Add-Type -AssemblyName 'Microsoft.SqlServer.Dmf, Version=14.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91' -ErrorAction Stop
+  Add-Type -AssemblyName 'Microsoft.SqlServer.Management.Sdk.Sfc, Version=14.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91' -ErrorAction Stop
 }
 catch {
   try {
-    #SQL Server 2014
-    Add-Type -AssemblyName 'Microsoft.SqlServer.Smo, Version=12.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91' -ErrorAction Stop; $smoVersion = 12
-    Add-Type -AssemblyName 'Microsoft.SqlServer.ConnectionInfo, Version=12.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91' -ErrorAction Stop
-    Add-Type -AssemblyName 'Microsoft.SqlServer.Dmf, Version=12.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91' -ErrorAction Stop
-    Add-Type -AssemblyName 'Microsoft.SqlServer.Management.Sdk.Sfc, Version=12.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91' -ErrorAction Stop
+    #SMO v13 - SQL Server 2016
+	Add-Type -AssemblyName 'Microsoft.SqlServer.Smo, Version=13.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91' -ErrorAction Stop; $smoVersion = 13
+	Add-Type -AssemblyName 'Microsoft.SqlServer.ConnectionInfo, Version=13.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91' -ErrorAction Stop
+	Add-Type -AssemblyName 'Microsoft.SqlServer.Dmf, Version=13.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91' -ErrorAction Stop
+	Add-Type -AssemblyName 'Microsoft.SqlServer.Management.Sdk.Sfc, Version=13.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91' -ErrorAction Stop
   }
   catch {
-    try {
-      #SQL Server 2012
-      Add-Type -AssemblyName 'Microsoft.SqlServer.Smo, Version=11.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91' -ErrorAction Stop; $smoVersion = 11
-      Add-Type -AssemblyName 'Microsoft.SqlServer.ConnectionInfo, Version=11.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91' -ErrorAction Stop
-      Add-Type -AssemblyName 'Microsoft.SqlServer.Dmf, Version=11.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91' -ErrorAction Stop
-      Add-Type -AssemblyName 'Microsoft.SqlServer.Management.Sdk.Sfc, Version=11.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91' -ErrorAction Stop
-    }
-    catch {
-      try {
-        #SQL Server 2008
-        Add-Type -AssemblyName 'Microsoft.SqlServer.Smo, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91' -ErrorAction Stop; $smoVersion = 10
-        Add-Type -AssemblyName 'Microsoft.SqlServer.ConnectionInfo, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91' -ErrorAction Stop
-        Add-Type -AssemblyName 'Microsoft.SqlServer.Dmf, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91' -ErrorAction Stop
-        Add-Type -AssemblyName 'Microsoft.SqlServer.Management.Sdk.Sfc, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91' -ErrorAction Stop
-      }
-      catch {
-        Write-Warning 'SMO components not installed. Download from https://goo.gl/E700bG'
-        Break
-      }
-    }
+	try {
+	#SMO v12 - SQL Server 2014
+	Add-Type -AssemblyName 'Microsoft.SqlServer.Smo, Version=12.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91' -ErrorAction Stop; $smoVersion = 12
+	Add-Type -AssemblyName 'Microsoft.SqlServer.ConnectionInfo, Version=12.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91' -ErrorAction Stop
+	Add-Type -AssemblyName 'Microsoft.SqlServer.Dmf, Version=12.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91' -ErrorAction Stop
+	Add-Type -AssemblyName 'Microsoft.SqlServer.Management.Sdk.Sfc, Version=12.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91' -ErrorAction Stop
+	}
+	catch {
+  	  try {
+		#SMO v11 - SQL Server 2012
+		Add-Type -AssemblyName 'Microsoft.SqlServer.Smo, Version=11.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91' -ErrorAction Stop; $smoVersion = 11
+		Add-Type -AssemblyName 'Microsoft.SqlServer.ConnectionInfo, Version=11.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91' -ErrorAction Stop
+		Add-Type -AssemblyName 'Microsoft.SqlServer.Dmf, Version=11.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91' -ErrorAction Stop
+		Add-Type -AssemblyName 'Microsoft.SqlServer.Management.Sdk.Sfc, Version=11.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91' -ErrorAction Stop
+	  }
+	  catch {
+		try {
+		  #SMO v10 - SQL Server 2008
+		  Add-Type -AssemblyName 'Microsoft.SqlServer.Smo, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91' -ErrorAction Stop; $smoVersion = 10
+		  Add-Type -AssemblyName 'Microsoft.SqlServer.ConnectionInfo, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91' -ErrorAction Stop
+		  Add-Type -AssemblyName 'Microsoft.SqlServer.Dmf, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91' -ErrorAction Stop
+		  Add-Type -AssemblyName 'Microsoft.SqlServer.Management.Sdk.Sfc, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91' -ErrorAction Stop
+		}
+		catch {
+		  Write-Warning 'SMO components not installed. Download from https://goo.gl/E700bG'
+		  Break
+		}
+	  }
+	}
   }
 }
 
 <#
     This will attempt to load the SQLPS version that matches the version of the SMO assembly loaded first on the list.
+	It is critical the versions match, because we need to call Invoke-PolicyEvaluation from this module.
     Based on code from here the following link.
     https://social.msdn.microsoft.com/Forums/sqlserver/en-US/0573fc94-3f31-4718-a683-4b7091fe16b2/invokepolicyevaluation-fails-with-value-cannot-be-null-parameter-name-policy?forum=sqlsmoanddmo
 #>
-
 $assemblyList = [appdomain]::CurrentDomain.GetAssemblies() | Where-Object {$_.Location -like '*\Microsoft.SqlServer.Smo.dll'} | Select-Object Location -First 1
-
 if ($assemblyList.Location.Contains('14.0.0.0')) {
   Get-Module SQLPS -ListAvailable | Where-Object {($_.Version -eq '14.0') -and ($_.ModuleBase -like '*140*')} | Import-Module -Cmdlet Invoke-PolicyEvaluation -DisableNameChecking -WarningAction Ignore
 }
@@ -70,6 +78,9 @@ elseif ($assemblyList.Location.Contains('12.0.0.0')) {
 }
 elseif ($assemblyList.Location.Contains('11.0.0.0')) {
   Get-Module SQLPS -ListAvailable | Where-Object {($_.Version -eq '1.0') -and ($_.ModuleBase -like '*110*')} | Import-Module -Cmdlet Invoke-PolicyEvaluation -DisableNameChecking -WarningAction Ignore
+}
+elseif ($assemblyList.Location.Contains('10.0.0.0')) {
+  Get-Module SQLPS -ListAvailable | Where-Object {($_.Version -eq '1.0') -and ($_.ModuleBase -like '*100*')} | Import-Module -Cmdlet Invoke-PolicyEvaluation -DisableNameChecking -WarningAction Ignore
 }
 
 <#
