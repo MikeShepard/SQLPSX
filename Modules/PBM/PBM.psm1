@@ -380,7 +380,7 @@ function Export-Policy {
     None
     You cannot pipe objects to Invoke-SqlPSXPolicyEvaluation.
     .OUTPUTS
-    Invoke-SqlPSXPolicyEvaluation will either store the results in the PolicyStore or output to an XML file.
+    Invoke-SqlPSXPolicyEvaluation will either store the results in the msdb database of the PolicyStore or output to an XML file.
     .EXAMPLE
     Invoke-SqlPSXPolicyEvaluation -policyStore "Z002\sql2K8" -$targetServerName "Z044\SQL01"
     This command gets all polices from Z002\SQL2K8 and evalutes then against "Z044\SQL01". The results are stored in msdb on Z002\SQL2K8.
@@ -476,13 +476,14 @@ function Invoke-SqlPSXPolicyEvaluation {
 
   #Store the results in the PBM system tables in msdb
   $prevPolicyID = -1
+  $prevTargetServer = $null
   $recordOpen = $false
   for($x=0; $x -le ($collection.Count)-1; $x++) {
 	#Do not insert rows into msdb if targetServer and policyStore are the same. This will cause duplicate records.
 	if($collection[$x].TargetServer -ne $policyStore.Name) {
 	  if($collection[$x].PolicyResult -eq $false -and $collection[$x].Exception -ne ''){
-		  if($recordOpen){
-		  #Close the previous parent record
+		if($recordOpen){
+		  #Close the previous parent record if it is still open
 		  $sqlQuery = "EXEC msdb.dbo.sp_syspolicy_log_policy_execution_end @history_id = $($historyId), @result = '$($collection[$x-1].PolicyResult)', @exception_message = N'', @exception = N''"
 		  $sqlConn.ExecuteNonQuery($sqlQuery) | Out-Null
 		  #Add an entry in SQL ErrorLog if the policy failed
@@ -493,18 +494,19 @@ function Invoke-SqlPSXPolicyEvaluation {
 			  $ErrorActionPreference = 'Continue'
 		  }
 		  $recordOpen = $false
-		  }
+		}
+		  #Insert detailed record
 		  $sqlQuery = "INSERT msdb.dbo.syspolicy_policy_execution_history_internal (policy_id,start_date,end_date,result,is_full_run,exception_message,exception) VALUES ($($collection[$x].PolicyID),'$($collection[$x].EvalStartDate)','$($collection[$x].EvalEndDate)','$($collection[$x].PolicyResult)',1,'ERROR: Policy evaluation failed.','$($collection[$x].Exception -replace "'",'"')')"
 		  $sqlConn.ExecuteNonQuery($sqlQuery) | Out-Null
 	  }
 	  else {
-		if($collection[$x].PolicyID -ne $prevPolicyID){
-		if($prevPolicyID -ne -1){
-		 	#Close the previous parent record
+		if(($collection[$x].PolicyID -ne $prevPolicyID) -or ($collection[$x].TargetServer -ne $prevTargetServer)){
+		  if($recordOpen -and $prevPolicyID -ne -1){
+		 	#Close the previous parent record if it is still open
 			$sqlQuery = "EXEC msdb.dbo.sp_syspolicy_log_policy_execution_end @history_id = $($historyId), @result = '$($collection[$x-1].PolicyResult)', @exception_message = N'', @exception = N''"
 			$sqlConn.ExecuteNonQuery($sqlQuery) | Out-Null
 			$recordOpen = $false
-		}
+		  }
 		#Open a new parent record
 		$sqlQuery = "DECLARE @history_id bigint; EXEC msdb.dbo.sp_syspolicy_log_policy_execution_start @history_id = @history_id OUTPUT, @policy_id = $($collection[$x].PolicyID), @is_full_run = True; SELECT @history_id AS history_id"
 		$historyId = $sqlConn.ExecuteScalar($sqlQuery)
@@ -514,12 +516,13 @@ function Invoke-SqlPSXPolicyEvaluation {
 		$sqlQuery = "EXEC msdb.dbo.sp_syspolicy_log_policy_execution_detail @history_id = $($historyId), @target_query_expression = N'$($collection[$x].Target)', @target_query_expression_with_id = N'Server', @result = '$($collection[$x].EvalResult)', @result_detail = N'$($collection[$x].ResultDetail)', @exception_message = N'', @exception = N''"
 		$sqlConn.ExecuteNonQuery($sqlQuery) | Out-Null
 	  }
-	$prevPolicyID = $collection[$x].PolicyID
+	  $prevPolicyID = $collection[$x].PolicyID
+	  $prevTargetServer = $collection[$x].TargetServer
 	}
   }
 
   if($recordOpen) {
-    #Close the previous parent record
+    #Close the previous parent record if it is still open
     $sqlQuery = "EXEC msdb.dbo.sp_syspolicy_log_policy_execution_end @history_id = $($historyId), @result = '$($collection[$x-1].PolicyResult)', @exception_message = N'', @exception = N''"
     $sqlConn.ExecuteNonQuery($sqlQuery) | Out-Null
     #Add an entry in SQL ErrorLog if the policy failed
@@ -531,6 +534,6 @@ function Invoke-SqlPSXPolicyEvaluation {
     }
   }
   
-  #Display the results
-  $collection | Select-Object PolicyName,PolicyResult,EvalEndDate,Target,EvalResult,Exception | Format-Table
+  #Return the results
+  Write-Output $collection
 }
