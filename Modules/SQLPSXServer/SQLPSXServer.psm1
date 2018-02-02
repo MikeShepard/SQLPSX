@@ -169,7 +169,7 @@ None
     You cannot pipe objects to Get-SqlPSXDatabase 
 .OUTPUTS
 Microsoft.SqlServer.Management.Smo.Database
-    Get-SqlDatabase returns a Microsoft.SqlServer.Management.Smo.Database object.
+    Get-SQLPSXDatabase returns a Microsoft.SqlServer.Management.Smo.Database object.
 .EXAMPLE
 Get-SqlPSXDatabase "Z002\sql2K8"
 This command gets a collection of SMO Database objects for SQL Server Z002\SQL2K8.
@@ -191,10 +191,10 @@ function Get-SqlPSXDatabase
     {
         'String' { $server = Get-SqlServer $sqlserver }
         'Server' { $server = $sqlserver }
-        default { throw 'Get-SqlDatabase:Param `$sqlserver must be a String or Server object.' }
+        default { throw 'Get-SQLPSXDatabase:Param `$sqlserver must be a String or Server object.' }
     }
 
-    Write-Verbose "Get-SqlDatabase $($server.Name) $dbname"
+    Write-Verbose "Get-SQLPSXDatabase $($server.Name) $dbname"
 
     if ($dbname)
     { if ($server.Databases.Contains("$dbname") -and $server.Databases[$dbname].IsAccessible)
@@ -208,7 +208,7 @@ function Get-SqlPSXDatabase
     else
     { $server.Databases | where {$_.IsSystemObject -eq $false -and $_.IsAccessible -eq $true} }
 
-} # Get-SqlDatabase
+} # Get-SQLPSXDatabase
 
 #######################
 <#
@@ -242,7 +242,7 @@ function Get-SqlData
 
     switch ($dbname.GetType().Name)
     {
-        'String' { $database = Get-SqlDatabase $sqlserver $dbname }
+        'String' { $database = Get-SQLPSXDatabase $sqlserver $dbname }
         'Database' { $database = $dbname }
         default { throw "Get-SqlData:Param '`$dbname' must be a String or Database object." }
     }
@@ -287,7 +287,7 @@ function Set-SqlData
 
     switch ($dbname.GetType().Name)
     {
-        'String' { $database = Get-SqlDatabase $sqlserver $dbname }
+        'String' { $database = Get-SQLPSXDatabase $sqlserver $dbname }
         'Database' { $database = $dbname }
         default { throw "Set-SqlData:Param '`$dbname' must be a String or Database object." }
     } 
@@ -398,10 +398,10 @@ Microsoft.SqlUser.Management.Smo.User
 .NOTES
 Additional properties including all of the objects owned by the user and the effective members of the user are returned. Nested AD/local groups are recursively enumerated and returned in a flat structure.
 .EXAMPLE
-Get-SqlUser $(Get-SqlDatabase "Z002\sql2K8" pubs)
+Get-SqlUser $(Get-SQLPSXDatabase "Z002\sql2K8" pubs)
 This command gets a collection of SMO User objects for SQL Server Z002\SQL2K8, pubs database.
 .EXAMPLE
-Get-SqlDatabase "Z002\sql2K8" | Get-SqlUser
+Get-SQLPSXDatabase "Z002\sql2K8" | Get-SqlUser
 This command gets a collection SMO User objects for all SQL databases on the SQL Server Z002\SQL2K8.
 .LINK
 Get-SqlUser 
@@ -532,10 +532,10 @@ Microsoft.SqlServer.Management.Smo.DatabaseRole
 .NOTES
 Additional properties are returned including the effective members of a role recursiving enumerates nested roles, and Windows Groups.
 .EXAMPLE
-Get-SqlDatabaseRole $(Get-SqlDatabase "Z002\sql2K8" pubs)
+Get-SqlDatabaseRole $(Get-SQLPSXDatabase "Z002\sql2K8" pubs)
 This command gets a collection of SMO DatabaseRole objects for SQL Server Z002\SQL2K8, pubs database.
 .EXAMPLE
-Get-SqlDatabase "Z002\sql2K8" | Get-SqlDatabaseRole
+Get-SQLPSXDatabase "Z002\sql2K8" | Get-SqlDatabaseRole
 This command gets a collection SMO DatabaseRole objects for all SQL databases on the SQL Server Z002\SQL2K8.
 .LINK
 Get-SqlDatabaseRole 
@@ -913,8 +913,8 @@ function Get-SqlServerPermission
     Write-Verbose "Get-SqlServerPermission $($server.Name)"
 
     if ($server.Information.Version.Major -ge 9)
-    {$perm = Get-ServerPermission90 $server; $perm += Get-SqlDatabasePermission $(Get-SqlDatabase $server 'master'); $perm}
-    else {Get-SqlDatabasePermission $(Get-SqlDatabase $server 'master')}
+    {$perm = Get-ServerPermission90 $server; $perm += Get-SqlDatabasePermission $(Get-SQLPSXDatabase $server 'master'); $perm}
+    else {Get-SqlDatabasePermission $(Get-SQLPSXDatabase $server 'master')}
 
 }# Get-SqlServerPermission
 
@@ -1027,10 +1027,10 @@ Microsoft.SqlServer.Management.Smo.DatabasePermissionInfo
 .NOTES
 Additional properties including the effective members of the DatabasePermissionInfo are returned. Nested AD/local groups are recursively enumerated and returned in a flat structure. SQL 2000 does not support this SMO method, instead a System.DataRow is returned of database permissions.
 .EXAMPLE
-Get-SqlDatabasePermission $(Get-SqlDatabase "Z002\sql2K8" pubs)
+Get-SqlDatabasePermission $(Get-SQLPSXDatabase "Z002\sql2K8" pubs)
 This command gets a collection of SMO DatabasePermissionInfo objects for SQL Server Z002\SQL2K8, pubs database.
 .EXAMPLE
-Get-SqlDatabase "Z002\sql2K8" | Get-SqlDatabasePermission
+Get-SQLPSXDatabase "Z002\sql2K8" | Get-SqlDatabasePermission
 This command gets a collection of SMO DatabasePermissionInfo objects for all user databases on SQL Server Z002\SQL2K8.
 .LINK
 Get-SqlDatabasePermission 
@@ -1128,10 +1128,10 @@ Microsoft.SqlServer.Management.Smo.ObjectPermissionInfo
 .NOTES
 Additional properties including the effective members of the ObjectPermissionInfo are returned. Nested AD/local groups are recursively enumerated and returned in a flat structure. SQL 2000 does not support this SMO method, instead a System.DataRow is returned of object permissions.
 .EXAMPLE
-Get-SqlObjectPermission $(Get-SqlDatabase "Z002\sql2K8" pubs)
+Get-SqlObjectPermission $(Get-SQLPSXDatabase "Z002\sql2K8" pubs)
 This command gets a collection of SMO ObjectPermissionInfo objects for SQL Server Z002\SQL2K8, pubs database.
 .EXAMPLE
-Get-SqlDatabase "Z002\sql2K8" | Get-SqlObjectPermission
+Get-SQLPSXDatabase "Z002\sql2K8" | Get-SqlObjectPermission
 This command gets a collection of SMO ObjectPermissionInfo objects for all user databases on SQL Server Z002\SQL2K8.
 .LINK
 Get-SqlObjectPermission 
@@ -1233,13 +1233,13 @@ Microsoft.SqlServer.Management.Smo.Table
 .NOTES
 Additional properties including the database, server and extended properties are included in the output. 
 .EXAMPLE
-Get-SqlTable $(Get-SqlDatabase "Z002\sql2K8" pubs)
+Get-SqlTable $(Get-SQLPSXDatabase "Z002\sql2K8" pubs)
 This command gets a collection of SMO Table objects for SQL Server Z002\SQL2K8, pubs database.
 .EXAMPLE
-Get-SqlDatabase "Z002\sql2K8" | Get-SqlTable
+Get-SQLPSXDatabase "Z002\sql2K8" | Get-SqlTable
 This command gets a collection of SMO Table objects for all user databases on SQL Server Z002\SQL2K8.
 .EXAMPLE
-Get-SqlDatabase "Z002\sql2K8" pubs | Get-SqlTable -name "authors"
+Get-SQLPSXDatabase "Z002\sql2K8" pubs | Get-SqlTable -name "authors"
 This command gets an SMO Table object for the authors table in the pubs database on SQL Server Z002\SQL2K8.
 .LINK
 Get-SqlTable 
@@ -1298,13 +1298,13 @@ Microsoft.SqlServer.Management.Smo.StoredProcedure
 .NOTES
 Additional properties including the database, server and extended properties are included in the output. 
 .EXAMPLE
-Get-SqlStoredProcedure $(Get-SqlDatabase "Z002\sql2K8" pubs)
+Get-SqlStoredProcedure $(Get-SQLPSXDatabase "Z002\sql2K8" pubs)
 This command gets a collection of SMO StoredProcedure objects for SQL Server Z002\SQL2K8, pubs database.
 .EXAMPLE
-Get-SqlDatabase "Z002\sql2K8" | Get-SqlStoredProcedure
+Get-SQLPSXDatabase "Z002\sql2K8" | Get-SqlStoredProcedure
 This command gets a collection of SMO StoredProcedure objects for all user databases on SQL Server Z002\SQL2K8.
 .EXAMPLE
-Get-SqlDatabase "Z002\sql2K8" pubs | Get-SqlStoredProcedure -name "byroyalty"
+Get-SQLPSXDatabase "Z002\sql2K8" pubs | Get-SqlStoredProcedure -name "byroyalty"
 This command gets an SMO StoredProcedure object for the byroyalty stored procedure in the pubs database on SQL Server Z002\SQL2K8.
 .LINK
 Get-SqlStoredProcedure 
@@ -1363,13 +1363,13 @@ Microsoft.SqlServer.Management.Smo.View
 .NOTES
 Additional properties including the database, server and extended properties are included in the output. 
 .EXAMPLE
-Get-SqlView $(Get-SqlDatabase "Z002\sql2K8" pubs)
+Get-SqlView $(Get-SQLPSXDatabase "Z002\sql2K8" pubs)
 This command gets a collection of SMO View objects for SQL Server Z002\SQL2K8, pubs database.
 .EXAMPLE
-Get-SqlDatabase "Z002\sql2K8" | Get-SqlView
+Get-SQLPSXDatabase "Z002\sql2K8" | Get-SqlView
 This command gets a collection of SMO View objects for all user databases on SQL Server Z002\SQL2K8.
 .EXAMPLE
-Get-SqlDatabase "Z002\sql2K8" pubs | Get-SqlView -name "titleview"
+Get-SQLPSXDatabase "Z002\sql2K8" pubs | Get-SqlView -name "titleview"
 This command gets an SMO View object for the titleview view in the pubs database on SQL Server Z002\SQL2K8.
 .LINK
 Get-SqlView 
@@ -1428,13 +1428,13 @@ Microsoft.SqlServer.Management.Smo.UserDefinedDataType
 .NOTES
 Additional properties including the database, server and extended properties are included in the output. 
 .EXAMPLE
-Get-SqlUserDefinedDataType $(Get-SqlDatabase "Z002\sql2K8" pubs)
+Get-SqlUserDefinedDataType $(Get-SQLPSXDatabase "Z002\sql2K8" pubs)
 This command gets a collection of SMO UserDefinedDataType objects for SQL Server Z002\SQL2K8, pubs database.
 .EXAMPLE
-Get-SqlDatabase "Z002\sql2K8" | Get-SqlUserDefinedDataType
+Get-SQLPSXDatabase "Z002\sql2K8" | Get-SqlUserDefinedDataType
 This command gets a collection of SMO UserDefinedDataType objects for all user databases on SQL Server Z002\SQL2K8.
 .EXAMPLE
-Get-SqlDatabase "Z002\sql2K8" pubs | Get-SqlUserDefinedDataType -name "empid"
+Get-SQLPSXDatabase "Z002\sql2K8" pubs | Get-SqlUserDefinedDataType -name "empid"
 This command gets an SMO UserDefinedDataType object for the empid user defined dataType in the pubs database on SQL Server Z002\SQL2K8.
 .LINK
 Get-SqlUserDefinedDataType 
@@ -1491,13 +1491,13 @@ Microsoft.SqlServer.Management.Smo.UserDefinedFunction
 .NOTES
 Additional properties including the database, server and extended properties are included in the output. 
 .EXAMPLE
-Get-SqlUserDefinedFunction $(Get-SqlDatabase "Z002\sql2K8" AdventureWorks)
+Get-SqlUserDefinedFunction $(Get-SQLPSXDatabase "Z002\sql2K8" AdventureWorks)
 This command gets a collection of SMO UserDefinedFunction objects for SQL Server Z002\SQL2K8, AdventureWorks database.
 .EXAMPLE
-Get-SqlDatabase "Z002\sql2K8" | Get-SqlUserDefinedFunction
+Get-SQLPSXDatabase "Z002\sql2K8" | Get-SqlUserDefinedFunction
 This command gets a collection of SMO UserDefinedFunction objects for all user databases on SQL Server Z002\SQL2K8.
 .EXAMPLE
-Get-SqlDatabase "Z002\sql2K8" AdventureWorks | Get-SqlUserDefinedFunction -name "ufnGetAccountingEndDate"
+Get-SQLPSXDatabase "Z002\sql2K8" AdventureWorks | Get-SqlUserDefinedFunction -name "ufnGetAccountingEndDate"
 This command gets an SMO UserDefinedFunction object for the ufnGetAccountingEndDate user defined function in the AdventureWorks database on SQL Server Z002\SQL2K8.
 .LINK
 Get-SqlUserDefinedFunction 
@@ -1556,13 +1556,13 @@ Microsoft.SqlServer.Management.Smo.Synonym
 .NOTES
 Additional properties including the database, server and extended properties are included in the output. 
 .EXAMPLE
-Get-SqlSynonym $(Get-SqlDatabase "Z002\sql2K8" AdventureWorks)
+Get-SqlSynonym $(Get-SQLPSXDatabase "Z002\sql2K8" AdventureWorks)
 This command gets a collection of SMO Synonym objects for SQL Server Z002\SQL2K8, AdventureWorks database.
 .EXAMPLE
-Get-SqlDatabase "Z002\sql2K8" | Get-SqlSynonym
+Get-SQLPSXDatabase "Z002\sql2K8" | Get-SqlSynonym
 This command gets a collection of SMO Synonym objects for all user databases on SQL Server Z002\SQL2K8.
 .EXAMPLE
-Get-SqlDatabase "Z002\sql2K8" AdventureWorks | Get-SqlSynonym -name "GrossRevenue"
+Get-SQLPSXDatabase "Z002\sql2K8" AdventureWorks | Get-SqlSynonym -name "GrossRevenue"
 This command gets an SMO Synonym object for the GrossRevenue synonym in the AdventureWorks database on SQL Server Z002\SQL2K8.
 .LINK
 Get-SqlSynonym 
@@ -1625,10 +1625,10 @@ Microsoft.SqlServer.Management.Smo.ServerDdlTrigger
 .NOTES
 Additional properties including the database, server and extended properties are included in the output. The output type depends on whether a server, database or table/view object is passed to the smo parameter.
 .EXAMPLE
-Get-SqlDatabase "Z002\sql2K8" "pubs" | Get-SqlTrigger -name tr_MStran_alterview 
+Get-SQLPSXDatabase "Z002\sql2K8" "pubs" | Get-SqlTrigger -name tr_MStran_alterview 
 This command gets the SMO database Trigger, tr_MStran_alterview for SQL Server Z002\SQL2K8, AdventureWorks database.
 .EXAMPLE
- Get-SqlDatabase "Z002\sql2K8" pubs | Get-SqlTable | Get-SqlTrigger
+ Get-SQLPSXDatabase "Z002\sql2K8" pubs | Get-SqlTable | Get-SqlTrigger
 This command gets a collection of SMO Trigger objects for all user tables in the pubs database.
 .LINK
 Get-SqlTrigger 
@@ -1692,7 +1692,7 @@ Microsoft.SqlServer.Management.Smo.Column
 .NOTES
 Additional properties including the database, server and extended properties are included in the output. 
 .EXAMPLE
-Get-SqlDatabase "Z002\sql2k8" "pubs" | Get-SqlTable -name "authors" | Get-SqlColumn
+Get-SQLPSXDatabase "Z002\sql2k8" "pubs" | Get-SqlTable -name "authors" | Get-SqlColumn
 This command gets a collection of SMO Column objects for the authors table.
 .LINK
 Get-SqlColumn 
@@ -1737,7 +1737,7 @@ Microsoft.SqlServer.Management.Smo.Index
 .NOTES
 Additional properties including the database, server and extended properties are included in the output. 
 .EXAMPLE
-Get-SqlDatabase "Z002\sql2k8" "pubs" | Get-SqlTable -name "authors" | Get-SqlIndex
+Get-SQLPSXDatabase "Z002\sql2k8" "pubs" | Get-SqlTable -name "authors" | Get-SqlIndex
 This command gets a collection of SMO Index objects for the authors table.
 .LINK
 Get-SqlIndex 
@@ -1783,7 +1783,7 @@ Microsoft.SqlServer.Management.Smo.Statistic
 .NOTES
 Additional properties including the database, server and extended properties are included in the output. 
 .EXAMPLE
-Get-SqlDatabase "Z002\sql2k8" "Northwind" | Get-SqlTable | Get-SqlStatistic
+Get-SQLPSXDatabase "Z002\sql2k8" "Northwind" | Get-SqlTable | Get-SqlStatistic
 This command gets a collection of SMO Statistic objects for all user tables in the Northwind database.
 .LINK
 Get-SqlStatistic 
@@ -1833,7 +1833,7 @@ Microsoft.SqlServer.Management.Smo.Check
 .NOTES
 Additional properties including the database, server and extended properties are included in the output. 
 .EXAMPLE
-Get-SqlDatabase "Z002\sql2k8" "pubs" | Get-SqlTable | Get-SqlCheck
+Get-SQLPSXDatabase "Z002\sql2k8" "pubs" | Get-SqlTable | Get-SqlCheck
 This command gets a collection of SMO Check objects for all user tables in the pubs database.
 .LINK
 Get-SqlCheck 
@@ -1877,7 +1877,7 @@ Microsoft.SqlServer.Management.Smo.ForeignKey
 .NOTES
 Additional properties including the database, server and extended properties are included in the output. 
 .EXAMPLE
-Get-SqlDatabase "Z002\sql2k8" "pubs" | Get-SqlTable | Get-SqlForeignKey
+Get-SQLPSXDatabase "Z002\sql2k8" "pubs" | Get-SqlTable | Get-SqlForeignKey
 This command gets a collection of SMO ForeignKey objects for all user tables in the pubs database.
 .LINK
 Get-SqlForeignKey 
@@ -1947,16 +1947,16 @@ Microsoft.SqlServer.Management.Smo.*
 System.String
     Get-SqlScripter returns an array System.String.
 .EXAMPLE
-Get-SqlDatabase "Z002\sql2k8" "pubs" | Get-SqlTable | Get-SqlScripter
+Get-SQLPSXDatabase "Z002\sql2k8" "pubs" | Get-SqlTable | Get-SqlScripter
 This command scripts out all user tables in the pubs database.
 .EXAMPLE
-Get-SqlDatabase "Z002\sql2k8" "pubs" | Get-SqlTable -name "authors" | Get-SqlScripter
+Get-SQLPSXDatabase "Z002\sql2k8" "pubs" | Get-SqlTable -name "authors" | Get-SqlScripter
 This command scripts out the authors table.
 .EXAMPLE
 $scriptingOptions = New-SqlScriptingOptions
 $scriptingOptions.Permissions = $true
 $scriptingOptions.IncludeIfNotExists = $true
-Get-SqlDatabase "Z002\sql2k8" "pubs" | Get-SqlTable | Get-SqlScripter -scriptingOptions $scriptingOptions
+Get-SQLPSXDatabase "Z002\sql2k8" "pubs" | Get-SqlTable | Get-SqlScripter -scriptingOptions $scriptingOptions
 This command scripts out all users tables in the pubs database and passes a scriptingOptions.
 .LINK
 Get-SqlScripter 
@@ -1988,10 +1988,10 @@ Microsoft.SqlServer.Management.Smo.Database
 System.Data.DataRow
     Get-SqlInformation_Schema.Tables returns an array of System.Data.DataRow.
 .EXAMPLE
-Get-SqlDatabase "Z002\sql2k8" "pubs" | Get-Information_Schema.Tables
+Get-SQLPSXDatabase "Z002\sql2k8" "pubs" | Get-Information_Schema.Tables
 This command returns the result set from INFORMATION_SCHEMA.Tables for the pubs database.
 .EXAMPLE
-Get-SqlDatabase "Z002\sql2k8" "pubs" | Get-Information_Schema.Tables -name "authors"
+Get-SQLPSXDatabase "Z002\sql2k8" "pubs" | Get-Information_Schema.Tables -name "authors"
 This command returns the result set from INFORMATION_SCHEMA.Tables for the pubs database where the table name is like authors.
 .LINK
 Get-SqlInformation_Schema.Tables
@@ -2030,10 +2030,10 @@ Microsoft.SqlServer.Management.Smo.Database
 System.Data.DataRow
     Get-SqlInformation_Schema.Columns returns an array of System.Data.DataRow.
 .EXAMPLE
-Get-SqlDatabase "Z002\sql2k8" "pubs" | Get-Information_Schema.Columns
+Get-SQLPSXDatabase "Z002\sql2k8" "pubs" | Get-Information_Schema.Columns
 This command returns the result set from INFORMATION_SCHEMA.Columns for the pubs database.
 .EXAMPLE
-Get-SqlDatabase "Z002\sql2k8" "pubs" | Get-Information_Schema.Columns -tblname "authors" -colname "au_fname"
+Get-SQLPSXDatabase "Z002\sql2k8" "pubs" | Get-Information_Schema.Columns -tblname "authors" -colname "au_fname"
 This command returns the result set from INFORMATION_SCHEMA.Columns for the pubs database where the table name is like authors and the column name is like au_fname.
 .LINK
 Get-SqlInformation_Schema.Columns
@@ -2072,10 +2072,10 @@ Microsoft.SqlServer.Management.Smo.Database
 System.Data.DataRow
     Get-SqlInformation_Schema.Views returns an array of System.Data.DataRow.
 .EXAMPLE
-Get-SqlDatabase "Z002\sql2k8" "pubs" | Get-Information_Schema.Views
+Get-SQLPSXDatabase "Z002\sql2k8" "pubs" | Get-Information_Schema.Views
 This command returns the result set from INFORMATION_SCHEMA.Views for the pubs database.
 .EXAMPLE
-Get-SqlDatabase "Z002\sql2k8" "pubs" | Get-Information_Schema.Views -name "titleview"
+Get-SQLPSXDatabase "Z002\sql2k8" "pubs" | Get-Information_Schema.Views -name "titleview"
 This command returns the result set from INFORMATION_SCHEMA.Views for the pubs database where the view name is like titleview.
 .LINK
 Get-SqlInformation_Schema.Views
@@ -2111,10 +2111,10 @@ Microsoft.SqlServer.Management.Smo.Database
 System.Data.DataRow
     Get-SqlInformation_Schema.Routines returns an array of System.Data.DataRow.
 .EXAMPLE
-Get-SqlDatabase "Z002\sql2k8" "pubs" | Get-Information_Schema.Routines
+Get-SQLPSXDatabase "Z002\sql2k8" "pubs" | Get-Information_Schema.Routines
 This command returns the result set from INFORMATION_SCHEMA.Routines for the pubs database.
 .EXAMPLE
-Get-SqlDatabase "Z002\sql2k8" "pubs" | Get-Information_Schema.Routines -name "reptq1"
+Get-SQLPSXDatabase "Z002\sql2k8" "pubs" | Get-Information_Schema.Routines -name "reptq1"
 This command returns the result set from INFORMATION_SCHEMA.Routines for the pubs database where the routine name is like reptq1.
 .LINK
 Get-SqlInformation_Schema.Routines
@@ -2177,7 +2177,7 @@ function Get-SqlSysDatabases
 
     Write-Verbose "Get-SqlSysDatabases $($server.Name)"
 
-    $database = Get-SqlDatabase $server 'master'
+    $database = Get-SQLPSXDatabase $server 'master'
 $qry = @"
 SELECT SERVERPROPERTY('ServerName') AS Server, name FROM sysdatabases
 WHERE name LIKE '%$name%'
@@ -2201,7 +2201,7 @@ Microsoft.SqlServer.Management.Smo.DataFile
 .NOTES
 Additional properties including the database, server and extended properties are included in the output. 
 .EXAMPLE
-Get-SqlDatabase "Z002\sql2k8" "pubs" | Get-SqlDataFile
+Get-SQLPSXDatabase "Z002\sql2k8" "pubs" | Get-SqlDataFile
 This command gets a collection of SMO DataFile objects for all data files in the pubs database.
 .LINK
 Get-SqlDataFile 
@@ -2241,7 +2241,7 @@ Microsoft.SqlServer.Management.Smo.LogFile
 .NOTES
 Additional properties including the database, server and extended properties are included in the output. 
 .EXAMPLE
-Get-SqlDatabase "Z002\sql2k8" "pubs" | Get-SqlLogFile
+Get-SQLPSXDatabase "Z002\sql2k8" "pubs" | Get-SqlLogFile
 This command gets a collection of SMO LogFile objects for all data files in the pubs database.
 .LINK
 Get-SqlLogFile 
@@ -2445,7 +2445,7 @@ None
 .NOTES
 Performs the equivalent of a DBCC CHECKDB.
 .EXAMPLE
- Get-SqlDatabase "Z002\sql2k8" "pubs" | Invoke-SqlDatabaseCheck
+ Get-SQLPSXDatabase "Z002\sql2k8" "pubs" | Invoke-SqlDatabaseCheck
 This command performs a database consistency check of the pubs database. 
 .LINK
 Invoke-SqlDatabaseCheck 
@@ -2490,7 +2490,7 @@ None
 None
     This function does not generate any output.
 .EXAMPLE
-Get-SqlDatabase "Z002\sql2k8" "pubs" | Get-SqlTable -name authors | Get-SqlIndex | Invoke-SqlIndexRebuild
+Get-SQLPSXDatabase "Z002\sql2k8" "pubs" | Get-SqlTable -name authors | Get-SqlIndex | Invoke-SqlIndexRebuild
 This command performs a reinidex of the authors table
 .LINK
 Invoke-SqlIndexRebuild 
@@ -2537,7 +2537,7 @@ None
 .NOTES
 Performs the equivalent of DBCC INDEXDEFRAG
 .EXAMPLE
-Get-SqlDatabase "Z002\sql2k8" "pubs" | Get-SqlTable -name authors | Get-SqlIndex | Invoke-SqlIndexDefrag
+Get-SQLPSXDatabase "Z002\sql2k8" "pubs" | Get-SqlTable -name authors | Get-SqlIndex | Invoke-SqlIndexDefrag
 This command defragments the indexes of the authors table
 .LINK
 Invoke-SqlIndexDefrag 
@@ -2584,7 +2584,7 @@ System.Data.DataRow
 .NOTES
 Performs the equivalent of DBCC SHOWCONTIG
 .EXAMPLE
-Get-SqlDatabase "Z002\sql2k8" "pubs" | Get-SqlTable -name authors | Get-SqlIndex | Get-SqlIndexFragmentation
+Get-SQLPSXDatabase "Z002\sql2k8" "pubs" | Get-SqlTable -name authors | Get-SqlIndex | Get-SqlIndexFragmentation
 This command gets index fragmentation of the indexes of the authors table
 .LINK
 Get-SqlIndexFragmentation 
@@ -2616,7 +2616,7 @@ None
 None
     This function does not generate any output.
 .EXAMPLE
-Get-SqlDatabase "Z002\sql2k8" "pubs" | Get-SqlTable -name authors | Get-SqlStatistic | Update-SqlStatistic
+Get-SQLPSXDatabase "Z002\sql2k8" "pubs" | Get-SqlTable -name authors | Get-SqlStatistic | Update-SqlStatistic
 This command updates the SQL statistics of the authors table
 .LINK
 Update-SqlStatistic 
@@ -2877,7 +2877,7 @@ function Remove-SqlDatabase
     
     $ErrorActionPreference = "Stop"
 
-    $database = Get-SqlDatabase $sqlserver $dbname
+    $database = Get-SQLPSXDatabase $sqlserver $dbname
     try { $database.Drop() }
     catch {
             $ex = $_.Exception
@@ -2908,14 +2908,14 @@ Microsoft.SqlServer.Management.Smo.FileGroup
 .NOTES
 Add-SqlFileGroup is used by Add-SqlDatabase.
 .EXAMPLE
-$database = Get-SqlDatabase "Z002\sql2k8" "pubs"
+$database = Get-SQLPSXDatabase "Z002\sql2k8" "pubs"
 Add-SqlFileGroup $database 'FileGroup2'
 $database.Alter()
 This command adds the filegroup FileGroup2 to the pubs database. 
 .LINK
 Add-SqlFileGroup 
 Add-SqlDatabase
-Get-SqlDatabase
+Get-SqlPSXDatabase
 #>
 function Add-SqlFileGroup
 {
@@ -2960,7 +2960,7 @@ Microsoft.SqlServer.Management.Smo.DataFile
 .NOTES
 Add-SqlDataFile is used by Add-SqlDatabase.
 .EXAMPLE
-$database = Get-SqlDatabase "Z002\sql2k8" "pubs"
+$database = Get-SQLPSXDatabase "Z002\sql2k8" "pubs"
 $fileGroup = Add-SqlFileGroup $database 'FileGroup2'
 Add-SqlDataFile -filegroup $fileGroup -name 'pubs_DataFile1'  -filepath 'C:\Program Files\Microsoft SQL Server\MSSQL10.SQL2K8\MSSQL\DATA\pubs_DataFile1.ndf'
 $database.Alter()
@@ -2969,7 +2969,7 @@ This command adds the DataFile DataFile2 to the pubs database.
 Add-SqlDataFile 
 Add-SqlFileGroup
 Add-SqlDatabase
-Get-SqlDatabase
+Get-SqlPDatabase
 #>
 function Add-SqlDataFile
 {
@@ -3028,14 +3028,14 @@ Microsoft.SqlServer.Management.Smo.LogFile
 .NOTES
 Add-SqlLogFile is used by Add-SqlDatabase.
 .EXAMPLE
-$database = Get-SqlDatabase "Z002\sql2k8" "pubs"
+$database = Get-SQLPSXDatabase "Z002\sql2k8" "pubs"
 Add-SqlLogFile -database $database -name 'pubs_LogFile1' -filepath 'C:\Program Files\Microsoft SQL Server\MSSQL10.SQL2K8\MSSQL\DATA\pubs_LogFile1.ldf'
 $database.Alter()
 This command adds the LogFile LogFile2 to the pubs database. 
 .LINK
 Add-SqlLogFile 
 Add-SqlDatabase
-Get-SqlDatabase
+Get-SQLPSXDatabase 
 #>
 function Add-SqlLogFile
 {
@@ -3231,7 +3231,7 @@ None
 Add-SqlUser "Z002\sql2k8" "pubs" "TestPSUnit"
 This command adds the TestPSUnit login to the pubs database.
 .EXAMPLE
-$database = Get-SqlDatabase "Z002\sql2k8" "pubs"
+$database = Get-SQLPSXDatabase "Z002\sql2k8" "pubs"
 Add-SqlUser -dbname $database "TestPSUnit"
 This command adds the TestPSUnit login to the pubs database.
 .LINK
@@ -3251,7 +3251,7 @@ function Add-SqlUser
 
     switch ($dbname.GetType().Name)
     {
-        'String' { $database = Get-SqlDatabase $sqlserver $dbname }
+        'String' { $database = Get-SQLPSXDatabase $sqlserver $dbname }
         'Database' { $database = $dbname }
         default { throw "Add-SqlUser:Param '`$dbname' must be a String or Database object." }
     }
@@ -3293,7 +3293,7 @@ None
 Remove-SqlUser "Z002\sql2k8" "pubs" "TestPSUnit"
 This command Removes the TestPSUnit user from the pubs database.
 .EXAMPLE
-$database = Get-SqlDatabase "Z002\sql2k8" "pubs"
+$database = Get-SQLPSXDatabase "Z002\sql2k8" "pubs"
 Remove-SqlUser -dbname $database "TestPSUnit"
 This command Removes the TestPSUnit user from the pubs database.
 .LINK
@@ -3309,7 +3309,7 @@ function Remove-SqlUser
 
     switch ($dbname.GetType().Name)
     {
-        'String' { $database = Get-SqlDatabase $sqlserver $dbname }
+        'String' { $database = Get-SQLPSXDatabase $sqlserver $dbname }
         'Database' { $database = $dbname }
         default { throw "Remove-SqlUser:Param '`$dbname' must be a String or Database object." }
     }
@@ -3367,7 +3367,7 @@ function Add-SqlLogin
         default { throw 'Add-SqlLogin:Param `$sqlserver must be a String or Server object.' }
     }
 
-    Write-Verbose "Get-SqlDatabase $($server.Name) $dbname"
+    Write-Verbose "Get-SQLPSXDatabase $($server.Name) $dbname"
 
     $login = new-object ('Microsoft.SqlServer.Management.Smo.Login') $server, $name
     $login.DefaultDatabase = $defaultDatabase
@@ -3582,7 +3582,7 @@ None
 Add-SqlDatabaseRole "Z002\sql2k8" "pubs" "TestPSUnitDBRole"
 This command adds the TestPSUnitDBRole role to the pubs database.
 .EXAMPLE
-$database = Get-SqlDatabase "Z002\sql2k8" "pubs"
+$database = Get-SQLPSXDatabase "Z002\sql2k8" "pubs"
 Add-SqlDatabaseRole -dbname $database -name "TestPSUnitDBRole"
 This command adds the TestPSUnitDBRole role to the pubs database.
 .LINK
@@ -3598,7 +3598,7 @@ function Add-SqlDatabaseRole
 
     switch ($dbname.GetType().Name)
     {
-        'String' { $database = Get-SqlDatabase $sqlserver $dbname }
+        'String' { $database = Get-SQLPSXDatabase $sqlserver $dbname }
         'Database' { $database = $dbname }
         default { throw "Add-SqlDatabaseRole:Param '`$dbname' must be a String or Database object." }
     }
@@ -3631,7 +3631,7 @@ None
 Remove-SqlDatabaseRole "Z002\sql2k8" "pubs" "TestPSUnitDBRole"
 This command Removes the TestPSUnitDBRole role from the pubs database.
 .EXAMPLE
-$database = Get-SqlDatabase "Z002\sql2k8" "pubs"
+$database = Get-SQLPSXDatabase "Z002\sql2k8" "pubs"
 Remove-SqlDatabaseRole -dbname $database -name "TestPSUnitDBRole"
 This command Removes the TestPSUnitDBRole role from the pubs database.
 .LINK
@@ -3647,7 +3647,7 @@ function Remove-SqlDatabaseRole
 
     switch ($dbname.GetType().Name)
     {
-        'String' { $database = Get-SqlDatabase $sqlserver $dbname }
+        'String' { $database = Get-SQLPSXDatabase $sqlserver $dbname }
         'Database' { $database = $dbname }
         default { throw "Remove-SqlDatabaseRole:Param '`$dbname' must be a String or Database object." }
     }
@@ -3679,7 +3679,7 @@ None
 Add-SqlDatabaseRoleMember "Z002\sql2k8" "pubs" "TestPSUnit" "TestPSUnitDBRole" 
 This command adds the TestUnit user to the TestPSUnitDBRole database role.
 .EXAMPLE
-$database = Get-SqlDatabase "Z002\sql2k8" "pubs"
+$database = Get-SQLPSXDatabase "Z002\sql2k8" "pubs"
 Add-SqlDatabaseRoleMember -dbname $database -name "TestPSUnit" -rolename "TestPSUnitDBRole" 
 This command adds the TestUnit user to the TestPSUnitDBRole database role.
 .LINK
@@ -3696,7 +3696,7 @@ function Add-SqlDatabaseRoleMember
 
     switch ($dbname.GetType().Name)
     {
-        'String' { $database = Get-SqlDatabase $sqlserver $dbname }
+        'String' { $database = Get-SQLPSXDatabase $sqlserver $dbname }
         'Database' { $database = $dbname }
         default { throw "Add-SqlDatabaseRoleMember:Param '`$dbname' must be a String or Database object." }
     }
@@ -3733,7 +3733,7 @@ None
 Remove-SqlDatabaseRoleMember "Z002\sql2k8" "pubs" "TestPSUnit" "TestPSUnitDBRole" 
 This command removes the TestUnit user to the TestPSUnitDBRole database role.
 .EXAMPLE
-$database = Get-SqlDatabase "Z002\sql2k8" "pubs"
+$database = Get-SQLPSXDatabase "Z002\sql2k8" "pubs"
 Remove-SqlDatabaseRoleMember -dbname $database -name "TestPSUnit" -rolename "TestPSUnitDBRole" 
 This command removes the TestUnit user to the TestPSUnitDBRole database role.
 .LINK
@@ -3750,7 +3750,7 @@ function Remove-SqlDatabaseRoleMember
 
     switch ($dbname.GetType().Name)
     {
-        'String' { $database = Get-SqlDatabase $sqlserver $dbname }
+        'String' { $database = Get-SQLPSXDatabase $sqlserver $dbname }
         'Database' { $database = $dbname }
         default { throw "Remove-SqlDatabaseRoleMember:Param '`$dbname' must be a String or Database object." }
     }
@@ -3851,7 +3851,7 @@ None
 Set-SqlDatabasePermission -sqlserver "Z002\sql2k8" -dbname $database -permission "ViewDefinition" -name "TestPSUnit" -action "Grant"
 This command grants ViewDefinition permission to the TestPSUnit user.
 .EXAMPLE
-$database = Get-SqlDatabase "Z002\sql2k8" "pubs"
+$database = Get-SQLPSXDatabase "Z002\sql2k8" "pubs"
 Set-SqlDatabasePermission -dbname $database -permission "ViewDefinition" -name "TestPSUnit" -action "Grant"
 This command grants ViewDefinition permission to the TestPSUnit user.
 .LINK
@@ -3880,7 +3880,7 @@ function Set-SqlDatabasePermission
 
     switch ($dbname.GetType().Name)
     {
-        'String' { $database = Get-SqlDatabase $sqlserver $dbname }
+        'String' { $database = Get-SQLPSXDatabase $sqlserver $dbname }
         'Database' { $database = $dbname }
         default { throw "Set-SqlDatabasePermission:Param '`$dbname' must be a String or Database object." }
     }
@@ -3917,7 +3917,7 @@ Microsoft.SqlServer.Management.Smo.*
 None
     This function does not generate any output.
 .EXAMPLE
-$database = Get-SqlDatabase "Z002\sql2k8" "pubs"
+$database = Get-SQLPSXDatabase "Z002\sql2k8" "pubs"
 $database | get-sqlschema -name dbo | set-sqlobjectpermission -permission Select -name TestPSUnit -action Grant
 This command grants select permission on the dbo schema to the TestPSUnit user.
 .LINK
@@ -3935,7 +3935,7 @@ function Set-SqlObjectPermission
     [Parameter(Mandatory=$true)] [string]$action
     )
 #Alter Connect Control Delete Execute Impersonate Insert Receive References Select Send TakeOwnership Update ViewChangeTracking ViewDefinition 
-#Example: Get-SqlDatabase 'Z002\Sql1 pubs | get-sqlschema -name dbo | set-sqlobjectpermission -permission Select -name test5 -action Grant
+#Example: Get-SQLPSXDatabase 'Z002\Sql1 pubs | get-sqlschema -name dbo | set-sqlobjectpermission -permission Select -name test5 -action Grant
     Write-Verbose "Set-SqlObjectPermission $($smo.Name) $permission $name $action"
 
     process
@@ -3974,13 +3974,13 @@ Microsoft.SqlServer.Management.Smo.Schema
 .NOTES
 Additional properties including the database, server and extended properties are included in the output. 
 .EXAMPLE
-Get-SqlSchema $(Get-SqlDatabase "Z002\sql2K8" pubs)
+Get-SqlSchema $(Get-SQLPSXDatabase "Z002\sql2K8" pubs)
 This command gets a collection of SMO schema objects for SQL Server Z002\SQL2K8, pubs database.
 .EXAMPLE
-Get-SqlDatabase "Z002\sql2K8" | Get-SqlSchema
+Get-SQLPSXDatabase "Z002\sql2K8" | Get-SqlSchema
 This command gets a collection of SMO schema objects for all user databases on SQL Server Z002\SQL2K8.
 .EXAMPLE
-Get-SqlDatabase "Z002\sql2K8" pubs | Get-SqlSchema -name "dbo"
+Get-SQLPSXDatabase "Z002\sql2K8" pubs | Get-SqlSchema -name "dbo"
 This command gets an SMO schema object for the dbo schema in the pubs database on SQL Server Z002\SQL2K8.
 .LINK
 Get-SqlSchema 
@@ -4085,7 +4085,7 @@ function Get-SqlTransaction
 
     switch ($dbname.GetType().Name)
     {
-        'String' { $database = Get-SqlDatabase $sqlserver $dbname }
+        'String' { $database = Get-SQLPSXDatabase $sqlserver $dbname }
         'Database' { $database = $dbname }
         default { throw "Get-SqlTransaction:Param '`$dbname' must be a String or Database object." }
     }
@@ -4606,8 +4606,8 @@ New-Alias -name Get-Information_Schema.Views -value Get-SqlInformation_Schema.Vi
 New-Alias -name Get-Information_Schema.Routines -value Get-SqlInformation_Schema.Routines -Description "SQLPSX Alias"
 New-Alias -name Get-SysDatabases -value Get-SqlSysDatabases -Description "SQLPSX Alias"
 
-if(-not(get-command Get-SQLDatabase -errorAction SilentlyContinue)){
-   New-Alias -Name Get-SQLDatabase -Value Get-SQLPSXDatabase
+if(-not(get-command Get-SQLPSXDatabase -errorAction SilentlyContinue)){
+   New-Alias -Name Get-SQLPSXDatabase -Value Get-SQLPSXDatabase
 }
 if(-not(get-command Get-SQLErrorLog -ErrorAction SilentlyContinue)){
    New-Alias -Name Get-SQLErrorLog -Value Get-SQLPSXErrorLog
